@@ -101,7 +101,7 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	parse.mli parse.ml			\
 	Makefile .depend README
 
-export: source
+export: source linux solaris
 	cp README COPYING GPL CHANGES $(FTP)
 	cd doc; make all export
 
@@ -122,9 +122,11 @@ linux: clean binary
 solaris:
 	rmake sun-demons $(HOME)/soft/ocaml/ocamlweb clean binary
 
-binary: ocamlweb
+BINARYFILES = README INSTALL COPYING GPL ocamlweb ocamlweb.sty
+
+binary: opt
 	mkdir -p export/$(BINARY)
-	cp README COPYING GPL ocamlweb export/$(BINARY)
+	cp $(BINARYFILES) export/$(BINARY)
 	(cd export; tar czf $(BINARY).tar.gz $(BINARY))
 	cp export/$(BINARY).tar.gz $(FTP)
 
