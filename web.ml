@@ -246,7 +246,7 @@ let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
       pretty_print_doc is_first_paragraph s
   | Code (l,s) ->
       if l>0 then output_label (make_label_name (f,l));
-      pretty_print_code is_last_paragraph s
+      pretty_print_code is_last_paragraph s f
 
 
 let pretty_print_section first f s = 

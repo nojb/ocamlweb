@@ -82,9 +82,6 @@ Document LaTeX
 
  3. Index des modules
 
- 4. « rule » est composé comme un mot-clé à cause des fichiers LEX,
-    mais ce n'est pas correct ailleurs.	idem pour « parse »
-
  5. Les espaces verticaux entre paragraphes sont pas terriblement au
     point, surtout avec hevea. Il faudrait revoir l'utilisation de
     \ocwnl et \medskip. Peut-etre remplacer \medskip par une macro
@@ -120,6 +117,9 @@ Document LaTeX
     ce n'est pas joli.
 
     (Demandé aussi par Pierre)
+
+ 7. \leqslant et \geqslant pour <= et >= respectivement.
+    pbm: il faut \usepackage{amssymb}. ca pose pbm ?
     
 Documentation ocamlweb
 ======================

@@ -147,9 +147,7 @@ let is_caml_keyword =
       "method";  "module";  "mutable";  "new"; "object";  "of";  "open";
       "or"; "parser";  "private"; "rec"; "sig";  "struct"; "then"; "to";
       "true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
-      "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
-      (* added for lexers *)
-      "rule"; "parse"
+      "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr"
     ]
 
 let is_base_type = 
@@ -202,14 +200,46 @@ let what_char = function
 let what_is_first_char s =
   if String.length s > 0 then what_char s.[0] else Lower
 
+let output_raw_ident_in_index s =
+  begin match what_is_first_char s with
+    | Upper -> output_string "\\ocwupperid{"
+    | Lower -> output_string "\\ocwlowerid{"
+    | Symbol -> output_string "\\ocwsymbolid{"
+  end;
+  output_latex_id s;
+  output_string "}"
+
 let output_raw_ident s =
   begin match what_is_first_char s with
     | Upper -> output_string "\\ocwupperid{"
     | Lower -> output_string "\\ocwlowerid{"
     | Symbol -> output_string "\\ocwsymbolid{"
   end;
-  output_latex_id s; 
-  output_string "}"
+  try
+    let qualification = Filename.chop_extension s in 
+    (* We extract the qualified name. *)
+    let qualified_name =
+      String.sub s (String.length qualification + 1)
+	(String.length s - String.length qualification - 1)
+    in 
+    (* We check now whether the qualified term is a lower id or not. *)
+    match qualified_name.[0] with
+      | 'A'..'Z' -> 
+      (* The qualified term is a module or a constructor: nothing to change. *)
+          output_latex_id (s);
+          output_string "}"
+      | _ -> 
+      (* The qualified term is a value or a type: 
+	 \verb!\\ocwlowerid! used instead. *)
+          output_latex_id (qualification ^ ".");
+          output_string "}";
+          output_string "\\ocwlowerid{";
+          output_latex_id qualified_name;
+          output_string "}"        
+  with Invalid_argument _ ->
+    (* The string [s] is a module name or a constructor: nothing to do. *)
+    output_latex_id s;
+    output_string "}"
 
 let output_ident s =
   if is_keyword s then begin
@@ -306,7 +336,13 @@ let begin_section () =
 
 let output_module s =
   output_string "\\ocwmodule{";
-  output_latex_id s;
+  let real_module_name =
+    if Filename.check_suffix s ".mll" || Filename.check_suffix s ".mly" then 
+      Filename.chop_extension s
+    else 
+      s
+  in 
+  output_latex_id real_module_name;
   output_string "}\n"
 
 let output_interface s =
@@ -380,7 +416,9 @@ let output_bf_elem n =
 let output_index_entry s def use =
   let sep () = output_string ", " in
   output_string "\\ocwwebindexentry{";
+  enter_math ();
   output_raw_ident s;
+  leave_math ();
   output_string "}{";
   print_list output_bf_elem sep def;
   output_string "}{";
@@ -400,7 +438,9 @@ let output_raw_index_entry s def use =
   let sep () = output_string "," 
   and sep' () = output_string ", " in
   output_string "\\ocwrefindexentry{";
-  output_raw_ident s;
+  enter_math ();
+  output_raw_ident_in_index s;
+  leave_math ();
   output_string "}{";
   print_list output_string sep def;
   output_string "}{";

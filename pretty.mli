@@ -21,5 +21,5 @@
     whether the given paragraph is the last one for
     [pretty_print_code] or the first one for [pretty_print_doc]. *)
 
-val pretty_print_code : bool -> string -> unit
+val pretty_print_code : bool -> string -> string -> unit
 val pretty_print_doc  : bool -> string -> unit

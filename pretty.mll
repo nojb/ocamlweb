@@ -62,6 +62,16 @@
     reset_output ();
     user_math_mode := false
 
+  let filename = ref ""
+
+  let is_lex_file () = Filename.check_suffix !filename ".mll"
+
+  let is_yacc_file () = Filename.check_suffix !filename ".mly"
+
+  let braces_depth = ref 0
+
+  let in_C_like_comment = ref false
+
 (*i*)
 }
 (*i*)
@@ -99,6 +109,70 @@ rule pr_code = parse
 (*s That function pretty-prints the code anywhere else. *)
 
 and pr_code_inside = parse
+  | '_'  { if is_lex_file () && !braces_depth = 0 then 
+	     output_string "\\ocwlexwc"
+           else 
+	     output_symbol "_";               
+           pr_code_inside lexbuf } 
+  | "eof" | "rule" | "parse" | "let" | "and"
+         { if is_lex_file () && !braces_depth = 0 then begin
+             leave_math (); 
+             output_string "\\ocwlexkw{";
+             output_string (Lexing.lexeme lexbuf);
+             output_string "}"
+           end else 
+	     output_ident (Lexing.lexeme lexbuf);
+	   pr_code_inside lexbuf }
+  | "%token" | "%start" | "%type" | "%left" | "%right" | "%nonassoc"
+         { let full_lexeme = Lexing.lexeme lexbuf in
+           let lexeme = 
+	     String.sub full_lexeme 1 (String.length full_lexeme - 1) in 
+	   if is_yacc_file () && !braces_depth = 0 then begin
+             output_symbol "%";
+             leave_math (); 
+             output_string "\\ocwyacckw{";
+             output_string lexeme;
+             output_string "}"
+           end else begin
+             output_symbol "%";
+             output_ident lexeme
+           end;
+	   pr_code_inside lexbuf }	
+  | "error"
+         { if is_yacc_file () && !braces_depth = 0 then begin
+             leave_math (); 
+             output_string "\\ocwyacckw{";
+             output_string "error";
+             output_string "}"
+           end else 
+	     output_ident "error";
+	pr_code_inside lexbuf }	
+  | '{'  { incr braces_depth; 
+	   output_symbol (lexeme lexbuf); 
+	   pr_code_inside lexbuf }
+  | '}'  { decr braces_depth;
+	   output_symbol (lexeme lexbuf); 
+	   pr_code_inside lexbuf }
+  | '*'  { if is_lex_file () && !braces_depth = 0 then begin
+             enter_math (); 
+             output_string "^\\star{}"
+           end else 
+	     output_symbol "*";
+	   pr_code_inside lexbuf } 
+  | '+'  { if is_lex_file () && !braces_depth = 0 then begin
+             enter_math (); 
+             output_string "^{\\scriptscriptstyle +}"
+           end else 
+	     output_symbol "+";
+	   pr_code_inside lexbuf } 
+  | "/*" { if is_yacc_file () && !braces_depth = 0 then 
+	     in_C_like_comment := true
+	   else begin
+             output_symbol "/";
+             output_string "\\star{}"
+           end;
+	   pr_comment lexbuf; 
+	   pr_code_inside lexbuf }	
   | '\n' { end_line () }
   | space+
          { output_char '~'; pr_code_inside lexbuf }
@@ -125,9 +199,26 @@ and pr_code_inside = parse
 (*s Comments. *)
 
 and pr_comment = parse
-  | "(*" { output_bc (); incr comment_depth; pr_comment lexbuf }
-  | "*)" { output_ec (); decr comment_depth;
-           if !comment_depth > 0 then pr_comment lexbuf }
+  | "/*" { output_symbol "/";
+           enter_math (); output_string "\\star{}"; leave_math ();
+           pr_comment lexbuf } 
+  | "*/" { if !in_C_like_comment then 
+	     in_C_like_comment := false
+           else begin
+             enter_math (); output_string "\\star{}"; leave_math ();
+             output_symbol "/";
+             pr_comment lexbuf
+           end } 
+  | "(*" { output_bc (); 
+           if not !in_C_like_comment then incr comment_depth; 
+	   pr_comment lexbuf }
+  | "*)" { output_ec (); 
+	   if !in_C_like_comment then 
+	     pr_comment lexbuf
+           else begin
+             decr comment_depth;
+             if !comment_depth > 0 then pr_comment lexbuf
+           end }
   | '\n' space* '*' ' '
          { output_string "\n "; pr_comment lexbuf }
   | '['  { if !user_math_mode then 
@@ -230,9 +321,10 @@ and pr_verbatim = parse
     documentation parts. 
  *)
 
-  let pretty_print_code is_last_paragraph s = 
+  let pretty_print_code is_last_paragraph s f = 
     reset_pretty ();
     begin_code_paragraph ();
+    filename := f;
     pr_code (Lexing.from_string s);
     end_code_paragraph is_last_paragraph
 

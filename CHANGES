@@ -3,6 +3,11 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 0.7, 31/01/2000
+=======================
+  o support of .mll and .mly files using the --impl option 
+    (Christian Rinderknecht); but still no indexing for these files.
+  o fixed bugs in identifiers pretty-printing (Christian Rinderknecht)
   o fixed bug of code indentation inside item-like environments
   o renaming of \comment (resp. \endcomment) in \ocwcomment
     (resp. \ocwendcomment) to avoid a clash with Hevea own macros

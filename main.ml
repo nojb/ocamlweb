@@ -184,7 +184,11 @@ let parse () =
 
     | ("-impl" | "--impl") :: f :: rem -> 
 	check_if_file_exists f;
-	let m = File_impl { caml_filename = f; caml_module = module_name f } in
+	let n = 
+	  if Filename.check_suffix f ".mll" || Filename.check_suffix f ".mly"
+          then Filename.chop_extension f else f
+	in
+	let m = File_impl { caml_filename = f; caml_module = module_name n } in
 	add_file m; parse_rec rem
     | ("-impl" | "--impl") :: [] ->
 	usage ()

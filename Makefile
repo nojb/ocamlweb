@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=61
+MINORVN=7
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc
@@ -169,11 +169,12 @@ clean:
 	rm -f *~ *.cm[iox] *.o 
 	rm -f ocamlweb doclexer.ml pretty.ml version.ml
 	rm -f ocaml-parser/*~ ocaml-parser/*.cm[iox] ocaml-parser/*.o
-	rm -f ocaml-parser/lexer.ml
+	rm -f ocaml-parser/lexer.ml ocaml-parser/linenum.ml
 	rm -f ocaml-parser/parser.mli ocaml-parser/parser.ml
 	make -C doc clean
 
-depend: doclexer.ml pretty.ml ocaml-parser/parser.ml ocaml-parser/lexer.ml
+depend: doclexer.ml pretty.ml ocaml-parser/parser.ml ocaml-parser/lexer.ml \
+        ocaml-parser/linenum.ml
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml ocaml-parser/*.ml ocaml-parser/*.mli > .depend
 
