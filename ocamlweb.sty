@@ -46,8 +46,10 @@
 % own name
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
 
-% underscore ?
-% \def\_{\kern.04em\vbox{\hrule width.3em height .6pt}\kern.08em}
+% pretty underscores (the package fontenc causes ugly underscores)
+%BEGIN LATEX
+\def\_{\kern.08em\vbox{\hrule width.35em height.6pt}\kern.08em}
+%END LATEX
 
 % Bigger underscore for ocamllex files (lexers).
 \newcommand{\ocwlexwc}{\textnormal{\large \_\,}}
