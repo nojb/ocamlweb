@@ -127,10 +127,13 @@ binary: ocamlweb
 
 clean:
 	rm -f *~ *.cm[iox] *.o ocamlweb doclexer.ml pretty.ml version.ml
+	make -C ocaml-parser clean
+	make -C doc clean
 
 depend: doclexer.ml pretty.ml
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml > .depend
+	make -C ocaml-parser depend
 
 include .depend
 
