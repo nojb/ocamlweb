@@ -18,6 +18,16 @@
 
 \section{Introduction}
 
+TODO
+
+Currently, the task of \ocamlweb\ is to:
+\begin{enumerate}
+\item make a readable documentation of the code;
+\item generate a global index of cross-references, where each identifier is
+  associated to the lists of sections where it is defined or used.
+\end{enumerate}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Principles}
@@ -33,17 +43,18 @@ comment's delimiters \texttt{(*} and \texttt{*)}, and is a regular
 \LaTeX\ text. Code starts with any characters sequence other than
 \texttt{(*} and ends with an empty line.
 
-Documentation and code are displayed in \emph{sections} --- not in the
-usual sense of sections in \LaTeX\ --- numbered
-consecutively starting with~1. A new section is started at the
-beginning of each file. You can also start a new section manually (see
-the paragraph below about controls). The role of sections is to be
-used as references in the various indexes produced at the end of the
-document.
-Indeed, the main task of \ocamlweb, after the pretty-printing job
-consisting in making a readable documentation of the code, is to
-generate a global index of cross-references, where each identifier is
-associated to the lists of sections where it is defined or used.
+Two styles are available for the final document:
+\begin{itemize}
+  
+\item a \WEB\ style, where the code and documentation are displayed in
+  \emph{sections}, numbered consecutively starting with~1.  A new
+  section is started at the beginning of each file. You can also start
+  a new section manually (see the paragraph below about controls);
+
+\item a \LaTeX\ style, where you structure your document by yourself,
+  using the usual sectioning commands of \LaTeX. 
+
+\end{itemize}
 
 
 \paragraph{Escapings: code inside documentation and vice versa.}
@@ -66,7 +77,7 @@ shape. These commands are the following:
 
 \item[\texttt{(*s}] ~\par
   
-  Starts a new section.
+  Starts a new section. (Meaningless in \LaTeX\ style.)
 
 \item[\texttt{(*i} \quad\dots\quad \texttt{i*)}] ~\par
   
