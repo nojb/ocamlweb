@@ -2,9 +2,11 @@
 
 		      LIST OF CHANGES
 		      ===============
- 
+version 0.5, 29/9/99
+====================
+  o better result with hevea (a single line break between code lines, etc.)
   o escape sequences ([...]) are no more active inside mathematics ($...$)
-  o bootstrap is now completed
+  o bootstrap is now completed (make bootstrap)
   o interfaces are no more inserted automatically before implementations 
     (patch from François Pottier)
 

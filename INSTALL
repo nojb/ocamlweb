@@ -6,8 +6,8 @@ COMPILATION (source distribution only)
  
   1. Compile with "make". It creates a binary file "ocamlweb".
 
-     If your platform supports native compilation, do instead "make opt"
-     to get a faster binary (still named "ocamlweb").
+     If your platform does not supports native compilation, do instead 
+     "make byte" to build the bytecode executable (still named ocamlweb).
 
 
 INSTALLATION

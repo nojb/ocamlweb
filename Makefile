@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=41
+MINORVN=5
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc
@@ -37,12 +37,12 @@ CMX = $(CMO:.cmo=.cmx)
 
 all: ocamlweb
 
-ocamlweb: $(CAML_CMO) $(CMO)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_CMO) $(CMO)
-
-opt: $(CAML_CMX) $(CMX)
+ocamlweb: $(CAML_CMX) $(CMX)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
 	strip ocamlweb
+
+byte: $(CAML_CMO) $(CMO)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_CMO) $(CMO)
 
 debug: $(CAML_CMO) $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
@@ -114,7 +114,7 @@ export-bootstrap: bootstrap
 	cp test/ocamlweb.html $(FTP)
 
 source:
-	mkdir -p export/$(NAME)
+	mkdir -p export/$(NAME)/test
 	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test
 	cp $(FILES) export/$(NAME)
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser

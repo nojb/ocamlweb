@@ -39,8 +39,9 @@
 %END LATEX
 % HeVeA reads the following
 
-%HEVEA puts to much space with \medskip
+%HEVEA puts to much space with \medskip and \bigskip
 %HEVEA\renewcommand{\medskip}{}
+%HEVEA\renewcommand{\bigskip}{}
 
 % own name
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
@@ -64,20 +65,21 @@
 \newcommand{\ocwupperid}[1]{\textit{#1\/}}
 
 % newline, and indentation 
-\newcommand{\ocweol}{\par}
 %BEGIN LATEX
+\newcommand{\ocweol}{\par}
 \newcommand{\ocwindent}[1]{\noindent\kern#1}
 %END LATEX
+%HEVEA\newcommand{\ocweol}{\begin{rawhtml}<BR>\end{rawhtml}}
 %HEVEA\newcommand{\ocwindent}[1]{\hspace{#1}\hspace{#1}}
 
 % macro for typesetting comments
 \newcommand{\ocwbc}{\quad\ensuremath{(\ast}}
 \newcommand{\ocwec}{\ensuremath{\ast)}}
 
+%BEGIN LATEX
 \newbox\boxA
 \newbox\boxB
 \newdimen\boxwidth
-
 \def\comment{\unskip\hskip 2em\null\par\nointerlineskip
   \setbox\boxA=\lastbox
   \setbox\boxB=\hbox{\strut\unhbox\boxA}\boxwidth=\wd\boxB
@@ -87,9 +89,18 @@
   \noindent\hangafter=0 \hangindent=\boxwidth
   \llap{$(*$ }\ignorespaces}
 \def\endcomment{\unskip~$*)$\strut\par}
+%END LATEX
+%HEVEA\newcommand{\comment}{(*}
+%HEVEA\newcommand{\endcomment}{*)}
 
+%BEGIN LATEX
 \def\codeline{\vbox\bgroup\noindent\strut\ignorespaces}
 \def\endcodeline{\egroup}
+%END LATEX
+%HEVEA\newcommand{\codeline}{}
+%HEVEA\newcommand{\endcodeline}{}
+
+%HEVEA\newcommand{\endgraf}{}
 
 % visible space in a string
 %BEGIN LATEX
@@ -121,7 +132,7 @@
 \refstepcounter{ocwcounter}%
 \bigskip\noindent{\bf\theocwcounter.}%
 %BEGIN LATEX
-\kern1em
+\kern1em%
 %END LATEX
 %HEVEA\hspace{1em}
 }
