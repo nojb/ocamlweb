@@ -84,6 +84,9 @@ Document LaTeX
     Par exemple, les constantes telles que 0x3FFF ne sont pas bien
     affichees (le 0 est droit et x3FFF est affiche comme un identificateur)
 
+    1b. apostrophes dans les identificateurs
+        x' devrait etre imprimer comme $x'$ et non comme $x$'
+
  2. style myheadings avec hauts de pages mentionnant la section (en
     mode web, bien sur)
 
