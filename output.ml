@@ -166,8 +166,8 @@ let end_line_string () =
 
 let build_table l = 
   let h = Hashtbl.create 101 in
-  List.iter (fun key ->Hashtbl.add h  key ()) l;
-  function s -> try Hashtbl.find h s; true with Not_found -> false
+  List.iter (fun key -> Hashtbl.add h  key ()) l;
+  Hashtbl.mem h
 
 let is_caml_keyword = 
   build_table

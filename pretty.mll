@@ -118,7 +118,6 @@ let bin_literal = '0' ['b' 'B'] ['0'-'1']+
 let float_literal =
   ['0'-'9']+ ('.' ['0'-'9']*)? (['e' 'E'] ['+' '-']? ['0'-'9']+)?
 
-
 (*s Pretty-printing of code. Main entry points for Caml and Lex and
     Yacc files, counts for spaces in order to respect alignment.  The
     following function pretty-prints some code and assumes that we are
@@ -175,8 +174,8 @@ and pr_camlcode_inside = parse
       { output_escaped_char (first_char lexbuf); pr_camlcode_inside lexbuf }
 
 
-
 (*s That function pretty-prints the Lex code anywhere else. *)
+
 and pr_lexcode_inside = parse 
   | '_'  
       { output_string "\\ocwlexwc"; pr_lexcode_inside lexbuf } 
@@ -249,8 +248,10 @@ and pr_yacccode_inside = parse
   | '\n' 
       { end_line (); }
   | space+
-         { output_char '~'; pr_yacccode_inside lexbuf }
-  | "/*r"{ output_hfill (); output_byc (); pr_yacc_comment lexbuf; pr_yacccode_inside lexbuf }
+      { output_char '~'; pr_yacccode_inside lexbuf }
+  | "/*r"
+      { output_hfill (); output_byc (); pr_yacc_comment lexbuf; 
+	pr_yacccode_inside lexbuf }
   | "/*" 
       { output_byc (); pr_yacc_comment lexbuf; pr_yacccode_inside lexbuf }
   | '%'? identifier

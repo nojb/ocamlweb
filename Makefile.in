@@ -1,11 +1,13 @@
 
-# where to install the binary executable
+# where to install the binaries
 prefix=@prefix@
 exec_prefix=@exec_prefix@
-MANDIR=@mandir@
 BINDIR=@bindir@
 
-# where to put the style file
+# where to install the man page
+MANDIR=@mandir@
+
+# where to install the style file
 BASETEXDIR = $(prefix)/share/texmf
 TEXDIR = $(BASETEXDIR)/tex/latex/misc 
 

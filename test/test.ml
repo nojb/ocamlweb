@@ -80,7 +80,7 @@ let autre_bout x =
   f 3;                                  (*r another *)
   cool ()                               (*r and a third one *)
 
-(*s Patterns. *)
+(* Patterns. *)
 
 let test_pat = function
   | A1 -> 1
@@ -89,3 +89,9 @@ let test_pat = function
 
 (*s Test escaped dollar in comments: \$ and even inside mathematical 
     mode: $\$$ *)
+
+(*s Toplevel directives. *)
+
+#use "foo.ml";;
+
+
