@@ -62,6 +62,7 @@ FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 FILES = buffer.mli buffer.ml \
         lexer.mll cross.mll pretty.mli pretty.mll \
 	output.mli output.ml web.mli web.ml main.ml \
+	ocamlweb.sty \
 	Makefile .depend README INSTALL COPYING GPL CHANGES
 
 export: source
