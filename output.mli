@@ -14,7 +14,7 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*s In that module, we concentrate all the printing functions.
    Thus, it will be easy to add another kind of output, HTML for instance,
@@ -127,6 +127,8 @@ val output_vspace : unit -> unit
 
 val output_module : string -> unit
 val output_interface : string -> unit
+val output_lexmodule : string -> unit
+val output_yaccmodule : string -> unit
 
 val begin_section : unit -> unit
 

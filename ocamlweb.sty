@@ -54,11 +54,13 @@
 % Bigger underscore for ocamllex files (lexers).
 \newcommand{\ocwlexwc}{\textnormal{\large \_\,}}
 
-% macro for typesetting ocamllex keywords.
+% macro for typesetting ocamllex keywords and for regexp and rule idents
 \newcommand{\ocwlexkw}[1]{\textsf{#1}}
+\newcommand{\ocwlexident}[1]{\ensuremath{\mathit{#1\/}}}
 
-% macro for typesetting ocamlyacc keywords.
+% macro for typesetting ocamlyacc keywords and for non-terminals and tokens
 \newcommand{\ocwyacckw}[1]{\textsf{#1}}
+\newcommand{\ocwyaccident}[1]{\ensuremath{\mathit{#1\/}}}
 
 % macro for typesetting keywords
 \newcommand{\ocwkw}[1]{\textsf{#1}}
@@ -94,6 +96,17 @@
 % macro for typesetting comments
 \newcommand{\ocwbc}{\ensuremath{(\ast}}
 \newcommand{\ocwec}{\ensuremath{\ast)}}
+% yacc comments
+\newcommand{\ocwbyc}{\ensuremath{/\ast}}
+\newcommand{\ocweyc}{\ensuremath{\ast/}}
+ 
+% yacc special notations
+\newcommand{\ocwyaccdpercent}{\ocwyacckw{\%\%}}
+\newcommand{\ocwyaccopercentbrace}{\ocwyacckw{\%\{}}
+\newcommand{\ocwyacccpercentbrace}{\ocwyacckw{\%\}}}
+\newcommand{\ocwyaccdots}{\ocwyacckw{:}}
+\newcommand{\ocwyaccpipe}{\ocwyacckw{|}}
+
 
 %BEGIN LATEX
 \newbox\boxA
@@ -143,6 +156,12 @@
 
 % code part of a module
 \newcommand{\ocwcodepart}{\subsection*{Code}}
+
+% macro for typesetting the title of a lex description
+\newcommand{\ocwlexmodule}[1]{\section*{Module #1 (Lex)}}
+
+% macro for typesetting the title of a yacc description
+\newcommand{\ocwyaccmodule}[1]{\section*{Module #1 (Yacc)}}
 
 % new WEB section
 \newcounter{ocwcounter}

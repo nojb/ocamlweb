@@ -14,7 +14,7 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*i*)
 open Printf
@@ -440,6 +440,20 @@ let output_interface s =
     output_string "}\n"
   end
 
+let output_lexmodule module_name =
+  if not !short then begin
+    output_string "\\ocwlexmodule{";
+    output_latex_id module_name;
+    output_string "}\n"
+  end
+
+let output_yaccmodule module_name =
+  if not !short then begin
+    output_string "\\ocwyaccmodule{";
+    output_latex_id module_name;
+    output_string "}\n"
+  end
+      
 let last_is_code = ref false
 
 let begin_code_paragraph () =

@@ -14,17 +14,19 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*s The following functions pretty-print the paragraphs of code and
     documentation, respectively. The boolean argument indicates
     whether the given paragraph is the last one for
     [pretty_print_code] or the first one for [pretty_print_doc]. *)
 
-val pretty_print_code : bool -> string -> string -> unit
+val pretty_print_code : bool -> string -> unit
 val pretty_print_doc  : bool -> string -> unit
 
-(*s These two functions pretty-print CAMLLEX code and CAMLYACC code *)
+(*s These three functions pretty-print subparagraphs of Caml code,
+Camllex code and Camlyacc code respectively *)
 
-val pretty_print_lex_code : string -> string -> unit
-val pretty_print_yacc_code : string -> string -> unit
+val pretty_print_caml_subpar : string -> unit
+val pretty_print_lex_subpar : string -> unit
+val pretty_print_yacc_subpar : string -> unit

@@ -14,7 +14,7 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*i*)
 open Filename
@@ -99,6 +99,10 @@ let what_file f =
     File_impl (make_caml_file f)
   else if check_suffix f ".mli" then
     File_intf (make_caml_file f)
+  else if check_suffix f ".mll" then 
+    File_lex (make_caml_file f)
+  else if check_suffix f ".mly" then 
+    File_yacc (make_caml_file f)
   else if check_suffix f ".tex" then
     File_other f
   else begin

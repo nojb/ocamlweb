@@ -14,70 +14,121 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
-(*i*)
 {
   open Printf
   open Lexing
   open Output
   open Web
-(*i*)
 
 (*s Global variables and functions used by the lexer. *)
 
+(* [skip_header] telles whether option \verb|--header| has been
+   selected by the user. *)
+
   let skip_header = ref true
+
+(* for displaying error message if any, [current_file] records the
+   name of the file currently read, and [comment_or_string_start] records
+   the starting position of the comment or the string currently being
+   read. *)
+
   let current_file = ref ""
+  let comment_or_string_start = ref 0
 
-  let comment_start = ref 0
-  let comment_depth = ref 0
+(* [brace_depth] records the current depth of imbrication of braces
+   \verb|{..}|, to know in lex files whether we are in an action or
+   not. [lexyacc_brace_start] records the position of the starting brace
+   of the current action, to display an error message if this brace is
+   unclosed. *)
+ 
+  let in_lexyacc_action = ref false
+  let doublepercentcounter = ref 0
+  let brace_depth = ref 0
+  let lexyacc_brace_start = ref 0
 
-  let parlist = ref ([] : paragraph list)
-  let seclist = ref ([] : raw_section list)
+(* global variables for temporarily recording data, for building
+   the [Web.file] structure. *)
+				  
+  let parbuf = Buffer.create 8192
+  let ignoring = ref false
 
-  let section_beg = ref 0
+  let push_char c = 
+    if not !ignoring then Buffer.add_char parbuf c
+  let push_first_char lexbuf = 
+    if not !ignoring then Buffer.add_char parbuf (lexeme_char lexbuf 0)
+  let push_string s = 
+    if not !ignoring then Buffer.add_string parbuf s
 
-  let new_section () =
-    if !parlist <> [] then begin
-      let s = { sec_contents = List.rev !parlist; sec_beg = !section_beg } in
-      seclist := s :: !seclist
-    end;
-    parlist := []
-
-  let first_char lexbuf = lexeme_char lexbuf 0
-
-  let docub = Buffer.create 8192
-
-  let new_doc () = comment_depth := 1; Buffer.clear docub
-
-  let push_doc () =
-    if Buffer.length docub > 0 then begin
-      parlist := (Documentation (Buffer.contents docub)) :: !parlist;
-      Buffer.clear docub
+  let subparlist = ref ([] : sub_paragraph list)
+		     
+  let push_caml_subpar () =
+    if Buffer.length parbuf > 0 then begin
+      subparlist := (CamlCode (Buffer.contents parbuf)) :: !subparlist;
+      Buffer.clear parbuf
     end
 
-  let codeb = Buffer.create 8192
+  let push_lex_subpar () =
+    if Buffer.length parbuf > 0 then begin
+      subparlist := (LexCode (Buffer.contents parbuf)) :: !subparlist;
+      Buffer.clear parbuf
+    end
 
+  let push_yacc_subpar () =
+    if Buffer.length parbuf > 0 then begin
+      subparlist := (YaccCode (Buffer.contents parbuf)) :: !subparlist;
+      Buffer.clear parbuf
+    end
+
+  let parlist = ref ([] : paragraph list)
   let code_beg = ref 0
-		
+
   let push_code () =
-    if Buffer.length codeb > 0 then begin
-      parlist := (Code (!code_beg, Buffer.contents codeb)) :: !parlist;
-      Buffer.clear codeb
+    assert (List.length !subparlist = 0);
+    if Buffer.length parbuf > 0 then begin
+      parlist := (Code (!code_beg, Buffer.contents parbuf)) :: !parlist;
+      Buffer.clear parbuf
+    end
+
+  let push_lexyacccode () =
+    assert (Buffer.length parbuf = 0) ;
+    if List.length !subparlist > 0 then begin
+      parlist := (LexYaccCode (!code_beg, List.rev !subparlist)) :: !parlist;
+      subparlist := []
+    end
+
+  let push_doc () =
+    if Buffer.length parbuf > 0 then begin
+      parlist := (Documentation (Buffer.contents parbuf)) :: !parlist;
+      Buffer.clear parbuf
+    end
+
+  let seclist = ref ([] : raw_section list)
+  let section_beg = ref 0
+
+  let push_section () =
+    if !parlist <> [] then begin
+      let s = { sec_contents = List.rev !parlist; sec_beg = !section_beg } in
+      seclist := s :: !seclist;
+      parlist := []
     end
 
   let reset_lexer f =
     current_file := f;
-    comment_depth := 0;
-    comment_start := 0;
+    comment_or_string_start := 0;
     section_beg := 0;
     code_beg := 0;
     parlist := [];
     seclist := []
 
-(*i*)
+  let backtrack lexbuf = 
+(*i
+    eprintf "backtrack to %d\n" (lexbuf.lex_abs_pos + lexbuf.lex_start_pos);
+i*)
+    lexbuf.lex_curr_pos <- lexbuf.lex_start_pos
+
 }
-(*i*)
 
 (*s Shortcuts for regular expressions. *)
 
@@ -86,123 +137,615 @@ let space_or_nl = [' ' '\t' '\n']
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
+(*i
 let rcs_keyword =
   "Author" | "Date" | "Header" | "Id" | "Name" | "Locker" | "Log" |
   "RCSfile" | "Revision" | "Source" | "State"
-
+i*)
 
 (*s Entry point to skip the headers. Returns when headers are skipped. *)
 rule header = parse
-  | "(*"   { comment_depth := 1; skip_comment lexbuf;
-	     skip_until_nl lexbuf; header lexbuf }
-  | "\n"   { () }
-  | space+ { header lexbuf }
-  | _      { lexbuf.lex_curr_pos <- lexbuf.lex_curr_pos - 1 }
-  | eof    { () }
+  | "(*"
+      { comment_or_string_start := lexeme_start lexbuf;
+	skip_comment lexbuf;
+	skip_spaces_until_nl lexbuf; 
+	header lexbuf }
+  | "\n" 
+      { () }
+  | space+ 
+      { header lexbuf }
+  | _      
+      { backtrack lexbuf }
+  | eof    
+      { () }
 
-(*s Inside a module, at the beginning of a line. *)
-and implementation = parse
-  | space* "(*" '*'* "*)" space* '\n'
-           { implementation lexbuf }
-  | space* "(*" space_or_nl*
-           { new_doc (); documentation lexbuf; implementation lexbuf }
-  | space* "(*s" space_or_nl*
-           { new_section (); section_beg := (lexeme_start lexbuf);
-	     new_doc (); documentation lexbuf; implementation lexbuf }
-  | space* "(*i"
-           { comment_start := lexeme_start lexbuf;
-	     ignore lexbuf; implementation lexbuf }
-  | space* "(*c"
-           { comment_depth := 1; Buffer.add_string codeb "(*";
-	     comment lexbuf; code lexbuf; implementation lexbuf }
-  | space* '\n'   
-           { implementation lexbuf }
-  | _      { Buffer.clear codeb; code_beg := (lexeme_start lexbuf);
-	     Buffer.add_char codeb (first_char lexbuf); 
-	     code lexbuf; implementation lexbuf }
-  | eof    { new_section (); List.rev !seclist }
+(* To skip a comment (used by [header]). *)
+and skip_comment = parse
+  | "(*" 
+      { skip_comment lexbuf; skip_comment lexbuf }
+  | "*)" 
+      { () }
+  | eof  
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocaml comment\n";
+	exit 1 }
+  | _ 
+      { skip_comment lexbuf }
+
+(*s Same as [header] but for \textsf{OCamlYacc} *)
+and yacc_header = parse
+  | "/*"   
+      { comment_or_string_start := lexeme_start lexbuf;
+	skip_yacc_comment lexbuf;
+	skip_spaces_until_nl lexbuf; 
+	yacc_header lexbuf }
+  | "\n"   
+      { () }
+  | space+ 
+      { yacc_header lexbuf }
+  | _     
+      { backtrack lexbuf }
+  | eof 
+      { () }
+
+and skip_yacc_comment = parse
+  | "/*" 
+      { skip_yacc_comment lexbuf; skip_yacc_comment lexbuf }
+  | "*/" 
+      { () }
+  | eof  
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocamlyacc comment\n";
+	exit 1 }
+  | _ 
+      { skip_yacc_comment lexbuf }
+
+
+(*s Recognizes a complete caml module body or interface, after header
+has been skipped. After calling that entry, the whole text read is in
+[seclist]. *) 
+
+and caml_implementation = parse
+  | _
+      { backtrack lexbuf;
+	paragraph lexbuf;
+	caml_implementation lexbuf }
+  | eof 
+      { push_section () }
       
-(*s Inside the documentation part, anywhere. *)
-and documentation = parse
-  | "(*" { Buffer.add_string docub (lexeme lexbuf);
-	   incr comment_depth; documentation lexbuf }
-  | space* "*)" 
-         { decr comment_depth;
-           if !comment_depth > 0 then begin
-	     Buffer.add_string docub (lexeme lexbuf);
-	     documentation lexbuf 
-	   end else begin
-	     skip_until_nl lexbuf;
-	     push_doc ()
-	   end}
-  | "\036" rcs_keyword [^ '$']* "\036"
-         { documentation lexbuf }
+(* recognizes a paragraph of caml code or documentation. After calling
+  that entry, the paragraph has been added to [parlist]. *)
+
+and paragraph = parse
+  | space_or_nl+
+      { paragraph lexbuf }
+  | ";;"
+      { paragraph lexbuf }
+  | "(*" '*'* "*)" space* '\n'
+      { paragraph lexbuf }
+  | "(*"    
+      { comment_or_string_start := lexeme_start lexbuf;
+	start_of_documentation lexbuf; 
+	push_doc () }
+  | "(*c" | _
+      { code_beg := lexeme_start lexbuf;
+	backtrack lexbuf;
+	caml_subparagraph lexbuf;
+	push_code() }
+  | eof 
+      { () }
+      
+(* recognizes a whole lex description file, after header has been
+skipped. After calling that entry, the whole text read is in
+[seclist]. *)
+
+and lex_description = parse
+  | _
+      { backtrack lexbuf;
+	lex_paragraph lexbuf ;
+	lex_description lexbuf }
+  | eof 
+      { push_section () }
+      
+and yacc_description = parse
+  | _ 
+      { backtrack lexbuf ;
+	yacc_paragraph lexbuf;
+	yacc_description lexbuf }
+  | eof 
+      { push_section () }
+
+(* Recognizes a paragraph of a lex description file. After calling
+  that entry, the paragraph has been added to [parlist]. *)
+
+and lex_paragraph = parse
+  | space_or_nl+
+      { lex_paragraph lexbuf }
+  | "(*" '*'* "*)" space* '\n'
+      { lex_paragraph lexbuf }
+  | "(*c" | _
+      { code_beg := lexeme_start lexbuf;
+	backtrack lexbuf;
+	lex_subparagraphs lexbuf ;
+	push_lexyacccode() }
+  | "(*"    
+      { comment_or_string_start := lexeme_start lexbuf;
+	start_of_documentation lexbuf; 
+	push_doc () }
+  | eof 
+      { () }
+
+and yacc_paragraph = parse
+  | space_or_nl+
+      { yacc_paragraph lexbuf }
+  | "/*" '*'* "*/" space* '\n'
+      { if not !in_lexyacc_action 
+	then yacc_paragraph lexbuf
+	else begin
+	  code_beg := lexeme_start lexbuf;
+	  backtrack lexbuf;
+	  yacc_subparagraphs lexbuf ;
+	  push_lexyacccode() 
+	end }
+  | "/*"    
+      { if not !in_lexyacc_action 
+	then begin
+	  comment_or_string_start := lexeme_start lexbuf;
+	  start_of_yacc_documentation lexbuf; 
+	  push_doc ()
+	end
+	else begin
+	  code_beg := lexeme_start lexbuf;
+	  backtrack lexbuf;
+	  yacc_subparagraphs lexbuf ;
+	  push_lexyacccode() 
+	end }
+  | "(*" '*'* "*)" space* '\n'
+      { if !in_lexyacc_action 
+	then yacc_paragraph lexbuf
+	else begin
+	  code_beg := lexeme_start lexbuf;
+	  backtrack lexbuf;
+	  yacc_subparagraphs lexbuf ;
+	  push_lexyacccode() 
+	end }
+  | "(*"    
+      { if !in_lexyacc_action 
+	then begin
+	  comment_or_string_start := lexeme_start lexbuf;
+	  start_of_documentation lexbuf; 
+	  push_doc ()
+	end
+	else begin
+	  code_beg := lexeme_start lexbuf;
+	  backtrack lexbuf;
+	  yacc_subparagraphs lexbuf ;
+	  push_lexyacccode() 
+	end }
+  | "/*c" | "(*c" | _
+      { code_beg := lexeme_start lexbuf;
+	backtrack lexbuf;
+	yacc_subparagraphs lexbuf ;
+	push_lexyacccode() }
+  | eof 
+      { () }
+
+(*s At the beginning of the documentation part, just after the
+  \verb|"(*"|. If the first character is ['s'], then a new section is
+  started. After calling that entry, the [parbuf] buffer contains the
+  doc read. *)
+
+
+and start_of_documentation = parse
+  | space_or_nl+   
+      { in_documentation lexbuf }
+  | 's' space_or_nl*
+      { push_section (); 
+	section_beg := lexeme_start lexbuf;
+	in_documentation lexbuf }
+  | 'i' 
+      { ignore lexbuf }
+  | _
+      { backtrack lexbuf;
+	in_documentation lexbuf }
+  | eof 
+      { in_documentation lexbuf }
+
+and start_of_yacc_documentation = parse
+  | space_or_nl+   
+      { in_yacc_documentation lexbuf }
+  | 's' space_or_nl*
+      { push_section (); 
+	section_beg := lexeme_start lexbuf;
+	in_yacc_documentation lexbuf }
+  | 'i' 
+      { yacc_ignore lexbuf }
+  | _
+      { backtrack lexbuf;
+	in_yacc_documentation lexbuf }
+  | eof 
+      { in_yacc_documentation lexbuf }
+
+(*s Inside the documentation part, anywhere after the "(*". After
+  calling that entry, the [parbuf] buffer contains the doc read. *)
+
+and in_documentation = parse 
+  | "(*" 
+      { push_string "(*";
+	in_documentation lexbuf; 
+	push_string "*)";
+	in_documentation lexbuf }
+  | "*)" 
+      { () }
+(*i
+  | space* "$" rcs_keyword [^ '$']* "$" space*
+      { in_documentation lexbuf }
+i*)
   | '\n' " * "
-         { Buffer.add_string docub "\n "; documentation lexbuf }
-  | eof  { push_doc () }
-  | _    { Buffer.add_char docub (first_char lexbuf); documentation lexbuf }
+      { push_char '\n'; in_documentation lexbuf }
+  | '"'  
+      { push_char '"'; in_string lexbuf; in_documentation lexbuf }
+  | character    
+      { push_string (lexeme lexbuf); in_documentation lexbuf }
+  | _    
+      { push_first_char lexbuf; in_documentation lexbuf }
+  | eof  
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocaml comment\n";
+	exit 1  }
 
-(*s Inside the code part, anywhere. *)
-and code = parse
-  | '\n' space* '\n' 
-         { push_code () }
-  | ";;" { push_code (); skip_until_nl lexbuf }
-  | eof  { push_code () }
+(* yacc comments are NOT nested *)
+
+and in_yacc_documentation = parse 
+  | "*/" 
+      { () }
+(*i
+  | space* "$" rcs_keyword [^ '$']* "$" space*
+      { in_yacc_documentation lexbuf }
+i*)
+  | '\n' " * "
+      { push_char '\n'; in_yacc_documentation lexbuf }
+  | '"'  
+      { push_char '"'; in_string lexbuf; in_yacc_documentation lexbuf }
+  | character    
+      { push_string (lexeme lexbuf); in_yacc_documentation lexbuf }
+  | _    
+      { push_first_char lexbuf; in_yacc_documentation lexbuf }
+  | eof  
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocamlyacc comment\n";
+	exit 1  }
+
+(*s Recognizes a subparagraph of caml code. After calling that entry, 
+  the [parbuf] buffer contains the code read. *)
+
+and caml_subparagraph = parse
+  | space* '\n' space* '\n' 
+      { backtrack lexbuf }
+  | ";;" 
+      { backtrack lexbuf }
+  | eof  
+      { () }
   | "(*" | "(*c"
-         { comment_depth := 1; Buffer.add_string codeb "(*";
-	   comment lexbuf; code lexbuf }
-  | space* "(*i"
-         { comment_start := lexeme_start lexbuf;
-	   ignore lexbuf; code lexbuf }
-  | '"'  { Buffer.add_char codeb '"'; code_string lexbuf; code lexbuf }
+      { comment_or_string_start := lexeme_start lexbuf;
+	push_string "(*";
+	comment lexbuf; 
+	caml_subparagraph lexbuf }
+  | "(*i"
+         { comment_or_string_start := lexeme_start lexbuf;
+	   ignore lexbuf; caml_subparagraph lexbuf }
+  | '"'  { comment_or_string_start := lexeme_start lexbuf;
+           push_char '"'; in_string lexbuf; caml_subparagraph lexbuf }
+  | '{'  { incr brace_depth;
+           push_char '{';
+           caml_subparagraph lexbuf }
+  | '}'  
+      { if !brace_depth = 0 then backtrack lexbuf
+        else 
+          begin       
+            decr brace_depth;
+            push_char '}';
+            caml_subparagraph lexbuf 
+          end }
+  | "%}"
+      { if !brace_depth = 0 then backtrack lexbuf
+        else 
+          begin       
+            decr brace_depth;
+            push_string "%}";
+            caml_subparagraph lexbuf 
+          end }
   | character
-         { Buffer.add_string codeb (lexeme lexbuf); code lexbuf }
-  | _    { Buffer.add_char codeb (first_char lexbuf); code lexbuf }
+         { push_string (lexeme lexbuf); caml_subparagraph lexbuf }
+  | _    { push_first_char lexbuf; caml_subparagraph lexbuf }
 
-(*s To skip everything until a newline. *)
-and skip_until_nl = parse
-  | '\n' { () }
+(*s Recognizes a sequence of subparagraphs of lex description,
+  including CAML actions. After calling that entry, the subparagraphs
+  read are in [subparlist]. *)
+
+and lex_subparagraphs = parse
+  | space* '\n' space* '\n' 
+      { backtrack lexbuf }
+  | ";;" 
+      { () }
+  | eof  
+      { if !in_lexyacc_action
+	then 
+	  begin
+	    eprintf "File \"%s\", character %d\n" 
+	      !current_file !lexyacc_brace_start;
+	    eprintf "Unclosed brace\n" ;
+	    exit 1	
+	  end }
+  | '}' 
+      { if !in_lexyacc_action
+	then 
+	  begin
+	    push_char '}';
+	    in_lexyacc_action := false;
+	    lex_subparagraph lexbuf;
+	    push_lex_subpar();
+	    lex_subparagraphs lexbuf
+	  end
+	else
+	  begin
+	    eprintf "File \"%s\", character %d\n" 
+	      !current_file (lexeme_start lexbuf);
+	    eprintf "Unexpected closing brace ";
+	    exit 1 
+	  end }
+  | _ 
+      { backtrack lexbuf;
+	if !in_lexyacc_action 
+	then
+	  begin
+	    caml_subparagraph lexbuf;
+	    push_caml_subpar()
+	  end
+	else 
+	  begin
+	    lex_subparagraph lexbuf;
+	    push_lex_subpar()
+	  end;
+        lex_subparagraphs lexbuf }
+
+and yacc_subparagraphs = parse
+  | space* '\n' space* '\n' 
+      { backtrack lexbuf }
+  | "%%" 
+      { if !in_lexyacc_action then begin
+	  push_string "%%";
+	  caml_subparagraph lexbuf;
+	  push_caml_subpar();
+          yacc_subparagraphs lexbuf 
+	end 
+	else begin
+	  push_yacc_subpar();
+	  push_string "%%";
+	  push_yacc_subpar();
+	  incr doublepercentcounter;
+	  if !doublepercentcounter >= 2 then in_lexyacc_action := true
+	end }
+  | ";;" 
+      { if !in_lexyacc_action then ()
+	else begin
+	  push_string ";;";
+	  yacc_subparagraph lexbuf;
+	  push_yacc_subpar();
+          yacc_subparagraphs lexbuf 
+	end }
+  | eof  
+      { if !in_lexyacc_action
+	then 
+	  begin
+	    eprintf "File \"%s\", character %d\n" 
+	      !current_file !lexyacc_brace_start;
+	    eprintf "Unclosed brace\n" ;
+	    exit 1	
+	  end }
+  | '}' 
+      { if !in_lexyacc_action
+	then 
+	  begin
+	    push_char '}';
+	    in_lexyacc_action := false;
+	    yacc_subparagraph lexbuf;
+	    push_yacc_subpar();
+	    yacc_subparagraphs lexbuf
+	  end
+	else
+	  begin
+	    eprintf "File \"%s\", character %d\n" 
+	      !current_file (lexeme_start lexbuf);
+	    eprintf "Unexpected closing brace ";
+	    exit 1 
+	  end }
+  | "%}" 
+      { if !in_lexyacc_action
+	then 
+	  begin
+	    push_string "%}";
+	    in_lexyacc_action := false;
+	    yacc_subparagraph lexbuf;
+	    push_yacc_subpar();
+	    yacc_subparagraphs lexbuf
+	  end
+	else
+	  begin
+	    eprintf "File \"%s\", character %d\n" 
+	      !current_file (lexeme_start lexbuf);
+	    eprintf "Unexpected closing brace ";
+	    exit 1 
+	  end }
+  | _ 
+      { backtrack lexbuf;
+	if !in_lexyacc_action
+	then
+	  begin
+	    caml_subparagraph lexbuf;
+	    push_caml_subpar()
+	  end
+	else 
+	  begin
+	    yacc_subparagraph lexbuf;
+	    push_yacc_subpar()
+	  end;
+        yacc_subparagraphs lexbuf }
+
+
+(*s Recognizes a subparagraph of lex description. After
+  calling that entry, the subparagraph read is in [parbuf]. *)
+
+and lex_subparagraph = parse
+  | space* '\n' space* '\n' 
+         { backtrack lexbuf }
+  | ";;" { backtrack lexbuf }
   | eof  { () }
-  | _    { skip_until_nl lexbuf }
+  | "(*" | "(*c"
+         { comment_or_string_start := lexeme_start lexbuf;
+	   push_string "(*";
+	   comment lexbuf; 
+	   lex_subparagraph lexbuf }
+  | space* "(*i"
+         { comment_or_string_start := lexeme_start lexbuf;
+	   ignore lexbuf; lex_subparagraph lexbuf }
+  | '"'  { comment_or_string_start := lexeme_start lexbuf;
+	   push_char '"'; in_string lexbuf; lex_subparagraph lexbuf }
+  | '{' 
+      { lexyacc_brace_start := lexeme_start lexbuf;
+	push_char '{';
+	in_lexyacc_action := true }
+  | character
+      { push_string (lexeme lexbuf); lex_subparagraph lexbuf }
+  | _
+      { push_first_char lexbuf; lex_subparagraph lexbuf }
+
+
+and yacc_subparagraph = parse
+  | space* '\n' space* '\n' 
+         { backtrack lexbuf }
+  | "%%" { backtrack lexbuf }
+  | ";;" { backtrack lexbuf }
+  | eof  { () }
+  | "/*" | "/*c"
+         { comment_or_string_start := lexeme_start lexbuf;
+	   push_string "/*";
+	   yacc_comment lexbuf; 
+	   yacc_subparagraph lexbuf }
+  | space* "/*i"
+         { comment_or_string_start := lexeme_start lexbuf;
+	   yacc_ignore lexbuf; yacc_subparagraph lexbuf }
+  | '"'  { comment_or_string_start := lexeme_start lexbuf;
+	   push_char '"'; in_string lexbuf; yacc_subparagraph lexbuf }
+  | "%{" 
+      { lexyacc_brace_start := lexeme_start lexbuf;
+	push_string "%{";
+	in_lexyacc_action := true }
+  | '{' 
+      { lexyacc_brace_start := lexeme_start lexbuf;
+	push_char '{';
+	in_lexyacc_action := true }
+  | '<' 
+      { lexyacc_brace_start := lexeme_start lexbuf;
+	push_char '<';
+	push_yacc_subpar ();
+	yacc_type lexbuf;
+	yacc_subparagraph lexbuf }
+  | character
+      { push_string (lexeme lexbuf); yacc_subparagraph lexbuf }
+  | _
+      { push_first_char lexbuf; yacc_subparagraph lexbuf }
+
+and yacc_type = parse
+  | "->"
+      { push_string "->"; yacc_type lexbuf }
+  | '>'
+      { push_caml_subpar(); push_char '>' }
+  | _ 
+      { push_first_char lexbuf; yacc_type lexbuf }
+  | eof
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !lexyacc_brace_start;
+	eprintf "Unclosed '<'";
+	exit 1 }
+
+(*s To skip spaces until a newline. *)
+and skip_spaces_until_nl = parse
+  | space* '\n'? { () }
+  | eof  { () }
+  | _    { backtrack lexbuf }
+
 
 (*s To read a comment inside a piece of code. *)
 and comment = parse
   | "(*" | "(*c"
-         { Buffer.add_string codeb "(*"; incr comment_depth; comment lexbuf }
-  | "*)" { Buffer.add_string codeb "*)"; decr comment_depth;
-           if !comment_depth > 0 then comment lexbuf }
-  | eof  { () }
-  | _    { Buffer.add_char codeb (first_char lexbuf); comment lexbuf }
+        { push_string "(*"; comment lexbuf; comment lexbuf }
+  | "*)" 
+      { push_string "*)"  }
+  | eof  
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocaml comment\n";
+	(* exit 1; *)
+      }
+  | _  
+      { push_first_char lexbuf; comment lexbuf }
 
-(*s To skip a comment (used by [header]). *)
-and skip_comment = parse
-  | "(*" { incr comment_depth; skip_comment lexbuf }
-  | "*)" { decr comment_depth;
-           if !comment_depth > 0 then skip_comment lexbuf }
-  | eof  { () }
-  | _    { skip_comment lexbuf }
+and yacc_comment = parse
+  | "*/" 
+      { push_string "*/"  }
+  | eof  
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocamlyacc comment\n";
+	(* exit 1; *)
+      }
+  | _  
+      { push_first_char lexbuf; yacc_comment lexbuf }
 
 (*s Ignored parts, between "(*i" and "i*)". Note that such comments
     are not nested. *)
 and ignore = parse
-  | "i*)" { () }
-  | eof   { eprintf "File \"%s\", character %d\n" !current_file !comment_start;
-	    eprintf "Unterminated ocamlweb comment\n"; 
-	    exit 1 }
-  | _     { ignore lexbuf }
+  | "i*)" 
+      { skip_spaces_until_nl lexbuf }
+  | eof   
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocamlweb comment\n"; 
+	exit 1 }
+  | _   
+      { ignore lexbuf }
+
+and yacc_ignore = parse
+  | "i*/" 
+      { skip_spaces_until_nl lexbuf }
+  | eof   
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
+	eprintf "Unterminated ocamlweb comment\n"; 
+	exit 1 }
+  | _   
+      { yacc_ignore lexbuf }
 
 (*s Strings in code. *)
-and code_string = parse
-  | '"'      { Buffer.add_char codeb '"' }
+and in_string = parse
+  | '"'      
+      { push_char '"' }
   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
-             { Buffer.add_string codeb (lexeme lexbuf); 
-	       code_string lexbuf }
-  | eof      { () }
-  | _        { Buffer.add_char codeb (first_char lexbuf); code_string lexbuf }
+      { push_string (lexeme lexbuf); in_string lexbuf }
+  | eof      
+      { eprintf "File \"%s\", character %d\n" !current_file !comment_or_string_start;
+	eprintf "Unterminated ocaml string\n"; 
+	exit 1 }
+  | _    
+      { push_first_char lexbuf; in_string lexbuf }
 
-(*i*)
+
 {
-(*i*)
 
 (*s \textbf{Caml files.} *)
 
@@ -217,29 +760,32 @@ let make_caml_file f =
 type file_type =
   | File_impl  of caml_file
   | File_intf  of caml_file
+  | File_lex   of caml_file
+  | File_yacc  of caml_file
   | File_other of string
 
 (*s \textbf{Reading Caml files.} *)
 
-let raw_read_file f =
+let raw_read_file header entry f =
   reset_lexer f;
   let c = open_in f in
   let buf = Lexing.from_channel c in
   if !skip_header then header buf;
-  let contents = implementation buf in
+  entry buf;
   close_in c;
-  contents
+  List.rev !seclist
 
-let read m =
+let read header entry m =
   { content_file = m.caml_filename; 
     content_name = m.caml_module;
-    content_contents = raw_read_file m.caml_filename }
+    content_contents = raw_read_file header entry m.caml_filename; }
 
 let read_one_file = function
-  | File_impl m -> Implem (read m)
-  | File_intf m -> Interf (read m)
+  | File_impl m -> Implem(read header caml_implementation m)
+  | File_intf m -> Interf (read header caml_implementation m)
+  | File_lex  m -> Lex (read header lex_description m)
+  | File_yacc m -> Yacc (read yacc_header yacc_description m)
   | File_other f -> Other f
 
-(*i*)
 }
-(*i*)
+

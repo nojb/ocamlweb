@@ -14,7 +14,7 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*s That module exports to global tables [used] and [defined], indexed
    by identifiers (strings) and containing respectively the sets of locations

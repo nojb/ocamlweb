@@ -4,7 +4,7 @@
 
 */
 
-/* $Id$ */
+/*i $Id$ i*/
 
 /*s Header Yacc en \LaTeX\ */
 %{
@@ -22,7 +22,7 @@
   let warning = ref false;;
 %}
 %token EOF LIFULA
-%token <string->string(*mettre une fleche ici*)> IDENT
+%token <string->string(*mettre une fleche ici *)> IDENT
 
 %right LET
 %left IN 

@@ -14,7 +14,7 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*s Caml files are represented by the record [caml_file], which
     contains their file names and their module names. The functions
@@ -30,6 +30,8 @@ val make_caml_file : string -> caml_file
 type file_type =
   | File_impl  of caml_file
   | File_intf  of caml_file
+  | File_lex   of caml_file
+  | File_yacc  of caml_file
   | File_other of string
 
 (*s The following function [read_one_file] reads a Caml file,

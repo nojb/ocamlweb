@@ -14,18 +14,24 @@
  * (enclosed in the file GPL).
  *)
 
-(* $Id$ *)
+(*i $Id$ i*)
 
 (*i*)
+
 open Filename
-open Printf
 open Cross
 open Output
 open Pretty
 
+type sub_paragraph =
+  | CamlCode of string
+  | LexCode  of string
+  | YaccCode of string
+ 
 type paragraph =
   | Documentation of string
   | Code of int * string
+  | LexYaccCode of int * (sub_paragraph list)
 
 type raw_section =  {
   sec_contents : paragraph list;
@@ -39,7 +45,84 @@ type content = {
 type file = 
   | Implem of content
   | Interf of content
+  | Lex    of content
+  | Yacc   of content
   | Other  of string
+
+(*i*)
+
+
+
+(*is To print a "Web.file" (for testing) *)
+
+let print_string s = Format.printf "\"%s\"" s
+
+(* To print c "(" arg with the function pr ")" *)
+let print c pr arg =
+  Format.printf "@[<hv 0>%s(@," c;
+  pr arg;
+  Format.printf ")@]"
+
+(* to print a list between "[" "]" *)
+
+let rec print_end_list f l =
+  match l with
+      [] -> Format.printf "]@]"
+    | x::l ->
+	Format.printf ";@ ";
+	f x;
+	print_end_list f l
+;;
+
+let print_list f l =
+  match l with
+      [] -> Format.printf "[]"
+    | x::l ->
+	Format.printf "@[<hv 2>[ ";
+	f x;
+	print_end_list f l
+;;
+
+ 
+(* To print a subparagraph *)
+let print_sub_paragraph = function 
+  | CamlCode(s)  -> print "CamlCode" print_string s;
+  | LexCode (s)  -> print "LexCode"  print_string s;
+  | YaccCode (s) -> print "YaccCode" print_string s
+      
+(* To print a paragraph *)
+let print_paragraph = function 
+  | Documentation(s) -> print "Documentation" print_string s
+  | Code(i,s) -> 
+      Format.printf "Code(%d,@ %s)" i s
+  | LexYaccCode(i,spl) -> 
+      Format.printf "@[<hv 5>LexYaccCode(%d,@ " i;
+      print_list print_sub_paragraph spl; 
+      Format.printf ")@]"
+      
+(* To print a section *)
+let print_raw_section { sec_contents = sc;
+			sec_beg = sb } =
+  Format.printf "@[<hv 2>{ sec_beg = %d ;@ sec_contents =@ " sb ; 
+  print_list print_paragraph sc;
+  Format.printf ";@ }@]"
+
+(* To print a "Web.content" *)
+let print_content { content_file = c;
+		    content_name = cn;
+		    content_contents  = rl } =
+  Format.printf "@[<hv 2>{ content_file = \"%s\" ;@ content_name = \"%s\" ;@ contents_contents =@ " c cn ; 
+  print_list print_raw_section rl ;
+  Format.printf ";@ }@]"
+
+(* To print a "Web.file" *)
+let print_file = function 
+  | Implem c -> print "Implem" print_content c
+  | Interf c -> print "Interf" print_content c
+  | Lex c    -> print "Lex"    print_content c
+  | Yacc c   -> print "Yacc"   print_content c
+  | Other s  -> print "Other"  print_string s
+      
 
 (*i*)
 
@@ -66,6 +149,8 @@ let add_latex_option s =
 let index_file = function 
   | Implem i -> cross_implem i.content_file i.content_name
   | Interf i -> cross_interf i.content_file i.content_name
+  | Lex i -> Printf.eprintf "Warning: lex indexing not implemented\n"
+  | Yacc i -> Printf.eprintf "Warning: yacc indexing not implemented\n"
   | Other _ -> ()
 
 let build_index l = List.iter index_file l
@@ -88,6 +173,9 @@ let add_par_loc =
     | Code (l,_) -> 
 	incr par_counter;
 	add_file_loc code_locations f (l,!par_counter)
+    | LexYaccCode (l,_) -> 
+	incr par_counter;
+	add_file_loc code_locations f (l,!par_counter)
     | Documentation _ -> ()
 
 let add_sec_loc =
@@ -103,6 +191,8 @@ let add_file_loc it =
 let locations_for_a_file = function
   | Implem i -> add_file_loc i
   | Interf i -> add_file_loc i
+  | Lex i -> Printf.eprintf "Warning: lex locations not implemented\n"
+  | Yacc i -> Printf.eprintf "Warning: yacc locations not implemented\n"
   | Other _ -> ()
 
 let find_where w =
@@ -265,12 +355,27 @@ let print_index () =
 
 (*s Pretty-printing of the document. *)
 
+let rec pretty_print_sub_paragraph = function
+  | CamlCode(s) -> 
+       pretty_print_caml_subpar s
+  | YaccCode(s) -> 
+       pretty_print_yacc_subpar s
+  | LexCode(s)  -> 
+       pretty_print_lex_subpar s
+
+
 let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
   | Documentation s -> 
-      pretty_print_doc is_first_paragraph s
+      pretty_print_doc is_first_paragraph s;
+      end_line()  (*i ajout Dorland-Muller i*)
   | Code (l,s) ->
       if l > 0 then output_label (make_label_name (f,l));
-      pretty_print_code is_last_paragraph s f
+      pretty_print_code is_last_paragraph s 
+  | LexYaccCode (l,s) ->
+      if l > 0 then output_label (make_label_name (f,l));
+      begin_code_paragraph ();
+      List.iter pretty_print_sub_paragraph s;
+      end_code_paragraph is_last_paragraph 
 
 let pretty_print_section first f s = 
   if !web then begin_section ();
@@ -300,6 +405,8 @@ let pretty_print_content output_header content =
 let pretty_print_file = function
   | Implem i -> pretty_print_content output_module i 
   | Interf i -> pretty_print_content output_interface i
+  | Lex i -> pretty_print_content output_lexmodule i
+  | Yacc i -> pretty_print_content output_yaccmodule i
   | Other f -> output_file f
 
 
@@ -312,6 +419,9 @@ let pretty_print_file = function
  *)
 
 let produce_document l =
+  (*i
+    List.iter print_file l;
+  i*)
   List.iter locations_for_a_file l;
   build_index l;
   latex_header !latex_options;
