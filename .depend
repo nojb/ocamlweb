@@ -13,8 +13,8 @@ cross.cmx: ocaml-parser/asttypes.cmi ocamllex-parser/lex_lexer.cmx \
     ocaml-parser/longident.cmx output.cmx ocaml-parser/parse.cmx \
     ocaml-parser/parsetree.cmi ocaml-parser/syntaxerr.cmx yacc_lexer.cmx \
     yacc_parser.cmx yacc_syntax.cmx cross.cmi 
-doclexer.cmo: output.cmi web.cmi doclexer.cmi 
-doclexer.cmx: output.cmx web.cmx doclexer.cmi 
+doclexer.cmo: output.cmi pretty.cmi web.cmi doclexer.cmi 
+doclexer.cmx: output.cmx pretty.cmx web.cmx doclexer.cmi 
 main.cmo: doclexer.cmi output.cmi version.cmo web.cmi 
 main.cmx: doclexer.cmx output.cmx version.cmx web.cmx 
 output.cmo: output.cmi 

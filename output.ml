@@ -425,7 +425,7 @@ let output_eyc () = leave_math (); output_string "\\ocweyc{}"
 
 (*s \textbf{Strings.} *)
 
-let output_bs () = leave_math (); output_string "\\texttt{\""
+let output_bs () = leave_math (); output_string "\\ocwstring{\""
 
 let output_es () = output_string "\"}"
 
