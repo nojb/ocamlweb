@@ -138,7 +138,7 @@ val end_code : unit -> unit
 
 val begin_code_paragraph : unit -> unit
 val end_code_paragraph : bool -> unit
-val begin_doc_paragraph : bool -> unit
+val begin_doc_paragraph : bool -> int -> unit
 val end_doc_paragraph : unit -> unit
 
 (*s Index functions. [(output_index_entry id t def use)] outputs an entry line

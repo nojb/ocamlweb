@@ -39,7 +39,7 @@ type sub_paragraph =
   | YaccCode of string
  
 type paragraph =
-  | Documentation of bool * string
+  | Documentation of bool * int * string
   | Code of int * string
   | LexYaccCode of int * (sub_paragraph list)
 

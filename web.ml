@@ -32,7 +32,7 @@ type sub_paragraph =
   | YaccCode of string
  
 type paragraph =
-  | Documentation of bool * string
+  | Documentation of bool * int * string
   | Code of int * string
   | LexYaccCode of int * (sub_paragraph list)
 
@@ -91,7 +91,7 @@ let print_sub_paragraph = function
       
 (* To print a paragraph *)
 let print_paragraph = function 
-  | Documentation (_,s) -> 
+  | Documentation (_,_,s) -> 
       print "Documentation" print_string s
   | Code (i,s) -> 
       Format.printf "Code(%d,@ %s)" i s
@@ -373,8 +373,8 @@ let rec pretty_print_sub_paragraph = function
 
 
 let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
-  | Documentation (b,s) -> 
-      pretty_print_doc is_first_paragraph (b,s);
+  | Documentation (b,n,s) -> 
+      pretty_print_doc is_first_paragraph (b,n,s);
       end_line()  (*i ajout Dorland-Muller i*)
   | Code (l,s) ->
       if l > 0 then output_label (make_label_name (f,l));

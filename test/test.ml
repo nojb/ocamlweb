@@ -3,6 +3,25 @@
 
 (*i $Id$ i*)
 
+module M = struct
+
+  (* et voici [x] *)
+
+  let x = 1
+
+  module N = struct
+    
+    (*s bla bla bla *)
+    
+    let y = 2
+
+  end
+
+  (* et voilà *)	       
+
+end
+
+
 (*i*)
 open Hidden
 (*i*)

@@ -495,8 +495,8 @@ let begin_code_paragraph () =
 let end_code_paragraph is_last_paragraph =
   if is_last_paragraph then end_line() else output_string "\\medskip\n\n"
 
-let begin_doc_paragraph is_first_paragraph =
-  if not is_first_paragraph then output_string "\\noindent{}";
+let begin_doc_paragraph is_first_paragraph n =
+  if not is_first_paragraph then indentation n;
   last_is_code := false
 
 let end_doc_paragraph () =

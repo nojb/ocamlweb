@@ -22,7 +22,7 @@
     [pretty_print_code] or the first one for [pretty_print_doc]. *)
 
 val pretty_print_code : bool -> string -> unit
-val pretty_print_doc  : bool -> bool * string -> unit
+val pretty_print_doc  : bool -> bool * int * string -> unit
 
 (*s These three functions pretty-print subparagraphs of Caml code,
 Camllex code and Camlyacc code respectively *)
@@ -36,3 +36,4 @@ val pretty_print_yacc_subpar : string -> unit
 
 val reset_pretty : unit -> unit
 
+val count_spaces : string -> int

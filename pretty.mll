@@ -440,8 +440,8 @@ and pr_verbatim = parse
     end_code ();
     end_code_paragraph is_last_paragraph
 
-  let pretty_print_doc is_first_paragraph (big,s) = 
-    begin_doc_paragraph is_first_paragraph;
+  let pretty_print_doc is_first_paragraph (big,n,s) = 
+    begin_doc_paragraph is_first_paragraph n;
     let lb = Lexing.from_string s in
     if big then begin output_string "\\textbf{"; pr_doc_title lb end;
     pr_doc lb;

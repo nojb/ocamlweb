@@ -21,6 +21,7 @@
   open Lexing
   open Output
   open Web
+  open Pretty
 
 (*s Global variables and functions used by the lexer. *)
 
@@ -104,9 +105,13 @@
 
   let big_section = ref false
 
+  let initial_spaces = ref 0
+
   let push_doc () =
     if Buffer.length parbuf > 0 then begin
-      let doc = Documentation (!big_section, Buffer.contents parbuf) in
+      let doc = 
+	Documentation (!big_section, !initial_spaces, Buffer.contents parbuf)
+      in
       parlist := doc :: !parlist;
       big_section := false;
       Buffer.clear parbuf
@@ -234,6 +239,8 @@ and paragraph = parse
       { paragraph lexbuf }
   | space* "(*"    
       { comment_or_string_start := lexeme_start lexbuf;
+	let s = lexeme lexbuf in
+	initial_spaces := count_spaces (String.sub s 0 (String.length s - 2));
 	start_of_documentation lexbuf; 
 	push_doc () }
   | space* ("(*c" | _)
