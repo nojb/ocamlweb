@@ -212,11 +212,19 @@ document.
 \section{FAQ}
 
 \begin{enumerate}
-\item \textbf{How can I insert `usepackage' commands, or whatever else,
-  in the \LaTeX\ preamble?} ~\par
 
-  Use the option \texttt{--no-preamble} and catenate the result with your
-  own header and trailer.
+\item \textbf{What about an HTML output?} ~\par
+
+  Use \textsf{hevea}, the \LaTeX\ to HTML translator written by Luc
+  Maranget (freely available at
+  \texttt{http://pauillac.inria.fr/hevea/}), with the following
+  command-line:
+  \begin{displaymath}
+    \texttt{hevea} ~ \texttt{ocamlweb.sty} ~ \textit{file.tex}
+  \end{displaymath}
+  where \textit{file.tex} is the document produced by \ocamlweb.
+  The package \texttt{ocamlweb.sty} contains the necessary support for
+  \textsf{hevea}.
 
 \item \textbf{How can I customize the appearance of the final
     document?} ~\par 
@@ -224,6 +232,12 @@ document.
   Make your own version of the \LaTeX\ package
   \texttt{ocamlweb.sty}. There are macros for keywords, identifiers,
   index entries, etc. with short comments explaining their role.
+
+\item \textbf{How can I insert `usepackage' commands, or whatever else,
+  in the \LaTeX\ preamble?} ~\par
+
+  Use the option \texttt{--no-preamble} and catenate the result with your
+  own header and trailer.
 
 \item \textbf{What about lexers and parsers?} ~\par
 
@@ -242,7 +256,7 @@ document.
   First alternative: you can run an ocamlweb command in each
   directories, producing a documentation for each library. If you want
   to have the documentations alltogether in the same TeX file, run
-  each ocamlweb commands with option \textt{--nodoc} to avoid
+  each ocamlweb commands with option \texttt{--no-preamble} to avoid
   generation of the LaTeX preamble, build by hand a master document
   file with the preamble you want, without forgetting the
   \verb|\usepackage{ocamlweb}|, and input each file in each directory
