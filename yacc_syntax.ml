@@ -16,7 +16,7 @@
 
 (* $Id$ *)
 
-(* locations for refering to CAML parts of yacc files *)
+(*s locations for refering to CAML parts of yacc files *)
 
 type location = Lex_syntax.location
 
@@ -38,17 +38,18 @@ type yacc_definitions =
       trailer : location
     }
 
-(*
 
-  current file being parsed, current lexer buffer,
+let current_file_name = ref ""
+let current_line_num = ref 0
+let current_line_start_pos = ref 0
+let current_lexbuf = ref (Lexing.from_string "")
 
-*)
-
-val current_file_name : string ref
-val current_line_num : int ref
-val current_line_start_pos : int ref
-val current_lexbuf : Lexing.lexbuf ref
-val issue_warning : string -> unit
-
-
-
+let issue_warning msg =
+  if not !Output.quiet then
+    let line = !current_line_num
+    and column = 
+      Lexing.lexeme_start !current_lexbuf - !current_line_start_pos 
+    in 
+    Printf.eprintf "Warning in file %s at line %d, character %d: %s\n" 
+      !current_file_name line column msg
+      

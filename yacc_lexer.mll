@@ -30,12 +30,9 @@ and mark_count = ref 0
 
 exception Lexical_error of string * int * int
 
-let line_num = ref 1
-let line_start_pos = ref 0
-
 let handle_lexical_error fn lexbuf =
-  let line = !line_num
-  and column = Lexing.lexeme_start lexbuf - !line_start_pos in
+  let line = !current_line_num
+  and column = Lexing.lexeme_start lexbuf - !current_line_start_pos in
   try
     fn lexbuf
   with Lexical_error(msg, _, _) ->
@@ -61,18 +58,21 @@ let keyword_token lexbuf =
       Not_found ->
 	raise(Lexical_error
              ("unknown keyword " ^ String.escaped(Lexing.lexeme lexbuf),
-              !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) 
+              !current_line_num, Lexing.lexeme_start lexbuf - !current_line_start_pos)) 
 
 let cur_loc lexbuf = 
   { start_pos = Lexing.lexeme_start lexbuf; 
     end_pos = Lexing.lexeme_end lexbuf; 
-    start_line = !line_num; 
-    start_col = Lexing.lexeme_start lexbuf - !line_start_pos } 
+    start_line = !current_line_num; 
+    start_col = Lexing.lexeme_start lexbuf - !current_line_start_pos } 
 
-let reset_lexer () =
+let reset_lexer f lexbuf =
+  current_file_name := f;
   mark_count := 0;
-  line_num := 1;
-  line_start_pos := 0
+  current_line_num := 1;
+  current_line_start_pos := 0;
+  current_lexbuf := lexbuf
+    
   
 
 }
@@ -80,11 +80,28 @@ let reset_lexer () =
 (*s main rule for tokens in yacc files *)
 
 rule main = parse
+
   | [' ' '\013' '\009' '\012' ] + 
     { main lexbuf }
+
+(*
+
+   Although few grammar files include commas anywhere commas are
+skipped in yacc.  The original yacc code is used for ocaml. See
+\verb|yacc/reader.c:nextc(),read_grammar()| from the ocaml 3.04 distribution.
+
+   We issue a warning for non conformity to ocamlyacc documentation.
+
+*)
+
+  | ','
+    { issue_warning 
+	"use of commas in mly files is allowed but not conform to ocamlyacc documentation";
+	main lexbuf }
+
   | '\010'
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       main lexbuf }
   | "/*" 
     { handle_lexical_error yacc_comment lexbuf;
@@ -100,8 +117,8 @@ rule main = parse
 	  Tident (s,l) }
   | '{' 
     { let n1 = Lexing.lexeme_end lexbuf
-      and l1 = !line_num
-      and s1 = !line_start_pos in
+      and l1 = !current_line_num
+      and s1 = !current_line_start_pos in
       brace_depth := 1;
       let n2 = handle_lexical_error action lexbuf in
       Taction({start_pos = n1; end_pos = n2;
@@ -116,8 +133,8 @@ rule main = parse
       { yacc_keyword lexbuf }
   | '<'
       { let n1 = Lexing.lexeme_end lexbuf
-	and l1 = !line_num
-	and s1 = !line_start_pos in
+	and l1 = !current_line_num
+	and s1 = !current_line_start_pos in
 	let n2 = handle_lexical_error typedecl lexbuf in
 	Ttypedecl({start_pos = n1; end_pos = n2;
 		   start_line = l1; start_col = n1 - s1}) }
@@ -126,23 +143,23 @@ rule main = parse
   | _
     { raise(Lexical_error
              ("illegal character " ^ String.escaped(Lexing.lexeme lexbuf),
-              !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) }
+              !current_line_num, Lexing.lexeme_start lexbuf - !current_line_start_pos)) }
 
 and yacc_keyword = parse
   | '%' 
       { incr mark_count;
 	if !mark_count = 1 then Tmark else 
 	  let n1 = Lexing.lexeme_end lexbuf
-	  and l1 = !line_num
-	  and s1 = !line_start_pos in
+	  and l1 = !current_line_num
+	  and s1 = !current_line_start_pos in
 	  brace_depth := 0;
 	  let n2 = handle_lexical_error action lexbuf in
 	  Taction({start_pos = n1; end_pos = n2;
 		   start_line = l1; start_col = n1 - s1}) }
   | '{'  
       { let n1 = Lexing.lexeme_end lexbuf
-	and l1 = !line_num
-	and s1 = !line_start_pos in
+	and l1 = !current_line_num
+	and s1 = !current_line_start_pos in
 	brace_depth := 1;
 	let n2 = handle_lexical_error action lexbuf in
 	Taction({start_pos = n1; end_pos = n2;
@@ -152,7 +169,7 @@ and yacc_keyword = parse
   | _ 
       { raise(Lexical_error
              ("illegal character " ^ String.escaped(Lexing.lexeme lexbuf),
-              !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) }
+              !current_line_num, Lexing.lexeme_start lexbuf - !current_line_start_pos)) }
 
 
 (*s recognizes a CAML action *)
@@ -169,7 +186,7 @@ and action = parse
       if !brace_depth = 0 then Lexing.lexeme_start lexbuf else 
 	raise(Lexical_error
 		("ill-balanced brace ",
-		 !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) }
+		 !current_line_num, Lexing.lexeme_start lexbuf - !current_line_start_pos)) }
   | '"' 
     { string lexbuf;
       action lexbuf }
@@ -187,13 +204,13 @@ and action = parse
     { if !brace_depth = 0 then Lexing.lexeme_start lexbuf else
 	raise (Lexical_error("unterminated action", 0, 0)) }
   | '\010'
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       action lexbuf }
   | _ 
     { action lexbuf }
 
-(*s recognizes a CAML ytpe between $<$ and $>$ *)
+(*s recognizes a CAML type between $<$ and $>$ *)
       
 and typedecl = parse
   | '>' 
@@ -201,8 +218,8 @@ and typedecl = parse
   | eof 
     { raise (Lexical_error("unterminated type declaration", 0, 0)) }
   | '\010'
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       typedecl lexbuf }
   | "->" 
     { typedecl lexbuf }
@@ -213,8 +230,8 @@ and string = parse
     '"' 
     { () }
   | '\\' [' ' '\013' '\009' '\012'] * '\010' [' ' '\013' '\009' '\012'] *
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       string lexbuf }
   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
     { string lexbuf }
@@ -223,8 +240,8 @@ and string = parse
   | eof 
     { raise(Lexical_error("unterminated string", 0, 0)) }
   | '\010'
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       string lexbuf }
   | _ 
     { string lexbuf }
@@ -249,8 +266,8 @@ and comment = parse
   | eof 
     { raise(Lexical_error("unterminated comment", 0, 0)) }
   | '\010'
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       comment lexbuf }
   | _ 
     { comment lexbuf }
@@ -261,8 +278,8 @@ and yacc_comment = parse
   | eof 
     { raise(Lexical_error("unterminated yacc comment", 0, 0)) }
   | '\010'
-    { line_start_pos := Lexing.lexeme_end lexbuf;
-      incr line_num;
+    { current_line_start_pos := Lexing.lexeme_end lexbuf;
+      incr current_line_num;
       yacc_comment lexbuf }
   | _ 
     { yacc_comment lexbuf }

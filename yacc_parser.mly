@@ -22,7 +22,7 @@
 
   open Lex_syntax
   open Yacc_syntax
-
+    
   let dummy_loc =
     { start_pos = 0 ;
       end_pos = 0 ;
@@ -46,26 +46,29 @@
 
 /*s Start symbol for yacc description files */
 
-yacc_definitions : 
-  header tokendecls Tmark rules header EOF 
-  { { header = $1 ; 
-      decls = $2;
-      rules = $4;
-      trailer = $5 } }
+yacc_definitions: 
+  | header tokendecls Tmark rules header EOF 
+      { { header = $1 ; 
+	  decls = $2;
+	  rules = $4;
+	  trailer = $5 } }
+;
 
 header :
   | Taction          
-    { $1 }
-  | /*epsilon*/      
+      { $1 }
+  | /* $\varepsilon$ */      
     { dummy_loc }
-
-/* Token declarations. */
-
+;
+      
+/*s Token declarations. */
+    
 tokendecls :
   | tokendecl tokendecls   
     { $1::$2 }
   | /*epsilon*/
     { [] }
+;
 
 tokendecl :
   | Ttoken Ttypedecl idlist
@@ -82,37 +85,55 @@ tokendecl :
       { Tokens_assoc($2) }
   | Tright idlist
       { Tokens_assoc($2) }
+;
 
-idlist :
+idlist:
   | Tident
     { [$1] }
   | Tident idlist
     { $1 :: $2 }
+;
 
 /*s Parsing of rules. */
 
-rules :
-  | rule Tsemicolon rules    
-    { $1 :: $3 }
-  | rule rules    
-    { $1 :: $2 }
-  | /*epsilon*/
+rules:
+  | /* $\varepsilon$ */
     { [] }
+  | general_rule rules    
+    { $1 :: $2 }
+;
+
+/*
+  
+Ocamlyacc manual asks for a semicolon at end of each rules. But ocamlyacc 
+accepts if they are missing. We issue a warning for non conformity to 
+ocamlyacc documentation. 
+
+*/
+general_rule:
+  | rule Tsemicolon
+      { $1 }
+  | rule
+      { Yacc_syntax.issue_warning "ocamlyacc documentation recommends adding a semicolon at end of each grammar rules";
+      $1 }
+;
 
 rule :
   | Tident Tcolon right_part 
     { ($1,$3) }
   | Tident Tcolon Tor right_part 
     { ($1,$4) }
+;
 
 right_part :
   | word Taction
     { [($1,$2)] }
   | word Taction Tor right_part
     { ($1,$2) :: $4 }
+;
 
 word :
-  | /*epsilon*/
+  | /* $\varepsilon$ */
     { [] }
   | Tident word
     { $1 :: $2 }
@@ -120,3 +141,4 @@ word :
     { $2 :: $3 }
   | Terror word
     { $2 }
+;

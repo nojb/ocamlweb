@@ -44,7 +44,7 @@ CAMLLEX_CMO = ocamllex-parser/lex_parser.cmo ocamllex-parser/lex_lexer.cmo
 
 CAMLLEX_CMX = $(CAMLLEX_CMO:.cmo=.cmx)
 
-CMO = output.cmo yacc_parser.cmo yacc_lexer.cmo cross.cmo pretty.cmo \
+CMO = output.cmo yacc_syntax.cmo yacc_parser.cmo yacc_lexer.cmo cross.cmo pretty.cmo \
       web.cmo doclexer.cmo \
       version.cmo main.cmo
 

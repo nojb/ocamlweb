@@ -772,19 +772,17 @@ let cross_yacc f m =
   let c = open_in f in
   let lexbuf = Lexing.from_channel c in
   try
-    Yacc_lexer.reset_lexer();
+    Yacc_lexer.reset_lexer f lexbuf;
     let yacc_defs = Yacc_parser.yacc_definitions Yacc_lexer.main lexbuf in
     traverse_yacc f m yacc_defs;
     close_in c
   with 
     | Parsing.Parse_error -> begin
-	if not !quiet then
-	  eprintf " ** warning: syntax error while parsing yacc file %s\n" f;
+	Yacc_syntax.issue_warning "syntax error";
 	close_in c
       end
     | Yacc_lexer.Lexical_error(msg,line,col) -> begin
-	if not !quiet then
-	  eprintf " ** warning: while parsing yacc file %s, lexical error (%s) at line %d, character %d\n" f msg line col;
+	Yacc_syntax.issue_warning ("lexical error (" ^ msg ^ ")");
 	close_in c
       end
 

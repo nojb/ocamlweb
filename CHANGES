@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o a warning is issued whenever an ocamlyacc file is correctly parsed
+    by ocamlyacc but is not conformant to ocamlyacc manual (this is
+    about commas and semicolons) 
   o added targets "install-byte" and "dist-clean" in Makefile
 
 version 1.2, 14/01/2002
