@@ -11,7 +11,9 @@
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
 \newcommand{\monurl}[2]{\url{#1}}
 %HEVEA\renewcommand{\monurl}[2]{\url{#2}{#2}}
-
+%HEVEA\newcommand{\lnot}{not}
+%HEVEA\newcommand{\lor}{or}
+%HEVEA\newcommand{\land}{\&}
 
 \begin{document}
 
@@ -132,7 +134,6 @@ shape. These commands are the following:
 
 \end{description}
 
-
 \paragraph{Pretty-printing.} 
 \ocamlweb\ uses different faces for identifiers and keywords, and use
 mathematical symbols for some \Caml\ tokens. Here are the
@@ -144,15 +145,32 @@ correspondences.
     \verb|*|             & $\times$        \\
     \verb|<=|            & $\le$           &
     \verb|>=|            & $\ge$           &
-    \verb|<>|            & $\not=$         \\
+    \verb|~-|            & $-$             \\
+    \verb|<>|            & $\not=$         &
     \verb|==|            & $\equiv$        &
-    \verb|!=|            & $\not\equiv$    &
-    \verb|&|, \verb|&&|  & $\land$         \\
+    \verb|!=|            & $\not\equiv$    \\
     \verb|or|, \verb!||! & $\lor$          &
+    \verb|&|, \verb|&&|  & $\land$         &
     \verb|not|           & $\lnot$ 
   \end{tabular}
 \end{center}
-
+Integers and floating-point literals are pretty-printed like this:
+\begin{center}
+  \begin{tabular}{l@{$\quad\rightarrow\quad$}l}
+    \verb|123|      & $123$      \\
+    \verb|0b010011| & $010011_2$ \\
+    \verb|0o466|    & $466_8$    \\
+    \verb|0x3fff|   & $\mathtt{3fff}_{16}$ \\
+    \verb|1.2e6|    & $1.2\cdot 10^6$      \\
+    \verb|1e-4|     & $10^{-4}$
+  \end{tabular}
+\end{center}
+Characters strings are pretty-printed in fixed-width
+%HEVEAfont.
+%BEGIN LATEX
+font, and spaces are explicitly shown as the symbol {\tt\char`\ },
+as in \texttt{"a\char`\ constant\char`\ string"}.
+%END LATEX
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
