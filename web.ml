@@ -167,8 +167,8 @@ module Smap = Map.Make(struct type t = string let compare = compare end)
 let sec_locations = ref Smap.empty
 let code_locations = ref Smap.empty
 
-let add_file_loc table file loc =
-  let l = try Smap.find file !table with Not_found -> [] in
+let add_loc table file ((_,s) as loc) =
+  let l = try Smap.find file !table with Not_found -> [(0,s)] in
   table := Smap.add file (loc :: l) !table
 
 let add_par_loc =
@@ -176,17 +176,17 @@ let add_par_loc =
   fun f p -> match p with
     | Code (l,_) -> 
 	incr par_counter;
-	add_file_loc code_locations f (l,!par_counter)
+	add_loc code_locations f (l,!par_counter)
     | LexYaccCode (l,_) -> 
 	incr par_counter;
-	add_file_loc code_locations f (l,!par_counter)
+	add_loc code_locations f (l,!par_counter)
     | Documentation _ -> ()
 
 let add_sec_loc =
   let sec_counter = ref 0 in
   fun f s ->
     incr sec_counter;
-    add_file_loc sec_locations f (s.sec_beg,!sec_counter);
+    add_loc sec_locations f (s.sec_beg,!sec_counter);
     (*i
     Printf.eprintf "section %d starts at character %d of file %s\n" 
       !sec_counter s.sec_beg f;
@@ -341,16 +341,16 @@ let entry_type_name = function
   | YaccTerminal    -> "(camlyacc token)"
 
 let print_one_entry id =
-  let def = list_in_table id !defined
-  and use = list_in_table id !used in
-  let s = id.e_name in
-  let t = entry_type_name id.e_type in
-  if !extern_defs || def <> [] then
+  let def = list_in_table id !defined in
+  if !extern_defs || def <> [] then begin
+    let use = list_in_table id !used in
+    let s = id.e_name in
+    let t = entry_type_name id.e_type in
     if !web then 
       output_index_entry s t (web_list def) (web_list use)
     else 
       output_raw_index_entry s t (label_list def) (label_list use)
-
+  end
 
 (*s Then printing the index is just iterating [print_one_entry] on all the
     index entries, given by [(all_entries())]. *)
