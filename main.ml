@@ -33,7 +33,7 @@ let usage () =
   prerr_endline "  -o <file>      write output in file <file>";
   prerr_endline "  --latex-sects  use LaTeX sectioning, not WEB";
   prerr_endline "  --header       do not skip the headers of Caml file";
-  prerr_endline "  --no-doc       suppress LaTeX header and trailer";
+  prerr_endline "  --no-preamble  suppress LaTeX header and trailer";
   prerr_endline "  --no-index     do not output the index";
   prerr_endline "  --extern-defs  keep external definitions in the index";
   prerr_endline "  --impl <file>  consider <file> as a .ml file";
