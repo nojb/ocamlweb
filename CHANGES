@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.3, 6/2/2002
+=====================
   o a warning is issued whenever an ocamlyacc file is correctly parsed
     by ocamlyacc but is not conformant to ocamlyacc manual (this is
     about commas and semicolons) 
