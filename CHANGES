@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o LaTeX messages now displayed (with -dvi,-ps), unless -q
   o big sections with (*S
   o nicer pretty-print of [< and >]
 

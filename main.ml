@@ -35,7 +35,7 @@ let usage () =
   prerr_endline "  --ps           output the PostScript";
   prerr_endline "  --html         output the HTML";
   prerr_endline "  --hevea-option <opt>";
-  prerr_endline "                 pass an option hevea (HTML output)";
+  prerr_endline "                 pass an option to hevea (HTML output)";
   prerr_endline "  -s             (short) no titles for files";
   prerr_endline "  --noweb        use manual LaTeX sectioning, not WEB";
   prerr_endline "  --header       do not skip the headers of Caml file";
@@ -297,7 +297,11 @@ let produce_output fl =
     produce_document fl;
     let command = 
       let file = basename texfile in
-      sprintf "(latex %s && latex %s) > /dev/null 2>&1" file file
+      let file = 
+	if !quiet then sprintf "'\\nonstopmode\\input{%s}'" file else file 
+      in
+      sprintf "(latex %s && latex %s)%s" file file
+	(if !quiet then " > /dev/null 2>&1" else "")
     in
     let res = locally (dirname texfile) Sys.command command in
     if res <> 0 then begin
