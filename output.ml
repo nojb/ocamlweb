@@ -88,7 +88,7 @@ let first_line = ref true
 let indentation n =
   leave_math ();
   if not !first_line then
-    let space = 0.75 *. (float n) in
+    let space = 0.5 *. (float n) in
     output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
   else
     first_line := false
@@ -165,6 +165,14 @@ let output_latex_special = function
 let output_bc () = leave_math (); output_string "\\ocwbc{}"
 
 let output_ec () = leave_math (); output_string "\\ocwec{}"
+
+(* strings *)
+
+let output_bs () = leave_math (); output_string "\\texttt{\""
+
+let output_es () = output_string "\"}"
+
+let output_vspace () = output_string "\\ocwvspace{}"
 
 (* coming back to initial values *)
 

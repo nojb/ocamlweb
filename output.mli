@@ -67,6 +67,14 @@ val output_latex_special : string -> unit
 val output_bc : unit -> unit
 val output_ec : unit -> unit
 
+(* Strings inside code are opened and close respectively by
+   [ output_bs] and [output_es]. A space character in a string is 
+   output as a visible space, with [output_vspace]. *)
+
+val output_bs : unit -> unit
+val output_es : unit -> unit
+val output_vspace : unit -> unit
+
 (*s The following functions deal with sectioning. The highest level is
     the one of modules and interfaces. A module may contain two subparts, 
     one for the specification and one for the code.

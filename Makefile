@@ -21,14 +21,17 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-BUFFER = buffer.cmx
+BUFFER = 
 OBJS = $(BUFFER) output.cmx cross.cmx pretty.cmx web.cmx lexer.cmx \
        version.cmx main.cmx
 
 all: ocamlweb
 
-ocamlweb: $(OBJS)
-	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(OBJS)
+ocamlweb: $(OBJS:.cmx=.cmo)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(OBJS:.cmx=.cmo)
+
+ocamlweb.opt: $(OBJS)
+	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb.opt $(OBJS)
 
 debug: $(OBJS:.cmx=.cmo)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(OBJS:.cmx=.cmo)
@@ -43,7 +46,7 @@ install:
 byte: $(OBJS:.cmx=.cmo)
 
 test: ocamlweb
-	cd tmp; ../ocamlweb ../output.mli ../web.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
 	latex essai
 
 # export

@@ -63,9 +63,10 @@ let uppercase = ['A'-'Z' '\192'-'\214' '\216'-'\222']
 let identchar = 
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
 let identifier = (lowercase | uppercase) identchar*
+let latex_reserved = '^' | '%' | '&' | '$' | '{' | '}' | '\\'
 let latex_special = 
-    ' ' | '^' | '%' | '&' | '$' | '{' | '}'  (* TeX reserved chars *)
-  | '*' | "->" | "<-" | "<=" | ">=" | "<>"   (* math symbols *)
+    ' ' | '^' | '%' | '&' | '$' | '{' | '}' | '\\' (* TeX reserved chars *)
+  | '*' | "->" | "<-" | "<=" | ">=" | "<>"         (* math symbols *)
 
 (************************************************************************)
 (* CODE                                                                 *)
@@ -85,6 +86,7 @@ and pr_code_inside = parse
   | "'a" { output_string "\\alpha{}"; pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
+  | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
   | latex_special  
          { output_latex_special (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
   | eof  { () }
@@ -101,6 +103,16 @@ and pr_comment = parse
   | '_' | '^' { check_user_math (first_char lexbuf); pr_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_comment lexbuf }
 
+(* strings in code *)
+and pr_code_string = parse
+  | '"'  { output_es () }
+  | '\n' { indentation 0; pr_code_string lexbuf }
+  | ' '  { output_vspace (); pr_code_string lexbuf }
+  | latex_reserved
+         { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
+  | eof  { () }
+  | _    { output_char (first_char lexbuf); pr_code_string lexbuf }
+
 (* escaped code *)
 and escaped_code = parse
   | '[' { output_char '['; incr bracket_depth; escaped_code lexbuf }
@@ -109,6 +121,7 @@ and escaped_code = parse
 	    output_char ']'; escaped_code lexbuf
           end else
 	    if not !user_math_mode then leave_math () }
+  | '"'  { output_bs (); pr_code_string lexbuf; escaped_code lexbuf }
   | identifier
          { output_ident (Lexing.lexeme lexbuf); escaped_code lexbuf }
   | latex_special  

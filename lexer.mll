@@ -115,6 +115,8 @@ and code = parse
   | '\n' { push_code () }
   | ";;" { push_code () }
   | eof  { push_code () }
+  | '"'  { Buffer.add_char codeb '"'; code_string lexbuf;
+	   code_until_nl lexbuf; code lexbuf }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf;
 	   code lexbuf }
 
@@ -124,6 +126,8 @@ and code_until_nl = parse
   | ";;" { code_until_nl lexbuf }
   | "(*" { comment_depth := 1; Buffer.add_string codeb "(*";
 	   comment lexbuf; code_until_nl lexbuf }
+  | '"'  { Buffer.add_char codeb '"'; code_string lexbuf;
+	   code_until_nl lexbuf }
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf }
 
@@ -154,3 +158,12 @@ and ignore = parse
   | "i*)" { () }
   | eof   { () }
   | _     { ignore lexbuf }
+
+(* strings in code *)
+and code_string = parse
+    '"'      { Buffer.add_char codeb '"' }
+  | '\\' '"' { Buffer.add_string codeb (Lexing.lexeme lexbuf); 
+	       code_string lexbuf }
+  | eof      { () }
+  | _        { Buffer.add_char codeb (first_char lexbuf); code_string lexbuf }
+

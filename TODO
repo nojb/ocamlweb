@@ -15,6 +15,10 @@ Web (cross)
  2. nom de constructeurs et étiquettes dans les déclarations de types
     == définitions
 
+ 3. supprimer les modules et fonctions de Pervasives de l'index
+
+ 4. que faire des noms qualifiés (M.f) ?
+
 
 Document LaTeX
 ==============
