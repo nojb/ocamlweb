@@ -300,8 +300,8 @@ let produce_output fl =
       let file = 
 	if !quiet then sprintf "'\\nonstopmode\\input{%s}'" file else file 
       in
-      sprintf "(latex %s && latex %s)%s" file file
-	(if !quiet then " > /dev/null 2>&1" else "")
+      sprintf "(latex %s && latex %s) 1>&2 %s" file file
+	(if !quiet then "> /dev/null" else "")
     in
     let res = locally (dirname texfile) Sys.command command in
     if res <> 0 then begin
@@ -319,7 +319,11 @@ let produce_output fl =
       let psfile = 
 	if !output_file <> "" then !output_file else basefile ^ ".ps" 
       in
-      let res = Sys.command (sprintf "dvips %s -o %s" dvifile psfile) in
+      let command = 
+	sprintf "dvips %s -o %s %s" dvifile psfile 
+	  (if !quiet then "> /dev/null 2>&1" else "")
+      in
+      let res = Sys.command command in
       if res <> 0 then begin
 	eprintf "Couldn't run dvips successfully\n"; exit res
       end;
@@ -331,7 +335,9 @@ let produce_output fl =
       in
       let options = String.concat " " (List.rev !hevea_options) in
       let command = 
-	sprintf "hevea %s ocamlweb.sty %s -o %s" options texfile htmlfile in
+	sprintf "hevea %s ocamlweb.sty %s -o %s %s" options texfile htmlfile
+	  (if !quiet then "> /dev/null 2>&1" else "")
+      in
       let res = Sys.command command in
       if res <> 0 then begin
 	eprintf "Couldn't run hevea successfully\n"; exit res
