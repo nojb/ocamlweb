@@ -76,19 +76,19 @@ install:
 		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
 	fi
 	mkdir -p $(MANDIR)
-	cp ocamlweb.1 $(MANDIR)/man1
+	cp doc/ocamlweb.1 $(MANDIR)/man1
 	mkdir -p $(TEXDIR)
 	cp ocamlweb.sty $(TEXDIR)	
 	$(UPDATETEX)
 
 local: ocamlweb
 	cp ocamlweb $$HOME/bin/$$OSTYPE
-	cp ocamlweb.1 $$HOME/man/man1
+	cp doc/ocamlweb.1 $$HOME/man/man1
 	cp ocamlweb.sty $$HOME/tex/inputs
 
 install-demons: ocamlweb
 	cp ocamlweb /users/demons/demons/bin/$$OSTYPE
-	cp ocamlweb.1 /users/demons/demons/man/man1
+	cp doc/ocamlweb.1 /users/demons/demons/man/man1
 	cp ocamlweb.sty /users/demons/demons/tex/inputs
 
 manual:
