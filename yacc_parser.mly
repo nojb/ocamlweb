@@ -52,6 +52,7 @@ yacc_definitions:
       trailer = $5 } }
 ;
 
+
 header :
   | Taction          
     { $1 }
@@ -64,7 +65,7 @@ tokendecls:
     { $1::$2 }
   | /*epsilon*/
     { [] }
-;
+
 
 tokendecl:
   | Ttoken Ttypedecl idlist
@@ -81,36 +82,38 @@ tokendecl:
       { Tokens_assoc($2) }
   | Tright idlist
       { Tokens_assoc($2) }
-;
+
 
 idlist:
   | Tident
     { [$1] }
   | Tident idlist
     { $1 :: $2 }
-;
+
 
 /*s entry for rules */
 rules:
   | rule Tsemicolon rules    
     { $1 :: $3 }
+  | rule rules    
+    { $1 :: $2 }
   | /*epsilon*/
     { [] }
-;
+
 
 rule:
   | Tident Tcolon right_part 
     { ($1,$3) }
   | Tident Tcolon Tor right_part 
     { ($1,$4) }
-;
+
 
 right_part:
   | word Taction
     { [($1,$2)] }
   | word Taction Tor right_part
     { ($1,$2) :: $4 }
-;
+
 
 word:
   | /*epsilon*/
@@ -119,6 +122,7 @@ word:
     { $1 :: $2 }
   | Tprec Tident word
     { $2 :: $3 }
-;
+
+
 
 

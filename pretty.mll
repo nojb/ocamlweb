@@ -236,6 +236,11 @@ and pr_yacccode_inside = parse
 	output_string "\\ocwyacccolon";
 	pr_yacccode_inside lexbuf
       }
+  | ";"
+      {
+	output_string "\\ocwyaccendrule";
+	pr_yacccode_inside lexbuf
+      }
   | "|" 
       {
 	output_string "\\ocwyaccpipe";
