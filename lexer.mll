@@ -45,13 +45,6 @@
   let first_char lexbuf = Lexing.lexeme_char lexbuf 0
 
   let docub = Buffer.create 8192
-  let codeb = Buffer.create 8192
-
-  let push_code () =
-    if Buffer.length codeb > 0 then begin
-      parlist := (Code (Buffer.contents codeb)) :: !parlist;
-      Buffer.clear codeb
-    end
 
   let push_doc () =
     if Buffer.length docub > 0 then begin
@@ -59,23 +52,13 @@
       Buffer.clear docub
     end
 
-  let current_indent = ref 0
-  let line_indent = ref 0
-
-  let count_spaces s =
-    let c = ref 0 in
-    for i = 0 to String.length s - 1 do
-      if s.[i] = '\t' then
-	c := !c + (8 - (!c mod 8))
-      else
-	incr c
-    done;
-    !c
-
-  let beginning_of_line s =
-    let n = count_spaces s in
-    line_indent := n;
-    if n <= !current_indent then current_indent := n
+  let codeb = Buffer.create 8192
+		
+  let push_code () =
+    if Buffer.length codeb > 0 then begin
+      parlist := (Code (Buffer.contents codeb)) :: !parlist;
+      Buffer.clear codeb
+    end
 
 }
 

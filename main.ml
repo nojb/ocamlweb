@@ -91,7 +91,7 @@ let check_if_file_exists f =
     exit 1
   end
 
-let process_one_file f =
+let read_one_file f =
   check_if_file_exists f;
   let (mo,suff) = what_file f in
   if suff = ".ml" or suff = ".mli" then begin
@@ -114,7 +114,8 @@ let main () =
   banner();
   let files = parse() in
   latex_header ();
-  let _ = List.map process_one_file files in
+  let modl = List.map read_one_file files in
+  produce_document modl;
   latex_trailer ();
   close_output ()
 

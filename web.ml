@@ -16,6 +16,10 @@
 
 (* $Id$ *)
 
+open Printf
+open Output
+open Pretty
+
 type paragraph =
     Documentation of string
   | Code of string
@@ -39,4 +43,32 @@ type file =
     Implem of implem
   | Interf of interf
   | Other  of string
+
+
+(* production of the TeX document *)
+
+let pretty_print_paragraph = function
+    Documentation s -> 
+      pretty_print_doc s;
+      output_string "\n\n"
+  | Code s ->
+      pretty_print_code s;
+      output_string "\n\n"
+
+let sec_number = ref 0
+
+let pretty_print_implem imp =
+  let pretty_print_section s = 
+    incr sec_number;
+    output_string (sprintf "\\ocwsection{%d}\n" !sec_number);
+    List.iter pretty_print_paragraph s
+  in
+  List.iter pretty_print_section imp.implem_contents
+
+let produce_document l =
+  List.iter 
+    (function 
+	 Implem i -> pretty_print_implem i 
+       | _ -> ())
+    l
 

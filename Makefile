@@ -22,7 +22,7 @@ BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
 BUFFER = 
-OBJS = $(BUFFER) output.cmx web.cmx lexer.cmx version.cmx main.cmx
+OBJS = $(BUFFER) output.cmx pretty.cmx web.cmx lexer.cmx version.cmx main.cmx
 
 all: ocamlweb
 
@@ -36,13 +36,14 @@ version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
 	echo "let date = \""`date`"\"" >> version.ml
 
-lexer.ml: lexer.mll
-	ocamllex lexer.mll
-
 install:
 	cp ocamlweb $(BINDIR)
 
 byte: $(OBJS:.cmx=.cmo)
+
+test: ocamlweb
+	cd tmp; ../ocamlweb essai.ml -o essai.tex ; \
+	latex essai
 
 # export
 ########
@@ -78,7 +79,10 @@ binary: ocamlweb
 # generic rules :
 #################
 
-.SUFFIXES: .mli .ml .cmi .cmo .cmx
+.SUFFIXES: .mli .ml .cmi .cmo .cmx .mll
+ 
+.mll.ml:
+	ocamllex $<
  
 .mli.cmi:
 	$(CAMLC) -c $(BYTEFLAGS) $<
@@ -97,9 +101,9 @@ binary: ocamlweb
 ##################
 
 clean:
-	rm -f *~ *.cm[iox] *.o ocamlweb lexer.ml version.ml
+	rm -f *~ *.cm[iox] *.o ocamlweb lexer.ml pretty.ml version.ml
 
-depend: lexer.ml
+depend: lexer.ml pretty.ml
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml > .depend
 

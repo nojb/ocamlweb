@@ -4,5 +4,7 @@ main.cmo: lexer.cmo output.cmi version.cmo web.cmi
 main.cmx: lexer.cmx output.cmx version.cmx web.cmx 
 output.cmo: output.cmi 
 output.cmx: output.cmi 
-web.cmo: web.cmi 
-web.cmx: web.cmi 
+pretty.cmo: output.cmi pretty.cmi 
+pretty.cmx: output.cmx pretty.cmi 
+web.cmo: pretty.cmi web.cmi 
+web.cmx: pretty.cmx web.cmi 

@@ -38,7 +38,7 @@ let set_no_doc b = nodoc := b
 
 let latex_header () =
   if not !nodoc then begin
-    output_string "\\documentclass{article}\n";
+    output_string "\\documentclass[12pt]{article}\n";
     output_string "\\usepackage{ocamlweb}\n";
     output_string "\\usepackage[latin1]{inputenc}\n";
     output_string "\\usepackage[T1]{fontenc}\n";
@@ -49,3 +49,18 @@ let latex_trailer () =
   if not !nodoc then begin
     output_string "\\end{document}\n"
   end
+
+let output_keyword s =
+  output_string "\\ocwkw{"; output_string s; output_string "}"
+
+let output_latex_id s =
+  for i = 0 to String.length s - 1 do
+    let c = s.[i] in
+    if c = '_' then
+      output_string "\\_"
+    else
+      output_char c
+  done
+
+let output_ident s =
+  output_string "\\ocwid{"; output_latex_id s; output_string "}"

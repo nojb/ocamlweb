@@ -16,15 +16,5 @@
 
 (* $Id$ *)
 
-val set_output_to_file : string -> unit
-val close_output : unit -> unit
-
-val output_char : char -> unit
-val output_string : string -> unit
-
-val set_no_doc : bool -> unit
-val latex_header : unit -> unit
-val latex_trailer : unit -> unit
-
-val output_keyword : string -> unit
-val output_ident : string -> unit
+val pretty_print_code : string -> unit
+val pretty_print_doc  : string -> unit

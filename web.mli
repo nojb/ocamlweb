@@ -40,3 +40,4 @@ type file =
   | Interf of interf
   | Other  of string
 
+val produce_document : file list -> unit
