@@ -28,6 +28,9 @@ let usage () =
   prerr_endline "  --header       do not skip the headers";
   prerr_endline "  --nodoc        suppress LaTeX header and trailer";
   prerr_endline "  --extern-defs  keep external definitions in the index";
+  prerr_endline "  --impl file    consider `file' as a .ml file";
+  prerr_endline "  --intf file    consider `file' as a .mli file";
+  prerr_endline "  --tex file     consider `file' as a .tex file";
   exit 1
 
 let copying () =
@@ -44,8 +47,54 @@ See the GNU General Public License version 2 for more details
 (enclosed in the file GPL).";
   flush stderr
 
+let banner () =
+  eprintf "This is ocamlweb version %s, compiled on %s\n"
+    Version.version Version.date;
+  eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
+  eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
+  flush stderr
+
+type caml_file = { caml_filename : string; caml_module : string }
+
+type file_type =
+    File_impl  of caml_file * caml_file option
+  | File_intf  of caml_file
+  | File_other of string
+
+let module_name f = String.capitalize (Filename.basename f)
+
+let make_impl f = 
+  { caml_filename = f;
+    caml_module = module_name (Filename.chop_suffix f ".ml") }
+
+let make_intf f = 
+  { caml_filename = f;
+    caml_module = module_name (Filename.chop_suffix f ".mli") }
+
+let check_if_file_exists f =
+  if not (Sys.file_exists f) then begin
+    eprintf "\nocamlweb: %s: no such file\n" f;
+    exit 1
+  end
+
+let what_file f =
+  check_if_file_exists f;
+  if Filename.check_suffix f ".ml" then
+    let fi = f^"i" in
+    let intf = if Sys.file_exists fi then Some (make_intf fi) else None in
+    File_impl (make_impl f, intf)
+  else if Filename.check_suffix f ".mli" then
+    File_intf (make_intf f)
+   else if Filename.check_suffix f ".tex" then
+    File_other f
+   else begin
+     eprintf "\nocamlweb: don't know what to do with %s\n" f;
+    exit 1
+  end
+
 let parse () =
   let files = ref [] in
+  let add_file f = files := f :: !files in
   let rec parse_rec = function
       [] -> ()
 
@@ -67,32 +116,28 @@ let parse () =
     | ("-warranty" | "--warranty") :: _ ->
 	copying (); exit 0
 
-    | s::rem -> files := s :: !files; parse_rec rem
+    | ("-impl" | "--impl") :: f :: rem -> 
+	check_if_file_exists f;
+	let m = File_impl ({ caml_filename = f; caml_module = module_name f },
+			   None) in
+	add_file m; parse_rec rem
+    | ("-impl" | "--impl") :: [] ->
+	usage ()
+    | ("-intf" | "--intf") :: f :: rem ->
+	check_if_file_exists f;
+	let i = File_intf { caml_filename = f; caml_module = module_name f } in
+	add_file i; parse_rec rem
+    | ("-intf" | "--intf") :: [] ->
+	usage ()
+    | ("-tex" | "--tex") :: f :: rem -> 
+	add_file (File_other f); parse_rec rem
+    | ("-tex" | "--tex") :: [] ->
+	usage ()
+    | f :: rem -> 
+	add_file (what_file f); parse_rec rem
   in 
   parse_rec (List.tl (Array.to_list Sys.argv));
   List.rev !files
-
-let banner () =
-  eprintf "This is ocamlweb version %s, compiled on %s\n"
-    Version.version Version.date;
-  eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
-  eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
-  flush stderr
-
-let what_file f =
-  let modulename f = String.capitalize (Filename.basename f) in
-  if Filename.check_suffix f ".ml" then
-    modulename (Filename.chop_suffix f ".ml"), ".ml"
-  else if Filename.check_suffix f ".mli" then
-    modulename (Filename.chop_suffix f ".mli"), ".mli"
-  else
-    f, ""
-
-let check_if_file_exists f =
-  if not (Sys.file_exists f) then begin
-    eprintf "\nocamlweb: %s: no such file\n" f;
-    exit 1
-  end
 
 let raw_read_file f =
   reset_lexer ();
@@ -103,32 +148,32 @@ let raw_read_file f =
   close_in c;
   contents
 
-let read_implem mo f =
-  let interf =
-    if Sys.file_exists (f^"i") then Some (raw_read_file (f^"i")) else None
-  in
-  Implem { implem_file = f; implem_name = mo;
-	   implem_contents = raw_read_file f;
-	   implem_interf = interf }
-
-let read_interf mo f =
-  Interf { interf_file = f; interf_name = mo; 
-	   interf_contents = raw_read_file f }
+let read_intf i = 
+  { interf_file = i.caml_filename; 
+    interf_name = i.caml_module; 
+    interf_contents = raw_read_file i.caml_filename }
     
-let read_one_file f =
-  check_if_file_exists f;
-  let (mo,suff) = what_file f in
-  if suff = ".ml" or suff = ".mli" then begin
-    if suff = ".ml" then read_implem mo f else read_interf mo f
-  end else
-    Other f
+let read_impl (m,mi) =
+  let interf = match mi with 
+    | None -> None
+    | Some i -> Some (read_intf i)
+  in
+  { implem_file = m.caml_filename; 
+    implem_name = m.caml_module;
+    implem_contents = raw_read_file m.caml_filename;
+    implem_interf = interf }
+
+let read_one_file = function
+    File_impl (m,i) -> Implem (read_impl (m,i))
+  | File_intf f -> Interf (read_intf f)
+  | File_other f -> Other f
 
 let main () =
   banner();
   let files = parse() in
   if List.length files > 0 then begin
-    latex_header ();
     let modl = List.map read_one_file files in
+    latex_header ();
     produce_document modl;
     latex_trailer ();
     close_output ()

@@ -49,7 +49,7 @@ manual:
 	cd doc; make all
 
 test: ocamlweb
-	cd tmp; ../ocamlweb foo.ml essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb --impl ../pretty.mll essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
 	latex essai
 
 # export
@@ -65,7 +65,7 @@ FILES = buffer.mli buffer.ml \
 	Makefile .depend README INSTALL COPYING GPL CHANGES
 
 export: source
-	cp README COPYING GPL CHANGES  $(FTP)
+	cp README COPYING GPL CHANGES $(FTP)
 	cd doc; make all export
 
 source:

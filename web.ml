@@ -38,7 +38,7 @@ type implem = {
   implem_file : string;
   implem_name : string;
   implem_contents : raw_section list;
-  implem_interf : (raw_section list) option } 
+  implem_interf : interf option } 
 
 type file = 
   | Implem of implem
@@ -77,7 +77,7 @@ let build_implem imp =
   cross_new_module imp.implem_name;
   begin match imp.implem_interf with
     | None -> ()
-    | Some l -> List.iter (build_section false) l
+    | Some i -> List.iter (build_section false) i.interf_contents
   end;
   List.iter (build_section true) imp.implem_contents
 
@@ -142,9 +142,9 @@ let pretty_print_implem imp =
   output_module imp.implem_name;
   begin match imp.implem_interf with
     | None -> ()
-    | Some l -> 
+    | Some i -> 
 	interface_part ();
-	List.iter pretty_print_section l;
+	List.iter pretty_print_section i.interf_contents;
 	code_part ()
   end;
   List.iter pretty_print_section imp.implem_contents

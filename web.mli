@@ -39,7 +39,7 @@ type implem = {
   implem_file : string;
   implem_name : string;
   implem_contents : raw_section list;
-  implem_interf : (raw_section list) option } 
+  implem_interf : interf option } 
 
 type file = 
   | Implem of implem
