@@ -58,7 +58,7 @@ install:
 manual:
 	cd doc; make all
 
-LATEX=export TEXINPUTS=..: ; latex
+LATEX=TEXINPUTS=..: ; export TEXINPUTS ; latex
 
 test: ocamlweb
 	cd tmp; ../ocamlweb --latex-sects essai.ml -o essai.tex ; \
