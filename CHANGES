@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.36, 12/10/2004
+========================
+  o adequacy to ocaml 3.08.1 parser
+
 version 1.35, 23/8/2004
 =======================
   o port to ocaml 3.08

@@ -15,8 +15,8 @@
 (* The shallow abstract syntax *)
 
 type location =
-    { start_pos: int;
-      end_pos: int;
+    { start_pos: Lexing.position;
+      end_pos: Lexing.position;
       start_line: int;
       start_col: int }
 

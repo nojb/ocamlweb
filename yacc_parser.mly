@@ -24,8 +24,8 @@
   open Yacc_syntax
     
   let dummy_loc =
-    { start_pos = 0 ;
-      end_pos = 0 ;
+    { start_pos = Lexing.dummy_pos;
+      end_pos = Lexing.dummy_pos;
       start_line = 0 ;
       start_col = 0 }
 

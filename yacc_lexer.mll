@@ -61,8 +61,8 @@ let keyword_token lexbuf =
               !current_line_num, Lexing.lexeme_start lexbuf - !current_line_start_pos)) 
 
 let cur_loc lexbuf = 
-  { start_pos = Lexing.lexeme_start lexbuf; 
-    end_pos = Lexing.lexeme_end lexbuf; 
+  { start_pos = Lexing.lexeme_start_p lexbuf; 
+    end_pos = Lexing.lexeme_end_p lexbuf; 
     start_line = !current_line_num; 
     start_col = Lexing.lexeme_start lexbuf - !current_line_start_pos } 
 
@@ -116,13 +116,13 @@ skipped in yacc.  The original yacc code is used for ocaml. See
 	  i*)
 	  Tident (s,l) }
   | '{' 
-    { let n1 = Lexing.lexeme_end lexbuf
+    { let n1 = Lexing.lexeme_end_p lexbuf
       and l1 = !current_line_num
       and s1 = !current_line_start_pos in
       brace_depth := 1;
       let n2 = handle_lexical_error action lexbuf in
       Taction({start_pos = n1; end_pos = n2;
-               start_line = l1; start_col = n1 - s1}) }
+               start_line = l1; start_col = n1.Lexing.pos_cnum - s1}) }
   | '|' 
       { Tor }
   | ';' 
@@ -132,12 +132,12 @@ skipped in yacc.  The original yacc code is used for ocaml. See
   | '%'  
       { yacc_keyword lexbuf }
   | '<'
-      { let n1 = Lexing.lexeme_end lexbuf
+      { let n1 = Lexing.lexeme_end_p lexbuf
 	and l1 = !current_line_num
 	and s1 = !current_line_start_pos in
 	let n2 = handle_lexical_error typedecl lexbuf in
 	Ttypedecl({start_pos = n1; end_pos = n2;
-		   start_line = l1; start_col = n1 - s1}) }
+		   start_line = l1; start_col = n1.Lexing.pos_cnum - s1}) }
   | eof 
       { EOF }
   | _
@@ -149,21 +149,21 @@ and yacc_keyword = parse
   | '%' 
       { incr mark_count;
 	if !mark_count = 1 then Tmark else 
-	  let n1 = Lexing.lexeme_end lexbuf
+	  let n1 = Lexing.lexeme_end_p lexbuf
 	  and l1 = !current_line_num
 	  and s1 = !current_line_start_pos in
 	  brace_depth := 0;
 	  let n2 = handle_lexical_error action lexbuf in
 	  Taction({start_pos = n1; end_pos = n2;
-		   start_line = l1; start_col = n1 - s1}) }
+		   start_line = l1; start_col = n1.Lexing.pos_cnum - s1}) }
   | '{'  
-      { let n1 = Lexing.lexeme_end lexbuf
+      { let n1 = Lexing.lexeme_end_p lexbuf
 	and l1 = !current_line_num
 	and s1 = !current_line_start_pos in
 	brace_depth := 1;
 	let n2 = handle_lexical_error action lexbuf in
 	Taction({start_pos = n1; end_pos = n2;
-		 start_line = l1; start_col = n1 - s1}) }
+		 start_line = l1; start_col = n1.Lexing.pos_cnum - s1}) }
   | ['a'-'z']+
       { keyword_token lexbuf }
   | _ 
@@ -180,10 +180,11 @@ and action = parse
       action lexbuf }
   | '}' 
     { decr brace_depth;
-      if !brace_depth = 0 then Lexing.lexeme_start lexbuf else action lexbuf }
+      if !brace_depth = 0 
+      then Lexing.lexeme_start_p lexbuf else action lexbuf }
   | "%}" 
     { decr brace_depth;
-      if !brace_depth = 0 then Lexing.lexeme_start lexbuf else 
+      if !brace_depth = 0 then Lexing.lexeme_start_p lexbuf else 
 	raise(Lexical_error
 		("ill-balanced brace ",
 		 !current_line_num, Lexing.lexeme_start lexbuf - !current_line_start_pos)) }
@@ -201,7 +202,7 @@ and action = parse
       comment lexbuf;
       action lexbuf }
   | eof 
-    { if !brace_depth = 0 then Lexing.lexeme_start lexbuf else
+    { if !brace_depth = 0 then Lexing.lexeme_start_p lexbuf else
 	raise (Lexical_error("unterminated action", 0, 0)) }
   | '\010'
     { current_line_start_pos := Lexing.lexeme_end lexbuf;
@@ -214,7 +215,7 @@ and action = parse
       
 and typedecl = parse
   | '>' 
-    { Lexing.lexeme_start lexbuf }
+    { Lexing.lexeme_start_p lexbuf }
   | eof 
     { raise (Lexical_error("unterminated type declaration", 0, 0)) }
   | '\010'

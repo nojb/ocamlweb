@@ -73,7 +73,8 @@ header:
     Taction
         { $1 }
   | /*epsilon*/
-        { { start_pos = 0; end_pos = 0; start_line = 1; start_col = 0 } }
+        { { start_pos = Lexing.dummy_pos; end_pos = Lexing.dummy_pos; 
+	    start_line = 1; start_col = 0 } }
 ;
 named_regexps:
     named_regexps Tlet Tident Tequal regexp

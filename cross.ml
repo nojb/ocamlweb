@@ -17,6 +17,7 @@
 (*i $Id$ i*)
 
 (*i*)
+open Lexing
 open Filename
 open Location
 open Longident
@@ -74,7 +75,8 @@ let current_file = ref ""
 let current_offset = ref 0
 
 let current_location loc = 
-  { w_filename = !current_file; w_loc = !current_offset + loc.loc_start }
+  { w_filename = !current_file; 
+    w_loc = !current_offset + loc.loc_start.pos_cnum }
 
 let add_def loc t s =
   if String.length s > 0 then
@@ -208,6 +210,8 @@ and tr_core_type_desc loc = function
       tr_core_type ct
   | Ptyp_variant (l,_,_) ->
       List.iter tr_row_field l
+  | Ptyp_poly (_,t) ->
+      tr_core_type t
 
 and tr_row_field = function
   | Rtag (_,_,ctl) -> List.iter tr_core_type ctl
@@ -306,6 +310,12 @@ and tr_expression_desc loc = function
       tr_expression e
   | Pexp_assertfalse ->
       ()
+  | Pexp_lazy e ->
+      tr_expression e
+  | Pexp_poly (e, t) ->
+      tr_expression e; option_iter tr_core_type t
+  | Pexp_object cs ->
+      tr_class_structure cs
 
 (*s Value descriptions. *)
 
@@ -320,10 +330,10 @@ and tr_type_declaration td =
 
 and tr_type_kind loc = function
   | Ptype_abstract -> ()
-  | Ptype_variant cl ->
+  | Ptype_variant (cl,_) ->
       iter_fst (add_def loc Constructor) cl;
       iter_snd (List.iter tr_core_type) cl
-  | Ptype_record fl ->
+  | Ptype_record (fl,_) ->
       List.iter (fun (f,_,t) -> add_def loc Field f; tr_core_type t) fl
 
 and tr_exception_declaration ed =
@@ -459,6 +469,8 @@ and tr_signature_item_desc loc = function
       add_def loc Exception id; tr_exception_declaration ed
   | Psig_module (id,mt) ->
       add_def loc Module id; tr_module_type mt
+  | Psig_recmodule l ->
+      List.iter (fun (id,mt) -> add_def loc Module id; tr_module_type mt) l
   | Psig_modtype (id,mtd) ->
       add_def loc ModuleType id; tr_modtype_declaration mtd
   | Psig_open q -> 
@@ -517,6 +529,10 @@ and tr_structure_item_desc loc = function
       add_def loc Exception id; tr_exception_declaration ed
   | Pstr_module (id,me) ->
       add_def loc Module id; tr_module_expr me
+  | Pstr_recmodule l ->
+      List.iter 
+	(fun (id,mt,me) -> 
+	   add_def loc Module id; tr_module_type mt; tr_module_expr me) l
   | Pstr_modtype (id,mt) ->
       add_def loc ModuleType id; tr_module_type mt
   | Pstr_open m -> 
@@ -535,8 +551,10 @@ and tr_structure_item_desc loc = function
     [cross_implem] and [cross_interf] which respectively compute the 
     cross-references in implementations and interfaces. *)
 
+let zero = { pos_fname = ""; pos_lnum = 0; pos_bol = 0; pos_cnum = 9 }
+
 let add_module m = 
-  add_def { loc_start = 0; loc_end = 0; loc_ghost = false } Module m
+  add_def { loc_start = zero; loc_end = zero; loc_ghost = false } Module m
 
 let wrapper parsing_function traverse_function f m =
   reset_cross f 0;
@@ -559,8 +577,10 @@ let cross_interf = wrapper Parse.interface tr_signature
 (*s cross-referencing lex and yacc description files *)
 
 let input_string_inside_file ic loc =
-  seek_in ic loc.Lex_syntax.start_pos;
-  let len = loc.Lex_syntax.end_pos - loc.Lex_syntax.start_pos in
+  seek_in ic loc.Lex_syntax.start_pos.pos_cnum;
+  let len = 
+    loc.Lex_syntax.end_pos.pos_cnum - loc.Lex_syntax.start_pos.pos_cnum 
+  in
   let buf = String.create len in
   try
     really_input ic buf 0 len;
@@ -568,8 +588,10 @@ let input_string_inside_file ic loc =
   with End_of_file -> assert false
 
 let lexer_function_inside_file ic loc =
-  seek_in ic loc.Lex_syntax.start_pos;
-  let left = ref (loc.Lex_syntax.end_pos - loc.Lex_syntax.start_pos) in
+  seek_in ic loc.Lex_syntax.start_pos.pos_cnum;
+  let left = 
+    ref (loc.Lex_syntax.end_pos.pos_cnum - loc.Lex_syntax.start_pos.pos_cnum) 
+  in
   fun buf len ->
     let m = input ic buf 0 (min !left len) in
     for i=0 to pred m do
@@ -582,7 +604,7 @@ let lexer_function_inside_file ic loc =
     m
 
 let cross_action_inside_file msg f m loc = 
-  reset_cross f loc.Lex_syntax.start_pos;
+  reset_cross f loc.Lex_syntax.start_pos.pos_cnum;
   let c = open_in f in
   let lexbuf = Lexing.from_function (lexer_function_inside_file c loc) in
   try
@@ -590,14 +612,15 @@ let cross_action_inside_file msg f m loc =
     close_in c
   with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
     if not !quiet then begin
-      eprintf "File \"%s\", character %d\n" f loc.Lex_syntax.start_pos;
+      eprintf "File \"%s\", character %d\n" 
+	f loc.Lex_syntax.start_pos.pos_cnum;
       eprintf " ** warning: syntax error while parsing %s\n" msg
     end;
     close_in c
   end
 
 let cross_type_inside_file f m loc = 
-  reset_cross f (loc.Lex_syntax.start_pos - 7);
+  reset_cross f (loc.Lex_syntax.start_pos.pos_cnum - 7);
   let c = open_in f in
   let lexbuf = 
     Lexing.from_string ("type t=" ^ input_string_inside_file c loc) in
@@ -606,7 +629,8 @@ let cross_type_inside_file f m loc =
     close_in c
   with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
     if not !quiet then begin
-      eprintf "File \"%s\", character %d\n" f loc.Lex_syntax.start_pos;
+      eprintf "File \"%s\", character %d\n" 
+	f loc.Lex_syntax.start_pos.pos_cnum;
       eprintf " ** warning: syntax error while parsing type\n"
     end;
     close_in c

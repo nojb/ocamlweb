@@ -69,8 +69,8 @@ let handle_lexical_error fn lexbuf =
     raise(Lexical_error(msg, line, column))
 
 let cur_loc lexbuf = 
-  { start_pos = Lexing.lexeme_start lexbuf; 
-    end_pos = Lexing.lexeme_end lexbuf; 
+  { start_pos = Lexing.lexeme_start_p lexbuf; 
+    end_pos = Lexing.lexeme_end_p lexbuf; 
     start_line = !line_num; 
     start_col = Lexing.lexeme_start lexbuf - !line_start_pos } 
 
@@ -112,13 +112,13 @@ rule main = parse
   | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
     { Tchar(Char.code(char_for_decimal_code lexbuf 2)) }
   | '{' 
-    { let n1 = Lexing.lexeme_end lexbuf
+    { let n1 = Lexing.lexeme_end_p lexbuf
       and l1 = !line_num
       and s1 = !line_start_pos in
       brace_depth := 1;
       let n2 = handle_lexical_error action lexbuf in
       Taction({start_pos = n1; end_pos = n2;
-               start_line = l1; start_col = n1 - s1}) }
+               start_line = l1; start_col = n1.Lexing.pos_cnum - s1}) }
   | '='  { Tequal }
   | '|'  { Tor }
   | '_'  { Tunderscore }
@@ -143,7 +143,7 @@ and action = parse
       action lexbuf }
   | '}' 
     { decr brace_depth;
-      if !brace_depth = 0 then Lexing.lexeme_start lexbuf else action lexbuf }
+      if !brace_depth = 0 then Lexing.lexeme_start_p lexbuf else action lexbuf }
   | '"' 
     { reset_string_buffer();
       string lexbuf;
