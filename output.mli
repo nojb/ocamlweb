@@ -53,6 +53,7 @@ val output_verbatim : string -> unit
     [latex_header] takes as argument the options of the \LaTeX\
     package ocamlweb.sty. *)
 
+val class_options : string ref
 val set_no_preamble : bool -> unit
 val push_in_preamble : string -> unit
 val latex_header : string -> unit

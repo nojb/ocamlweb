@@ -7,7 +7,7 @@ module M = struct
 
   (* et voici [x] *)
 
-  let x = 1
+  let x = 1 < 2
 
   module N = struct
     

@@ -105,7 +105,7 @@ let symbolchar =
   ['!' '$' '%' '&' '*' '+' '-' '.' '/' ':' '<' '=' '>' '?' '@' '^' '|' '~']
 let caml_token =
     "[" | "]" | "[|" | "|]" | "[<" | ">]" | "{" | "}" | "{<" | ">}" | "[]" 
-  | "(" | ")" | "or" | "not" | "||" 
+  | "(" | ")" | "or" | "not" | "||"
 let symbol_token =
   caml_token | (symbolchar+)
 let character = 
@@ -191,6 +191,8 @@ and pr_lexcode_inside = parse
       { leave_math ();
 	output_string "--";
         pr_lexcode_inside lexbuf }
+  | '|'
+      { enter_math (); output_string "\\mid{}"; pr_lexcode_inside lexbuf }
   | '\n' 
       { end_line () }
   | space+

@@ -86,11 +86,13 @@ let (preamble : string Queue.t) = Queue.create ()
 
 let push_in_preamble s = Queue.add s preamble
 
+let class_options = ref "12pt"
+
 let latex_header opt =
   if not !no_preamble then begin
-    output_string "\\documentclass[12pt]{article}\n";
+    output_string (sprintf "\\documentclass[%s]{article}\n" !class_options);
     output_string "\\usepackage[latin1]{inputenc}\n";
-    output_string "\\usepackage[T1]{fontenc}\n";
+    (* output_string "\\usepackage[T1]{fontenc}\n"; *)
     output_string "\\usepackage{fullpage}\n";
     output_string "\\usepackage";
     if opt <> "" then output_string (sprintf "[%s]" opt);
@@ -234,6 +236,8 @@ let output_escaped_char c =
 	output_char '\\'; output_char c
     | '^' | '~' -> 
 	output_char '\\'; output_char c; output_string "{}"
+    | '<' | '>' ->
+        output_string "\\ensuremath{"; output_char c; output_string "}"
     | _ -> 
 	output_char c
 
@@ -340,7 +344,7 @@ let output_symbol = function
   | "~-" -> enter_math (); output_string "-"
   | "[<" -> enter_math (); output_string "[\\langle{}"
   | ">]" -> enter_math (); output_string "\\rangle{}]"
-  | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
+  | "<" | ">" | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
             enter_math (); output_string s
   | "&" | "&&" ->
             enter_math (); output_string "\\land{}"
@@ -348,6 +352,7 @@ let output_symbol = function
             enter_math (); output_string "\\lor{}"
   | "not" -> enter_math (); output_string "\\lnot{}"
   | "[]" -> enter_math (); output_string "[\\,]"
+  | "|" -> enter_math (); output_string "\\mid{}"
   | s    -> output_latex_id s
 
 let use_greek_letters = ref true

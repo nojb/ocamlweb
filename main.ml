@@ -47,6 +47,8 @@ let usage () =
   prerr_endline "  --tex <file>   consider <file> as a .tex file";
   prerr_endline "  --latex-option <opt>";
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
+  prerr_endline "  --class-options <opt>";
+  prerr_endline "                 set the document class options (defaults to `12pt')";
   prerr_endline "  -p <string>    insert something in LaTeX preamble";
   prerr_endline "  --files <file> read file names to process in <file>";
   prerr_endline "  --quiet        quiet mode";
@@ -212,6 +214,10 @@ let parse () =
     | ("-warranty" | "--warranty") :: _ ->
 	copying (); exit 0
 
+    | "--class-options" :: s :: rem ->
+	class_options := s; parse_rec rem
+    | "--class-options" :: [] ->
+	usage ()
     | "--latex-option" :: s :: rem ->
 	add_latex_option s; parse_rec rem
     | "--latex-option" :: [] ->
