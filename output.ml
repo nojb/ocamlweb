@@ -263,6 +263,8 @@ let output_symbol = function
   | "<=" -> enter_math (); output_string "\\le{}"
   | ">=" -> enter_math (); output_string "\\ge{}"
   | "<>" -> enter_math (); output_string "\\not="
+  | "==" -> enter_math (); output_string "\\equiv"
+  | "!=" -> enter_math (); output_string "\\not\equiv"
   | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
             enter_math (); output_string s
   | "&" | "&&" ->

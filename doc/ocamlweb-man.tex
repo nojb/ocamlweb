@@ -74,11 +74,11 @@ Two styles are available for the final document:
 \begin{itemize}
   
 \item a \WEB\ style, where the code and documentation are displayed in
-  \emph{sections}, numbered consecutively starting with~1.  A new
+  \emph{sections}, numbered consecutively starting from~1.  A new
   section is started at the beginning of each file. You can also start
   a new section manually (see the paragraph below about controls);
 
-\item a \LaTeX\ style, where you structure your document by yourself,
+\item a \LaTeX\ style, where you structure your document as you like,
   using the usual sectioning commands of \LaTeX. 
 
 \end{itemize}
@@ -114,8 +114,8 @@ shape. These commands are the following:
   to enclose a comment that shouldn't appear in the document, but also
   to hide some \Caml\ code, putting it between \texttt{(*i*)} and
   \texttt{(*i*)} in such a way that your code still compiles but is
-  ignored by \ocamlweb. (Notice that of you use the delimiters
-  \texttt{(*i} and \texttt{i*)} directly, the text inside is commented
+  ignored by \ocamlweb. (Notice that if you use the delimiters
+  \texttt{(*i} and \texttt{i*)} directly, the text enclosed is commented
   for both \Caml\ and \ocamlweb.)
 
 \item[\texttt{(*c}] ~\par
@@ -132,18 +132,39 @@ shape. These commands are the following:
 
 \end{description}
 
+
+\paragraph{Pretty-printing.} 
+\ocamlweb\ uses different faces for identifiers and keywords, and use
+mathematical symbols for some \Caml\ tokens. Here are the
+correspondences.
+\begin{center}
+  \begin{tabular}{ll@{\qquad\qquad}ll@{\qquad\qquad}ll@{\qquad\qquad}}
+    \verb!->!            & $\rightarrow$   &
+    \verb!<-!            & $\leftarrow$    &
+    \verb|*|             & $\times$        \\
+    \verb|<=|            & $\le$           &
+    \verb|>=|            & $\ge$           &
+    \verb|<>|            & $\not=$         \\
+    \verb|==|            & $\equiv$        &
+    \verb|!=|            & $\not\equiv$    &
+    \verb|&|, \verb|&&|  & $\land$         \\
+    \verb|or|, \verb!||! & $\lor$          &
+    \verb|not|           & $\lnot$ 
+  \end{tabular}
+\end{center}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Hints to get a pretty document}
 
 \ocamlweb\ is rather robust, in the sense that it will always succeed
 in producing a document, as soon as the \Caml\ files are lexically
-correct. However, you may find the result rather ugly if so was your
+correct. However, you may find the result rather ugly if so were your
 source files. Here are some style hints to get a pretty document.
 
-First, \ocamlweb\ is not a real code pretty-printer: it uses different
-faces for identifiers and keywords, and use some mathematical symbols
-for \verb!->!, \verb!*!, etc. but it does not indent your code. It
+First, \ocamlweb\ is not a real code pretty-printer: it does not
+indent your code, and it
 does not even cut your code lines when they are too long. The code
 will always appear formatted as it is in the source files. The
 indentation at the beggining of each line is output as a proportional
@@ -392,15 +413,19 @@ redefining some macros:
   LaTeX file.)
 
 \item \textbf{What about lexers and parsers?} ~\par
+  
+  This is currently only a pretty-printing support for
+  \textsf{ocamllex} lexers and \textsf{ocamlyacc} parsers.  There is
+  no indexing for the identifiers defined or used in these modules.
+  You have to pass the corresponding files to \ocamlweb\ through the
+  option \verb!--impl!.
 
-  This is currently no real support for \textsf{ocamllex} lexers and
-  \textsf{ocamlyacc} parsers. You can pass the corresponding files to
-  \ocamlweb\ through the option \verb!--impl!, and the produced
-  \LaTeX\ file should compile. However, there will be no indexing for
-  the identifiers of those modules and the pretty-print may look
-  somewhat dirty (The symbol \verb!*! will always appear as $\times$,
-  in the final document, even when it appears in regular expressions
-  in lexers or in the comments \verb!/*! and \verb!*/! in parsers.)
+\item \textbf{I would like my pattern-matching right-hand sides to be
+    aligned. Is it possible?} ~\par
+
+  No, it is not, since \ocamlweb\ uses proportional fonts. However you
+  can align your pattern-matching in your source files, since
+  \ocamlweb\ converts multiple spaces into single ones.
 
 \item \textbf{What can I do with a large program with sources in several
     directories, organised as libraries?} ~

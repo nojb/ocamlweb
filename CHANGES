@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o pretty-printing for == and !=
   o pretty underscores in identifiers (by redefinition of \_) 
 
 version 0.7, 31/01/2000
