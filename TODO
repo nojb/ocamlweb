@@ -80,6 +80,10 @@ Web (cross)
 Document LaTeX
 ==============
 
+ 1. Adequation avec le lexer ocaml
+    Par exemple, les constantes telles que 0x3FFF ne sont pas bien
+    affichees (le 0 est droit et x3FFF est affiche comme un identificateur)
+
  2. style myheadings avec hauts de pages mentionnant la section (en
     mode web, bien sur)
 
