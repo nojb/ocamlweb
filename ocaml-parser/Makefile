@@ -32,10 +32,6 @@ byte: $(OBJS)
 opt: $(OBJS:.cmo=.cmx)
 
 import:
-#	config
-	cd $(CAML); if test ! -f utils/config.ml ; then ./configure; make utils/config.ml; fi
-	cp $(CAML)/utils/config.ml .; chmod u+w config.ml
-#	source files
 	for f in $(SOURCES); do cp $(CAML)/$$f .; done
 
 linenum.ml: linenum.mll

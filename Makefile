@@ -78,18 +78,33 @@ NAME=ocamlweb-$(VERSION)
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = buffer.mli buffer.ml \
-        doclexer.mll cross.ml pretty.mli pretty.mll \
+        doclexer.mll cross.ml cross.mli pretty.mli pretty.mll \
 	output.mli output.ml web.mli web.ml main.ml \
 	ocamlweb.sty \
 	Makefile .depend README INSTALL COPYING GPL CHANGES
+
+OCAMLFILES = misc.mli misc.ml clflags.ml \
+	terminfo.mli terminfo.ml \
+	warnings.mli warnings.ml \
+	linenum.mli linenum.mll \
+	location.mli location.ml \
+	longident.mli longident.ml \
+	pstream.mli pstream.ml \
+	syntaxerr.mli syntaxerr.ml \
+	asttypes.mli parsetree.mli \
+	parser.mly \
+	lexer.mli lexer.mll \
+	parse.mli parse.ml \
+	Makefile .depend README
 
 export: source
 	cp README COPYING GPL CHANGES $(FTP)
 	cd doc; make all export
 
 source:
-	mkdir -p export/$(NAME)
+	mkdir -p export/$(NAME)/ocaml-parser
 	cp $(FILES) export/$(NAME)
+	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
 	(cd export ; tar cf $(NAME).tar $(NAME) ; \
 	gzip -f --best $(NAME).tar)
 	cp export/$(NAME).tar.gz $(FTP)
