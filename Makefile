@@ -16,16 +16,21 @@ CAMLC    = ocamlc
 CAMLCOPT = ocamlopt 
 CAMLDEP  = ocamldep
 ZLIBS    =
-DEBUG    =
-FLAGS    = $(ZLIBS) $(DEBUG)
+DEBUG    = -g
 PROFILE  =
+BYTEFLAGS= $(ZLIBS) $(DEBUG)
+OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-OBJS = lexer.cmx version.cmx main.cmx
+BUFFER = buffer.cmx
+OBJS = $(BUFFER) output.cmx web.cmx lexer.cmx version.cmx main.cmx
 
 all: ocamlweb
 
 ocamlweb: $(OBJS)
-	ocamlopt $(PROFILE) $(FLAGS) -o ocamlweb $(OBJS)
+	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(OBJS)
+
+debug: $(OBJS:.cmx=.cmo)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(OBJS:.cmx=.cmo)
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -36,6 +41,8 @@ lexer.ml: lexer.mll
 
 install:
 	cp ocamlweb $(BINDIR)
+
+byte: $(OBJS:.cmx=.cmo)
 
 # export
 ########
@@ -55,7 +62,7 @@ source: $(FILES)
 	gzip -f --best $(NAME).tar)
 	cp README COPYING GPL CHANGES export/$(NAME).tar.gz $(FTP)
 
-BINARY = ocamlweb-$(VERSION)-$(OSTYPE)
+BINARY = $(NAME)-$(OSTYPE)
 
 linux: clean binary
 
@@ -74,16 +81,16 @@ binary: ocamlweb
 .SUFFIXES: .mli .ml .cmi .cmo .cmx
  
 .mli.cmi:
-	$(CAMLC) -c $(FLAGS) $<
+	$(CAMLC) -c $(BYTEFLAGS) $<
  
 .ml.cmo:
-	$(CAMLC) -c $(FLAGS) $<
+	$(CAMLC) -c $(BYTEFLAGS) $<
 
 .ml.o:
-	$(CAMLCOPT) -c $(FLAGS) $<
+	$(CAMLCOPT) -c $(OPTFLAGS) $<
 
 .ml.cmx:
-	$(CAMLCOPT) -c $(PROFILE) $(FLAGS) $<
+	$(CAMLCOPT) -c $(OPTFLAGS) $<
 
 
 # clean and depend
