@@ -106,10 +106,13 @@ and pr_comment = parse
   | "(*" { output_bc (); incr comment_depth; pr_comment lexbuf }
   | "*)" { output_ec (); decr comment_depth;
            if !comment_depth > 0 then pr_comment lexbuf }
+  | '\n' space* '*' ' '
+         { output_string "\n "; pr_comment lexbuf }
   | '['  { bracket_depth := 1; escaped_code lexbuf; pr_comment lexbuf }
   | eof  { () }
   | '$'  { user_math(); pr_comment lexbuf }
-  | '_' | '^' { check_user_math (first_char lexbuf); pr_comment lexbuf }
+  | '_' | '^' 
+         { check_user_math (first_char lexbuf); pr_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_comment lexbuf }
 
 (* strings in code *)
@@ -153,7 +156,8 @@ and escaped_code = parse
 and pr_doc = parse
   | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
-  | '_' | '^' { check_user_math (first_char lexbuf); pr_doc lexbuf }
+  | '_' | '^' 
+        { check_user_math (first_char lexbuf); pr_doc lexbuf }
   | eof { () }
   | _   { output_char (first_char lexbuf); pr_doc lexbuf }
 
