@@ -52,7 +52,7 @@ module Whereset : Set.S with type elt = where
 val used : Whereset.t Idmap.t ref
 val defined : Whereset.t Idmap.t ref
 
-(*s The two following functions fill the above table for a given file. *)
+(*s The two following functions fill the above tables for a given file. *)
 
 val cross_implem : string -> string -> unit
 val cross_interf : string -> string -> unit

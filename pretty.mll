@@ -37,15 +37,13 @@
 
   let verb_delim = ref (Char.chr 0)
 
+(* counts occurences of "%%" in yacc files *)
+
+  let yaccdoublepercentcounter = ref 0
+
 (* This function returns the first char of a lexbuf. *)
 
   let first_char lexbuf = lexeme_char lexbuf 0
-
-(* Accounts for "\{" in order to imbricate them, as specified in the caml's 
-   specifications. Used for header and trailer and actions in Lex and Yacc
-   files. *)
-
-  let braces_depth = ref 0
 
 (* The [count_spaces] function acccounts for spaces in order to respect
    alignment (in the \LaTeX{}-outputed file) concerning left margins. *)
@@ -87,6 +85,7 @@
 
   let reset_pretty () =
     reset_output ();
+    yaccdoublepercentcounter := 0;
     user_math_mode := false
 
 }
@@ -144,14 +143,6 @@ and pr_yacccode = parse
 (*s That function pretty-prints the Caml code anywhere else. *)
 
 and pr_camlcode_inside = parse
-(*i
-  | '{'  { incr braces_depth; 
-	   output_symbol (lexeme lexbuf); 
-	   pr_camlcode_inside lexbuf }
-  | '}'  { decr braces_depth;
-	   output_symbol (lexeme lexbuf); 
-	   pr_camlcode_inside lexbuf }
-i*)
   | '\n' 
       { end_line () }
   | space+
@@ -189,12 +180,6 @@ i*)
 and pr_lexcode_inside = parse 
   | '_'  
       { output_string "\\ocwlexwc"; pr_lexcode_inside lexbuf } 
-  | "eof" | "rule" | "parse" | "let" | "and"
-      { leave_math (); 
-        output_string "\\ocwlexkw{";
-        output_string (Lexing.lexeme lexbuf);
-        output_string "}";
-        pr_lexcode_inside lexbuf }
   | '*'  
       { enter_math (); 
         output_string "^\\star{}";
@@ -213,75 +198,27 @@ and pr_lexcode_inside = parse
       { output_char '~'; pr_lexcode_inside lexbuf }
   | character
       { output_verbatim (lexeme lexbuf); pr_lexcode_inside lexbuf }
-  | "'" identifier
-      { let id = lexeme lexbuf in
-	  output_type_variable (String.sub id 1 (pred (String.length id))); 
-	  pr_lexcode_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_lexcode_inside lexbuf }
   | "(*r" 
       { output_hfill (); output_bc (); comment_depth := 1;
 	pr_comment lexbuf; pr_lexcode_inside lexbuf }
   | '"'  { output_bs (); pr_code_string lexbuf; pr_lexcode_inside lexbuf }
-  | symbol_token
-      { output_symbol (lexeme lexbuf); pr_lexcode_inside lexbuf }
-  | (identifier '.')* identifier
+  | identifier
       { output_lex_ident (lexeme lexbuf); pr_lexcode_inside lexbuf }
   | eof  { () }
-  | decimal_literal | hex_literal | oct_literal | bin_literal
-        { output_integer (lexeme lexbuf); pr_lexcode_inside lexbuf }
-  | float_literal
-      { output_float (lexeme lexbuf); pr_lexcode_inside lexbuf }
   | _ 
       { output_escaped_char (first_char lexbuf); pr_lexcode_inside lexbuf }
       
 (*s That function pretty-prints the Yacc code anywhere else. *)
 and pr_yacccode_inside = parse
-  | '_'  { output_symbol "_";               
-           pr_yacccode_inside lexbuf } 
-  | "%token" | "%start" | "%type" | "%left" | "%right" | "%nonassoc"  | "%prec"
-         { let full_lexeme = Lexing.lexeme lexbuf in
-           let lexeme = 
-	     String.sub full_lexeme 1 (String.length full_lexeme - 1) in 
-	     (if !braces_depth = 0 
-	      then 
-		begin
-		  leave_math (); 
-		  output_string "\\ocwyacckw{";
-		  output_symbol "%";
-		  output_string lexeme;
-		  output_string "}"
-		end
-	      else 
-		begin
-		  output_symbol "%";
-		  output_yacc_ident lexeme
-           	end);
-	     pr_yacccode_inside lexbuf }	
-  | "error"
-         { if !braces_depth = 0 
-	   then 
-	     begin
-               leave_math (); 
-               output_string "\\ocwyacckw{";
-               output_string "error";
-               output_string "}"
-             end 
-	   else output_yacc_ident "error";
-	   pr_yacccode_inside lexbuf }	
-  | '{'  { incr braces_depth; 
-	   output_symbol (lexeme lexbuf); 
-	   pr_camlcode_inside lexbuf }
-  | '}'  { decr braces_depth;
-	   output_symbol (lexeme lexbuf); 
-	   pr_yacccode_inside lexbuf }
-  | '*'  { output_symbol "*";
-	   pr_yacccode_inside lexbuf } 
-  | '+'  { output_symbol "+";
-	   pr_yacccode_inside lexbuf } 
   | "%%" 
       {
-	output_string "\\ocwyaccdpercent";
+	incr yaccdoublepercentcounter;
+	output_string 
+	  (if !yaccdoublepercentcounter = 1 
+	   then "\\ocwyaccrules"
+	   else "\\ocwyacctrailer");
 	pr_yacccode_inside lexbuf
       }
   | "%{"
@@ -296,7 +233,7 @@ and pr_yacccode_inside = parse
       }
   | ":"
       {
-	output_string "\\ocwyaccdots";
+	output_string "\\ocwyacccolon";
 	pr_yacccode_inside lexbuf
       }
   | "|" 
@@ -308,25 +245,15 @@ and pr_yacccode_inside = parse
       { end_line (); }
   | space+
          { output_char '~'; pr_yacccode_inside lexbuf }
-  | "'" identifier
-         { let id = lexeme lexbuf in
-	   output_type_variable (String.sub id 1 (pred (String.length id))); 
-	   pr_yacccode_inside lexbuf }
   | "/*r"{ output_hfill (); output_byc (); pr_yacc_comment lexbuf; pr_yacccode_inside lexbuf }
-  | "/*" { output_byc (); pr_yacc_comment lexbuf; pr_yacccode_inside lexbuf }
-  | '"'  { output_bs (); pr_code_string lexbuf; pr_yacccode_inside lexbuf }
-  | character
-         { output_verbatim (lexeme lexbuf); pr_yacccode_inside lexbuf }
-  | symbol_token
-         { output_symbol (lexeme lexbuf); pr_yacccode_inside lexbuf }
-  | (identifier '.')* identifier
-         { output_yacc_ident (lexeme lexbuf); pr_yacccode_inside lexbuf }
-  | eof  { () }
-  | decimal_literal | hex_literal | oct_literal | bin_literal
-         { output_integer (lexeme lexbuf); pr_yacccode_inside lexbuf }
-  | float_literal
-         { output_float (lexeme lexbuf); pr_yacccode_inside lexbuf }
-  | _    { output_escaped_char (first_char lexbuf); pr_yacccode_inside lexbuf }
+  | "/*" 
+      { output_byc (); pr_yacc_comment lexbuf; pr_yacccode_inside lexbuf }
+  | '%'? identifier
+      { output_yacc_ident (lexeme lexbuf); pr_yacccode_inside lexbuf }
+  | _ 
+      { output_escaped_char (first_char lexbuf); pr_yacccode_inside lexbuf }
+  | eof 
+      { () }
 
 
 (*s Comments. *)
@@ -478,13 +405,11 @@ and pr_verbatim = parse
  *)
 
   let pretty_print_code is_last_paragraph s = 
-    reset_pretty ();
     begin_code_paragraph ();
     pr_camlcode (Lexing.from_string s);
     end_code_paragraph is_last_paragraph
 
   let pretty_print_doc is_first_paragraph s = 
-    reset_pretty ();
     begin_doc_paragraph is_first_paragraph;
     pr_doc (Lexing.from_string s);
     end_doc_paragraph ()

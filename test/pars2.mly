@@ -12,10 +12,10 @@
   open Asa_expr;;
 
   let parse_error s =
-    let error = Parser_error(
-				Parsing.symbol_start(),
-				Parsing.symbol_end(),
-				"" ) 
+    let error = 
+      Parser_error(Parsing.symbol_start(),
+		   Parsing.symbol_end(),
+		   "" ) 
     in raise error
   ;;
 (*s  Une petite section caml pour voir ... *)

@@ -123,9 +123,9 @@
     seclist := []
 
   let backtrack lexbuf = 
-(*i
+    (*i
     eprintf "backtrack to %d\n" (lexbuf.lex_abs_pos + lexbuf.lex_start_pos);
-i*)
+    i*)
     lexbuf.lex_curr_pos <- lexbuf.lex_start_pos
 
 }
@@ -256,6 +256,8 @@ and yacc_description = parse
   that entry, the paragraph has been added to [parlist]. *)
 
 and lex_paragraph = parse
+  | space* '\n'
+      { lex_paragraph lexbuf }
   | space* "(*" '*'* "*)" space* '\n'
       { lex_paragraph lexbuf }
   | space* ("(*c" | _)
@@ -271,6 +273,8 @@ and lex_paragraph = parse
       { () }
 
 and yacc_paragraph = parse
+  | space* '\n'
+      { yacc_paragraph lexbuf }
   | space* "/*" '*'* "*/" space* '\n'
       { if not !in_lexyacc_action 
 	then yacc_paragraph lexbuf
@@ -364,7 +368,7 @@ and start_of_yacc_documentation = parse
 
 and in_documentation = parse 
   | "(*" 
-      { push_string "(*";`
+      { push_string "(*";
 	in_documentation lexbuf; 
 	push_string "*)";
 	in_documentation lexbuf }

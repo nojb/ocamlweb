@@ -21,7 +21,6 @@
    final \LaTeX\ document. *)
 
 
-
 (*s Source file structure. *)
 
 (* A source file is splitted into paragraphs of code and
@@ -70,6 +69,7 @@ type file =
   | Lex    of content
   | Yacc   of content
   | Other  of string
+
 
 (*
 

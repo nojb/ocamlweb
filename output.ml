@@ -194,6 +194,7 @@ let output_lex_keyword s =
 
 let output_yacc_keyword s =
   output_string "\\ocwyacckw{";
+  if String.get s 0 = '%' then output_string "\\";
   output_string s;
   output_string "}"
 

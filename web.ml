@@ -23,6 +23,9 @@ open Cross
 open Output
 open Pretty
 
+(*i*)
+
+
 type sub_paragraph =
   | CamlCode of string
   | LexCode  of string
@@ -49,7 +52,77 @@ type file =
   | Yacc   of content
   | Other  of string
 
-(*i*)
+
+(*s To print a [file] (for testing) *)
+
+let print_string s = Format.printf "\"%s\"" s
+
+(* To print c "(" arg with the function pr ")" *)
+let print c pr arg =
+  Format.printf "@[<hv 0>%s(@," c;
+  pr arg;
+  Format.printf ")@]"
+
+(* to print a list between "[" "]" *)
+
+let rec print_end_list f l =
+  match l with
+      [] -> Format.printf "]@]"
+    | x::l ->
+	Format.printf ";@ ";
+	f x;
+	print_end_list f l
+;;
+
+let print_list f l =
+  match l with
+      [] -> Format.printf "[]"
+    | x::l ->
+	Format.printf "@[<hv 2>[ ";
+	f x;
+	print_end_list f l
+;;
+
+ 
+(* To print a subparagraph *)
+let print_sub_paragraph = function 
+  | CamlCode(s)  -> print "CamlCode" print_string s;
+  | LexCode (s)  -> print "LexCode"  print_string s;
+  | YaccCode (s) -> print "YaccCode" print_string s
+      
+(* To print a paragraph *)
+let print_paragraph = function 
+  | Documentation(s) -> print "Documentation" print_string s
+  | Code(i,s) -> 
+      Format.printf "Code(%d,@ %s)" i s
+  | LexYaccCode(i,spl) -> 
+      Format.printf "@[<hv 5>LexYaccCode(%d,@ " i;
+      print_list print_sub_paragraph spl; 
+      Format.printf ")@]"
+      
+(* To print a section *)
+let print_raw_section { sec_contents = sc;
+			sec_beg = sb } =
+  Format.printf "@[<hv 2>{ sec_beg = %d ;@ sec_contents =@ " sb ; 
+  print_list print_paragraph sc;
+  Format.printf ";@ }@]"
+
+(* To print a [content] *)
+let print_content { content_file = c;
+		    content_name = cn;
+		    content_contents  = rl } =
+  Format.printf "@[<hv 2>{ content_file = \"%s\" ;@ content_name = \"%s\" ;@ contents_contents =@ " c cn ; 
+  print_list print_raw_section rl ;
+  Format.printf ";@ }@]"
+
+(* To print a [file] *)
+let print_file = function 
+  | Implem c -> print "Implem" print_content c
+  | Interf c -> print "Interf" print_content c
+  | Lex c    -> print "Lex"    print_content c
+  | Yacc c   -> print "Yacc"   print_content c
+  | Other s  -> print "Other"  print_string s
+      
 
 
 
@@ -107,7 +180,7 @@ let print_raw_section { sec_contents = sc;
   print_list print_paragraph sc;
   Format.printf ";@ }@]"
 
-(* To print a "Web.content" *)
+(* To print a [Web.content] *)
 let print_content { content_file = c;
 		    content_name = cn;
 		    content_contents  = rl } =
@@ -115,7 +188,7 @@ let print_content { content_file = c;
   print_list print_raw_section rl ;
   Format.printf ";@ }@]"
 
-(* To print a "Web.file" *)
+(* To print a [Web.file] *)
 let print_file = function 
   | Implem c -> print "Implem" print_content c
   | Interf c -> print "Interf" print_content c
@@ -149,8 +222,8 @@ let add_latex_option s =
 let index_file = function 
   | Implem i -> cross_implem i.content_file i.content_name
   | Interf i -> cross_interf i.content_file i.content_name
-  | Lex i -> Printf.eprintf "Warning: lex indexing not implemented\n"
-  | Yacc i -> Printf.eprintf "Warning: yacc indexing not implemented\n"
+  | Lex i -> () (* Crosslex.cross_lex i.content_file i.content_name i.content_contents *)
+  | Yacc i -> () (* Crossyacc.cross_yacc i.content_file i.content_name i.content_contents *)
   | Other _ -> ()
 
 let build_index l = List.iter index_file l
@@ -191,8 +264,8 @@ let add_file_loc it =
 let locations_for_a_file = function
   | Implem i -> add_file_loc i
   | Interf i -> add_file_loc i
-  | Lex i -> Printf.eprintf "Warning: lex locations not implemented\n"
-  | Yacc i -> Printf.eprintf "Warning: yacc locations not implemented\n"
+  | Lex i -> add_file_loc i
+  | Yacc i -> add_file_loc i
   | Other _ -> ()
 
 let find_where w =
@@ -399,6 +472,7 @@ let pretty_print_sections f = function
       List.iter (pretty_print_section false f) r
 
 let pretty_print_content output_header content =
+  reset_pretty();
   output_header content.content_name;
   pretty_print_sections content.content_file content.content_contents
 
@@ -419,9 +493,9 @@ let pretty_print_file = function
  *)
 
 let produce_document l =
-  (*i*)
+  (*i
     List.iter print_file l;
-  (*i*)
+  i*)
   List.iter locations_for_a_file l;
   build_index l;
   latex_header !latex_options;

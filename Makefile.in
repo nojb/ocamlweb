@@ -35,7 +35,8 @@ CAML_CMO = ocaml-parser/misc.cmo ocaml-parser/clflags.cmo	\
 
 CAML_CMX = $(CAML_CMO:.cmo=.cmx)
 
-CMO = output.cmo cross.cmo pretty.cmo web.cmo doclexer.cmo \
+CMO = output.cmo cross.cmo pretty.cmo \
+      web.cmo doclexer.cmo \
       version.cmo main.cmo
 
 CMX = $(CMO:.cmo=.cmx)
@@ -93,8 +94,8 @@ test: test/test.tex
 	xdvi test.dvi
 
 BOOTSTRAP= bootstrap.tex output.mli output.ml cross.mli cross.ml \
-           pretty.mli --impl pretty.mll web.mli web.ml \
-	   doclexer.mli --impl doclexer.mll main.ml 
+           pretty.mli pretty.mll \
+	   web.mli web.ml doclexer.mli doclexer.mll main.ml 
 
 bootstrap: ocamlweb
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
@@ -113,8 +114,8 @@ NAME=ocamlweb-$(VERSION)
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = doclexer.mli doclexer.mll cross.ml cross.mli		\
-	pretty.mli pretty.mll					\
-	output.mli output.ml web.mli web.ml main.ml		\
+	pretty.mli pretty.mll \
+	output.mli output.ml web.mli web.ml main.ml	        \
 	ocamlweb.sty bootstrap.tex				\
 	Makefile.in configure .depend README INSTALL COPYING GPL CHANGES
 

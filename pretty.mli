@@ -30,3 +30,9 @@ Camllex code and Camlyacc code respectively *)
 val pretty_print_caml_subpar : string -> unit
 val pretty_print_lex_subpar : string -> unit
 val pretty_print_yacc_subpar : string -> unit
+
+(*s This function sets values in order to reset the lexer, so we could
+   call it on an another file. *)
+
+val reset_pretty : unit -> unit
+
