@@ -338,6 +338,8 @@ let output_symbol = function
   | "==" -> enter_math (); output_string "\\equiv"
   | "!=" -> enter_math (); output_string "\\not\equiv"
   | "~-" -> enter_math (); output_string "-"
+  | "[<" -> enter_math (); output_string "[\\langle{}"
+  | ">]" -> enter_math (); output_string "\\rangle{}]"
   | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
             enter_math (); output_string s
   | "&" | "&&" ->
