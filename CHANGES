@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 0.4, 25/06/99
+=====================
+  o better handling of spaces before sections (thanks to François Pottier)
   o right-justified comments with (*r ... *)
   o misinterpretation of -- in strings fixes
   o better adequacy to caml tokens (and better pretty-printing)
