@@ -98,8 +98,11 @@ val interface_part : unit -> unit
 val code_part : unit -> unit
 
 val begin_section : unit -> unit
-val begin_paragraph : unit -> unit
-val end_paragraph : unit -> unit
+
+val begin_code_paragraph : unit -> unit
+val end_code_paragraph : unit -> unit
+val begin_doc_paragraph : unit -> unit
+val end_doc_paragraph : unit -> unit
 
 (*s Index functions. [(output_index_entry f def use)] outputs an entry line
     for function [f], where [def] is the list of sections where [f] is

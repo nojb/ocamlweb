@@ -208,15 +208,17 @@ and pr_verbatim = parse
     documentation parts. 
  *)
 
-  let pretty_print f x =
+  let pretty_print_code s = 
     reset_pretty ();
-    begin_paragraph ();
-    f x;
-    end_paragraph ()
+    begin_code_paragraph ();
+    pr_code (Lexing.from_string s);
+    end_code_paragraph ()
 
-  let pretty_print_code s = pretty_print pr_code (Lexing.from_string s)
-
-  let pretty_print_doc s = pretty_print pr_doc (Lexing.from_string s)
+  let pretty_print_doc s = 
+    reset_pretty ();
+    begin_doc_paragraph ();
+    pr_doc (Lexing.from_string s);
+    end_doc_paragraph ()
 
 (*i*)
 }

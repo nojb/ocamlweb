@@ -286,11 +286,22 @@ let output_interface s =
   output_latex_id s;
   output_string "}\n"
 
-let begin_paragraph () =
-  output_string "\\noindent{}"
+let last_is_code = ref false
 
-let end_paragraph () =
-  output_string "\n\n\\medskip{}\n"
+let begin_code_paragraph () =
+  if not !last_is_code then output_string "\\medskip\n";
+  output_string "\\noindent{}";
+  last_is_code := true
+
+let end_code_paragraph () =
+  output_string "\\medskip\n\n"
+
+let begin_doc_paragraph () =
+  output_string "\\noindent{}";
+  last_is_code := false
+
+let end_doc_paragraph () =
+  output_string "\n\n"
 
 
 (*s \textbf{Index.}
