@@ -200,11 +200,10 @@
 %HEVEA\newcommand{\ocwtitle}[1]{\section*{#1}}
 
 % macro for typesetting the title of a module implementation
-\newcommand{\ocwmodule}[1]{\ocwtitle{Module #1}\typeout{OCamlWeb
-    file #1.ml}}
+\newcommand{\ocwmodule}[1]{\ocwtitle{Module #1}}
 
 % macro for typesetting the title of a module interface
-\newcommand{\ocwinterface}[1]{\ocwtitle{Interface for module #1}\typeout{OCamlWeb file #1.mli}}
+\newcommand{\ocwinterface}[1]{\ocwtitle{Interface for module #1}}
 
 % interface part of a module
 \newcommand{\ocwinterfacepart}{\subsection*{Interface}}
@@ -214,11 +213,11 @@
 
 % macro for typesetting the title of a lex description
 \newcommand{\ocwlexmodule}[1]{\ocwtitle{Module #1
-    (Lex)}\typeout{OCamlWeb file #1.mll}}
+    (Lex)}}
 
 % macro for typesetting the title of a yacc description
 \newcommand{\ocwyaccmodule}[1]{\ocwtitle{Module #1
-    (Yacc)}\typeout{OcamlWeb file #1.mly}}
+    (Yacc)}}
 
 % new WEB section
 \newcounter{ocwcounter}

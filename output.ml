@@ -443,22 +443,30 @@ let reset_output () =
 let begin_section () =
   output_string "\\ocwsection\n"
 
+let output_typeout_command filename =
+  output_string "\\typeout{OcamlWeb file ";
+  output_string filename;
+  output_string "}\n"
+
 let output_module module_name =
   if not !short then begin
+    output_typeout_command (module_name^".ml");
     output_string "\\ocwmodule{";
     output_latex_id module_name;
     output_string "}\n"
   end
       
-let output_interface s =
+let output_interface module_name =
   if not !short then begin
+    output_typeout_command (module_name^".mli");
     output_string "\\ocwinterface{";
-    output_latex_id s;
+    output_latex_id module_name;
     output_string "}\n"
   end
 
 let output_lexmodule module_name =
   if not !short then begin
+    output_typeout_command (module_name^".mll");
     output_string "\\ocwlexmodule{";
     output_latex_id module_name;
     output_string "}\n"
@@ -466,6 +474,7 @@ let output_lexmodule module_name =
 
 let output_yaccmodule module_name =
   if not !short then begin
+    output_typeout_command (module_name^".mly");
     output_string "\\ocwyaccmodule{";
     output_latex_id module_name;
     output_string "}\n"
