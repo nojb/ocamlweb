@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=06
+MINORVN=1
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc
@@ -61,7 +61,8 @@ FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = lexer.mll main.ml Makefile .depend README COPYING GPL CHANGES
 
-export: source linux solaris
+export: 
+	cp README COPYING GPL CHANGES  $(FTP)
 	cd doc; make all export
 
 source: $(FILES)
@@ -69,7 +70,7 @@ source: $(FILES)
 	cp $(FILES) export/$(NAME)
 	(cd export ; tar cf $(NAME).tar ocamlweb ; \
 	gzip -f --best $(NAME).tar)
-	cp README COPYING GPL CHANGES export/$(NAME).tar.gz $(FTP)
+	cp export/$(NAME).tar.gz $(FTP)
 
 BINARY = $(NAME)-$(OSTYPE)
 

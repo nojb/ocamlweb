@@ -1,16 +1,16 @@
 
-all: ocamlweb-manual.ps
+all: ocamlweb-man.ps
 
 WWW=$(HOME)/ftp/ocamlweb/
 
-export:
-	cp ocamlweb-manual.ps $(WWW)
+export: all
+	gzip -c ocamlweb-man.ps > $(WWW)/ocamlweb-man.ps.gz
 
-ocamlweb-manual.ps: ocamlweb-manual.dvi
-	dvips ocamlweb-manual.dvi -o ocamlweb-manual.ps
+ocamlweb-man.ps: ocamlweb-man.dvi
+	dvips ocamlweb-man.dvi -o ocamlweb-man.ps
 
-ocamlweb-manual.dvi: ocamlweb-manual.tex
-	latex ocamlweb-manual
+ocamlweb-man.dvi: ocamlweb-man.tex
+	latex ocamlweb-man
 
 clean:
 	rm -f *~ *.aux *.log *.dvi *.ps

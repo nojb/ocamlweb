@@ -25,9 +25,9 @@ let usage () =
   prerr_endline "";
   prerr_endline "Usage: ocamlweb <options and files>";
   prerr_endline "  -o file        write output in file `file'";
-  prerr_endline "  --header       do not skip the header";
+  prerr_endline "  --header       do not skip the headers";
   prerr_endline "  --nodoc        suppress LaTeX header and trailer";
-  prerr_endline "  --extern-defs  keep extern definitions in the index";
+  prerr_endline "  --extern-defs  keep external definitions in the index";
   exit 1
 
 let copying () =
