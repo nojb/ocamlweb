@@ -43,16 +43,18 @@ type paragraph =
   | Code of int * string
   | LexYaccCode of int * (sub_paragraph list)
 
-(* A web section is a numbered part of a source file, which contains a sequence of paragraphs. The [sec_beg] field is the character position of the beginning of the web section inside the whole file *)
+(* A web section is a numbered part of a source file, which contains a
+   sequence of paragraphs. The [sec_beg] field is the character
+   position of the beginning of the web section inside the whole file *)
   
 type raw_section = {
   sec_contents : paragraph list;
   sec_beg : int }
 
 (* Finally, the contents of a source file is a sequence of web
-sections. The [content_file] field is the whole file name (including
-dirname and extension) whereas the [content_name] field is the
-corresponding module name *)
+   sections. The [content_file] field is the whole file name
+   (including dirname and extension) whereas the [content_name] field
+   is the corresponding module name *)
 
 type content = { 
   content_file : string;
@@ -71,24 +73,25 @@ type file =
   | Other  of string
 
 
-(*
+(*s Options. 
 
-  [extern_defs] to be documented.
+    [index] indicates whether the index is to be produced; default value
+    is [true].
 
-  [add_latex_option] to be documented.
+    [extern_defs] indicates whether identifiers used but not defined should
+    appear in the index; default value is [false].
 
-  [index] to be documented.
+    [web] indicates WEB style or not; default value is [true].
 
-  [web] to be documented.
-
-  [produce_document] to be documented.
-
-*)
+    [add_latex_option] passed an option to the \texttt{ocamlweb} \LaTeX\
+    package. *)
 
 val extern_defs : bool ref
 val add_latex_option : string -> unit
 val index : bool ref
 val web : bool ref
+
+(*s Main entry: production of the document from a list of files. *)
 
 val produce_document : file list -> unit
 

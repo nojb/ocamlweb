@@ -5,7 +5,7 @@ exec_prefix=@exec_prefix@
 BINDIR=@bindir@
 
 # where to put the style file
-BASETEXDIR = $(PREFIX)/share/texmf
+BASETEXDIR = $(prefix)/share/texmf
 TEXDIR = $(BASETEXDIR)/tex/latex/misc 
 
 # command to update TeX' kpathsea database
