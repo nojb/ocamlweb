@@ -83,6 +83,12 @@ Document LaTeX
  3. indexer les entrees de l'index lorsqu'il y a plusieurs types pour
     un meme identificateur
 
+ 4. Cesures. Les identificateurs ne subissent pas de cesures, car
+    affiches en mode math (\mathit et non \textit). La raison est que
+    les apostrophes (x') ne sont pas jolis en mode texte.
+
+    Comment faire pour avoir de jolis apostrophes et de la cesure ?
+
  6. (Claude) Possibilité d'insérer du code caml dans les commentaires :
     cela est utile pour citer des exemples d'utilisation des
     fonctions.  Par exemple :
