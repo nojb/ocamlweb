@@ -73,6 +73,7 @@ bootstrap: ocamlweb
 	cd test; $(LATEX) ocamlweb
 	cd test; grep -q "Rerun" ocamlweb.log && $(LATEX) ocamlweb || true
 	-cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
+	cd test; dvips ocamlweb.dvi -o ocamlweb.ps
 
 check: bootstrap
 
@@ -107,6 +108,11 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 export: source linux
 	cp README COPYING GPL CHANGES $(FTP)
 	cd doc; make all export
+	make export-bootstrap
+
+export-bootstrap: bootstrap
+	gzip -c test/ocamlweb.ps > $(FTP)/ocamlweb.ps.gz
+	cp test/ocamlweb.html $(FTP)
 
 source:
 	mkdir -p export/$(NAME)
