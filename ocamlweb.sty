@@ -128,7 +128,7 @@
 \def\ocwsep{, }%
 \fi}
 
-\newcommand{\ocwrefindexentry}[3]{\item #1,\quad
+\newcommand{\ocwrefindexentry}[5]{\item #1,\quad
 \def\ocwsep{\relax}%
 \def\ocwoutputref{\textbf}%
 \def\ocwprevious{0}%
@@ -138,9 +138,8 @@
 \@for\ocwloop:=#3\do{\loopbody}%
 }
 %END LATEX
+%HEVEA\newcommand{\ocwrefindexentry}[5]{\item #1,\quad#4, #5}
 
-% ca c'est du provisoire
-%HEVEA\newcommand{\ocwrefindexentry}[3]{\item #1,\quad#2#3}
 
 %HEVEA\newcommand{\lnot}{\ocwkw{not}}
 %HEVEA\newcommand{\lor}{\ocwkw{or}}

@@ -358,13 +358,18 @@ let output_index_entry s def use =
  *)
 
 let output_raw_index_entry s def use =
-  let sep () = output_string "," in
+  let sep () = output_string "," 
+  and sep' () = output_string ", " in
   output_string "\\ocwrefindexentry{";
   output_raw_ident s;
   output_string "}{";
   print_list output_string sep def;
   output_string "}{";
   print_list output_string sep use;
+  output_string "}{";
+  print_list output_ref sep' def;
+  output_string "}{";
+  print_list output_ref sep' use;
   output_string "}\n"
 
 let output_label l =
