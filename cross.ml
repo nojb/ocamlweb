@@ -484,7 +484,8 @@ let wrapper parsing_function traverse_function f m =
     traverse_function (parsing_function lexbuf);
     close_in c
   with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
-    eprintf " ** warning: syntax error while parsing %s\n" f;
+    if not !quiet then
+      eprintf " ** warning: syntax error while parsing %s\n" f;
     close_in c
   end
 

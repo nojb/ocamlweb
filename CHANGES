@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o option -q, --quiet
+
 version 0.3, 17/06/99 (first official release)
 =====================
   o \ocwnl has been splitted into \ocweol and \ocwindent for better

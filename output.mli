@@ -26,6 +26,8 @@
 val set_output_to_file : string -> unit
 val close_output : unit -> unit
 
+val quiet : bool ref
+
 (* Then we introduce some low level output functions, for characters 
    and strings.
    [(output_file f)] copies the contents of file [f] on the output. 

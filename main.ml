@@ -42,6 +42,7 @@ let usage () =
   prerr_endline "  --latex-option <opt>";
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
   prerr_endline "  --files <file> read file names to process in <file>";
+  prerr_endline "  --quiet        quiet mode";
   exit 1
 
 
@@ -69,12 +70,14 @@ See the GNU General Public License version 2 for more details
     course). *)
 
 let banner () =
-  eprintf "This is ocamlweb version %s, compiled on %s\n"
-    Version.version Version.date;
-  eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
-  eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
-  flush stderr
-
+  if not !quiet then begin
+    eprintf "This is ocamlweb version %s, compiled on %s\n"
+      Version.version Version.date;
+    eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
+    eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
+    flush stderr
+  end
+    
 
 (*s \textbf{Separation of files.} Files given on the command line are
     separating according to their type, which is determined by their suffix.
@@ -161,6 +164,8 @@ let parse () =
 	usage ()
     | ("-extern-defs" | "--extern-defs") :: rem ->
 	extern_defs := true; parse_rec rem
+    | ("-q" | "-quiet" | "--quiet") :: rem ->
+	quiet := true; parse_rec rem
 
     | ("-h" | "-help" | "-?" | "--help") :: rem ->
 	usage ()
@@ -207,8 +212,8 @@ let parse () =
     read the files and then call [produce_document] from module [Web]. *)
 
 let main () =
-  banner();
   let files = parse() in
+  banner();
   if List.length files > 0 then begin
     let l = List.map read_one_file files in
     produce_document l

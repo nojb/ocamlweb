@@ -38,6 +38,8 @@ let set_output_to_file f =
 let close_output () =
   if !output_is_file then close_out !out_channel
 
+let quiet = ref false
+
 let output_char c = Pervasives.output_char !out_channel c
 
 let output_string s = Pervasives.output_string !out_channel s
