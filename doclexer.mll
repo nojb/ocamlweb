@@ -137,11 +137,6 @@ let space_or_nl = [' ' '\t' '\n']
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
-(*i
-let rcs_keyword =
-  "Author" | "Date" | "Header" | "Id" | "Name" | "Locker" | "Log" |
-  "RCSfile" | "Revision" | "Source" | "State"
-i*)
 
 (*s Entry point to skip the headers. Returns when headers are skipped. *)
 rule header = parse
@@ -219,17 +214,17 @@ and caml_implementation = parse
   that entry, the paragraph has been added to [parlist]. *)
 
 and paragraph = parse
-  | space_or_nl+
+  | space* '\n'
       { paragraph lexbuf }
-  | ";;"
+  | space* ";;"
       { paragraph lexbuf }
-  | "(*" '*'* "*)" space* '\n'
+  | space* "(*" '*'* "*)" space* '\n'
       { paragraph lexbuf }
-  | "(*"    
+  | space* "(*"    
       { comment_or_string_start := lexeme_start lexbuf;
 	start_of_documentation lexbuf; 
 	push_doc () }
-  | "(*c" | _
+  | space* ("(*c" | _)
       { code_beg := lexeme_start lexbuf;
 	backtrack lexbuf;
 	caml_subparagraph lexbuf;
@@ -261,16 +256,14 @@ and yacc_description = parse
   that entry, the paragraph has been added to [parlist]. *)
 
 and lex_paragraph = parse
-  | space_or_nl+
+  | space* "(*" '*'* "*)" space* '\n'
       { lex_paragraph lexbuf }
-  | "(*" '*'* "*)" space* '\n'
-      { lex_paragraph lexbuf }
-  | "(*c" | _
+  | space* ("(*c" | _)
       { code_beg := lexeme_start lexbuf;
 	backtrack lexbuf;
 	lex_subparagraphs lexbuf ;
 	push_lexyacccode() }
-  | "(*"    
+  | space* "(*"    
       { comment_or_string_start := lexeme_start lexbuf;
 	start_of_documentation lexbuf; 
 	push_doc () }
@@ -278,9 +271,7 @@ and lex_paragraph = parse
       { () }
 
 and yacc_paragraph = parse
-  | space_or_nl+
-      { yacc_paragraph lexbuf }
-  | "/*" '*'* "*/" space* '\n'
+  | space* "/*" '*'* "*/" space* '\n'
       { if not !in_lexyacc_action 
 	then yacc_paragraph lexbuf
 	else begin
@@ -289,7 +280,7 @@ and yacc_paragraph = parse
 	  yacc_subparagraphs lexbuf ;
 	  push_lexyacccode() 
 	end }
-  | "/*"    
+  | space* "/*"    
       { if not !in_lexyacc_action 
 	then begin
 	  comment_or_string_start := lexeme_start lexbuf;
@@ -302,7 +293,7 @@ and yacc_paragraph = parse
 	  yacc_subparagraphs lexbuf ;
 	  push_lexyacccode() 
 	end }
-  | "(*" '*'* "*)" space* '\n'
+  | space* "(*" '*'* "*)" space* '\n'
       { if !in_lexyacc_action 
 	then yacc_paragraph lexbuf
 	else begin
@@ -311,7 +302,7 @@ and yacc_paragraph = parse
 	  yacc_subparagraphs lexbuf ;
 	  push_lexyacccode() 
 	end }
-  | "(*"    
+  | space* "(*"    
       { if !in_lexyacc_action 
 	then begin
 	  comment_or_string_start := lexeme_start lexbuf;
@@ -324,7 +315,7 @@ and yacc_paragraph = parse
 	  yacc_subparagraphs lexbuf ;
 	  push_lexyacccode() 
 	end }
-  | "/*c" | "(*c" | _
+  | space* ("/*c" | "(*c" | _)
       { code_beg := lexeme_start lexbuf;
 	backtrack lexbuf;
 	yacc_subparagraphs lexbuf ;
@@ -373,16 +364,12 @@ and start_of_yacc_documentation = parse
 
 and in_documentation = parse 
   | "(*" 
-      { push_string "(*";
+      { push_string "(*";`
 	in_documentation lexbuf; 
 	push_string "*)";
 	in_documentation lexbuf }
   | "*)" 
       { () }
-(*i
-  | space* "$" rcs_keyword [^ '$']* "$" space*
-      { in_documentation lexbuf }
-i*)
   | '\n' " * "
       { push_char '\n'; in_documentation lexbuf }
   | '"'  
@@ -402,10 +389,6 @@ i*)
 and in_yacc_documentation = parse 
   | "*/" 
       { () }
-(*i
-  | space* "$" rcs_keyword [^ '$']* "$" space*
-      { in_yacc_documentation lexbuf }
-i*)
   | '\n' " * "
       { push_char '\n'; in_yacc_documentation lexbuf }
   | '"'  
@@ -683,15 +666,14 @@ and skip_spaces_until_nl = parse
 (*s To read a comment inside a piece of code. *)
 and comment = parse
   | "(*" | "(*c"
-        { push_string "(*"; comment lexbuf; comment lexbuf }
+      { push_string "(*"; comment lexbuf; comment lexbuf }
   | "*)" 
       { push_string "*)"  }
   | eof  
       { eprintf "File \"%s\", character %d\n" 
 	  !current_file !comment_or_string_start;
 	eprintf "Unterminated ocaml comment\n";
-	(* exit 1; *)
-      }
+	exit 1 }
   | _  
       { push_first_char lexbuf; comment lexbuf }
 
@@ -702,8 +684,7 @@ and yacc_comment = parse
       { eprintf "File \"%s\", character %d\n" 
 	  !current_file !comment_or_string_start;
 	eprintf "Unterminated ocamlyacc comment\n";
-	(* exit 1; *)
-      }
+	exit 1 }
   | _  
       { push_first_char lexbuf; yacc_comment lexbuf }
 
@@ -738,7 +719,8 @@ and in_string = parse
   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
       { push_string (lexeme lexbuf); in_string lexbuf }
   | eof      
-      { eprintf "File \"%s\", character %d\n" !current_file !comment_or_string_start;
+      { eprintf "File \"%s\", character %d\n" 
+	  !current_file !comment_or_string_start;
 	eprintf "Unterminated ocaml string\n"; 
 	exit 1 }
   | _    

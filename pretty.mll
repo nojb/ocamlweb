@@ -144,12 +144,14 @@ and pr_yacccode = parse
 (*s That function pretty-prints the Caml code anywhere else. *)
 
 and pr_camlcode_inside = parse
+(*i
   | '{'  { incr braces_depth; 
 	   output_symbol (lexeme lexbuf); 
 	   pr_camlcode_inside lexbuf }
   | '}'  { decr braces_depth;
 	   output_symbol (lexeme lexbuf); 
 	   pr_camlcode_inside lexbuf }
+i*)
   | '\n' 
       { end_line () }
   | space+
@@ -185,46 +187,30 @@ and pr_camlcode_inside = parse
 
 (*s That function pretty-prints the Lex code anywhere else. *)
 and pr_lexcode_inside = parse 
-  | '_'  { if !braces_depth = 0 
-	   then output_string "\\ocwlexwc"
-           else output_symbol "_";
-	   pr_lexcode_inside lexbuf } 
+  | '_'  
+      { output_string "\\ocwlexwc"; pr_lexcode_inside lexbuf } 
   | "eof" | "rule" | "parse" | "let" | "and"
-        { if !braces_depth = 0 
-	  then 
-	    begin 
-	      leave_math (); 
-              output_string "\\ocwlexkw{";
-              output_string (Lexing.lexeme lexbuf);
-              output_string "}";
-	    end
-	  else output_lex_ident (Lexing.lexeme lexbuf);
-          pr_lexcode_inside lexbuf }
-  | '{'  { incr braces_depth; 
-	   output_symbol (lexeme lexbuf); 
-	   pr_camlcode_inside lexbuf }
-  | '}'  { decr braces_depth;
-	   output_symbol (lexeme lexbuf); 
-	   pr_lexcode_inside lexbuf }
-  | '*'  {  if !braces_depth = 0 
-	    then 
-	      begin  
-		enter_math (); 
-           	output_string "^\\star{}";
-	      end 
-	    else output_symbol "*";
-           pr_lexcode_inside lexbuf } 
-  | '+'  { if !braces_depth = 0 
-	   then 
-	     begin
-	       enter_math (); 
-               output_string "^{\\scriptscriptstyle +}";
-	     end
-	   else output_symbol "+";
-             pr_lexcode_inside lexbuf } 
-  | '\n' { end_line () }
+      { leave_math (); 
+        output_string "\\ocwlexkw{";
+        output_string (Lexing.lexeme lexbuf);
+        output_string "}";
+        pr_lexcode_inside lexbuf }
+  | '*'  
+      { enter_math (); 
+        output_string "^\\star{}";
+        pr_lexcode_inside lexbuf } 
+  | '+'  
+      { enter_math (); 
+        output_string "^{\\scriptscriptstyle +}";
+        pr_lexcode_inside lexbuf } 
+  | '-'  
+      { leave_math ();
+	output_string "--";
+        pr_lexcode_inside lexbuf }
+  | '\n' 
+      { end_line () }
   | space+
-    { output_char '~'; pr_lexcode_inside lexbuf }
+      { output_char '~'; pr_lexcode_inside lexbuf }
   | character
       { output_verbatim (lexeme lexbuf); pr_lexcode_inside lexbuf }
   | "'" identifier
@@ -241,7 +227,7 @@ and pr_lexcode_inside = parse
       { output_symbol (lexeme lexbuf); pr_lexcode_inside lexbuf }
   | (identifier '.')* identifier
       { output_lex_ident (lexeme lexbuf); pr_lexcode_inside lexbuf }
-  | eof  { end_line() }
+  | eof  { () }
   | decimal_literal | hex_literal | oct_literal | bin_literal
         { output_integer (lexeme lexbuf); pr_lexcode_inside lexbuf }
   | float_literal

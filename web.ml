@@ -419,9 +419,9 @@ let pretty_print_file = function
  *)
 
 let produce_document l =
-  (*i
+  (*i*)
     List.iter print_file l;
-  i*)
+  (*i*)
   List.iter locations_for_a_file l;
   build_index l;
   latex_header !latex_options;
