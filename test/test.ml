@@ -82,10 +82,18 @@ let autre_bout x =
 
 (* Patterns. *)
 
+(*i
 let test_pat = function
   | A1 -> 1
   | BB -> foo 2
   | CC -> C.f 3
+i*)
+
+let t = {
+  a : int;
+  b : int;
+  c : int;
+}
 
 (*s Test escaped dollar in comments: \$ and even inside mathematical 
     mode: $\$$ *)

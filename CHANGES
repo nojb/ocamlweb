@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o \nopagebreak in \ocweol
+
 version 1.3, 6/2/2002
 =====================
   o a warning is issued whenever an ocamlyacc file is correctly parsed
