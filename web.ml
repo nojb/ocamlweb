@@ -374,14 +374,18 @@ let rec pretty_print_sub_paragraph = function
 
 let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
   | Documentation (b,n,s) -> 
+      end_code ();
       pretty_print_doc is_first_paragraph (b,n,s);
       end_line()  (*i ajout Dorland-Muller i*)
   | Code (l,s) ->
       if l > 0 then output_label (make_label_name (f,l));
+      begin_code_paragraph ();
+      begin_code ();
       pretty_print_code is_last_paragraph s 
   | LexYaccCode (l,s) ->
       if l > 0 then output_label (make_label_name (f,l));
       begin_code_paragraph ();
+      begin_code ();
       List.iter pretty_print_sub_paragraph s;
       end_code_paragraph is_last_paragraph 
 
@@ -398,7 +402,8 @@ let pretty_print_section first f s =
 	pretty_print_paragraph is_first_paragraph false f p;
 	loop false rest 
   in
-  loop true s.sec_contents
+  loop true s.sec_contents;
+  end_code ()
     
 let pretty_print_sections f = function
   | [] -> ()

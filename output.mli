@@ -135,6 +135,8 @@ val begin_section : unit -> unit
 
 val begin_code : unit -> unit
 val end_code : unit -> unit
+val begin_dcode : unit -> unit
+val end_dcode : unit -> unit
 
 val begin_code_paragraph : unit -> unit
 val end_code_paragraph : bool -> unit

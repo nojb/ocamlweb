@@ -269,9 +269,8 @@ clean:
 	rm -f ocamllex-parser/*~ ocamllex-parser/*.cm[iox] ocamllex-parser/*.o
 	rm -f ocamlweb ocamlweb.byte
 	rm -f $(GENERATED)
-	rm -f ocaml-parser/parser.output
+	rm -f yacc-parser.output ocaml-parser/parser.output
 	rm -f ocamllex-parser/lex_parser.output
-	make -C doc VERSION=$(VERSION) clean
 	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
 
 dist-clean:: clean

@@ -480,13 +480,21 @@ let output_yaccmodule module_name =
     output_string "}\n"
   end
       
-let last_is_code = ref false
+let in_code = ref false
 
 let begin_code () =
-  output_string "\\ocwbegincode{}"
-
+  if not !in_code then output_string "\\ocwbegincode{}";
+  in_code := true
 let end_code () =
-  output_string "\\ocwendcode{}"
+  if !in_code then output_string "\\ocwendcode{}";
+  in_code := false
+
+let begin_dcode () =
+  output_string "\\ocwbegindcode{}"
+let end_dcode () =
+  output_string "\\ocwenddcode{}"
+
+let last_is_code = ref false
 
 let begin_code_paragraph () =
   if not !last_is_code then output_string "\\medskip\n";

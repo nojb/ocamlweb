@@ -285,7 +285,7 @@ and pr_comment = parse
 	  output_char '['
 	else begin
 	  bracket_depth := 1; 
-	  begin_code (); escaped_code lexbuf; end_code ()
+	  begin_dcode (); escaped_code lexbuf; end_dcode ()
 	end; 
 	pr_comment lexbuf }
   | eof  
@@ -307,7 +307,7 @@ and pr_yacc_comment = parse
 	     output_char '['
 	   else begin
 	     bracket_depth := 1; 
-	     begin_code (); escaped_code lexbuf; end_code ()
+	     begin_dcode (); escaped_code lexbuf; end_dcode ()
 	   end; 
 	   pr_yacc_comment lexbuf }
   | eof  { () }
@@ -376,7 +376,7 @@ and pr_doc = parse
 	  output_char '['
 	else begin
 	  bracket_depth := 1; 
-	  begin_code (); escaped_code lexbuf; end_code ()
+	  begin_dcode (); escaped_code lexbuf; end_dcode ()
 	end; 
 	pr_doc lexbuf }
   | "\\$" 
@@ -401,7 +401,7 @@ and pr_doc_title = parse
 	  output_char '['
 	else begin
 	  bracket_depth := 1; 
-	  begin_code (); escaped_code lexbuf; end_code ()
+	  begin_dcode (); escaped_code lexbuf; end_dcode ()
 	end; 
 	pr_doc_title lexbuf }
   | '.'
@@ -442,10 +442,7 @@ and pr_verbatim = parse
  *)
 
   let pretty_print_code is_last_paragraph s = 
-    begin_code_paragraph ();
-    begin_code ();
     pr_camlcode (Lexing.from_string s);
-    end_code ();
     end_code_paragraph is_last_paragraph
 
   let pretty_print_doc is_first_paragraph (big,n,s) = 
