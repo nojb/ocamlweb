@@ -2,8 +2,6 @@
 Parsing ocaml
 =============
 
- 2. caractères \xxx et caractères échappés
-
  3. (*x bla bla bla *) => met "bla bla bla" dans l'index (à cet endroit)
 
 Web (cross)
