@@ -26,7 +26,7 @@ let usage () =
   prerr_endline "Usage: ocamlweb <options and files>";
   prerr_endline "  -o file        write output in file `file'";
   prerr_endline "  --header       do not skip the headers";
-  prerr_endline "  --nodoc        suppress LaTeX header and trailer";
+  prerr_endline "  --no-doc       suppress LaTeX header and trailer";
   prerr_endline "  --extern-defs  keep external definitions in the index";
   prerr_endline "  --impl file    consider `file' as a .ml file";
   prerr_endline "  --intf file    consider `file' as a .mli file";
@@ -100,7 +100,7 @@ let parse () =
 
     | ("-header" | "--header") :: rem ->
 	skip_header := false; parse_rec rem
-    | ("-nodoc" | "--nodoc") :: rem ->
+    | ("-nodoc" | "--nodoc" | "--no-doc") :: rem ->
 	set_no_doc true; parse_rec rem
     | ("-o" | "--output") :: f :: rem ->
 	set_output_to_file f; parse_rec rem
