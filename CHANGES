@@ -1,4 +1,6 @@
 
+  o \verb and \begin{verbatim} correctly handled during pretty-printing
+  o option --no-web becomes --latex-sects
   o option --no-doc becomes --no-preamble
   o better sorting and pretty-printing of index entries
   o fixed bug in global index (interfaces were scanned after implementations

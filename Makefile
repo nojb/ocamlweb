@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=26
+MINORVN=3
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc
@@ -70,7 +70,7 @@ BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml
 bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; latex ocamlweb; latex ocamlweb
-	hevea -o test/ocamlweb.html ocamlweb.sty test/ocamlweb.tex
+	-hevea -o test/ocamlweb.html ocamlweb.sty test/ocamlweb.tex
 
 check: bootstrap
 
