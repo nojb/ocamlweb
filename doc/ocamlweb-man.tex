@@ -191,6 +191,12 @@ document.
   Considers the file `\textit{file}' respectively as a \verb!.ml! file, a
   \verb!.mli! file or a \verb!.tex! file.
 
+\item[\texttt{--files }\textit{file}] ~\par
+
+  Read file names to process in file `\textit{file}' as if they were
+  given on the command line. Useful for program sources splitted in
+  several directories. See FAQ.
+  
 \item[\texttt{-h}, \texttt{--help}] ~\par
 
   Gives a short summary of the options and exit.
@@ -230,6 +236,30 @@ document.
   in the final document, even when it appears in regular expressions
   in lexers or in the comments \verb!/*! and \verb!*/! in parsers.)
 
+\item \textbf{What can I do with a large program with sources in several
+    directories, organised as libraries?} ~
+
+  First alternative: you can run an ocamlweb command in each
+  directories, producing a documentation for each library. If you want
+  to have the documentations alltogether in the same TeX file, run
+  each ocamlweb commands with option \textt{--nodoc} to avoid
+  generation of the LaTeX preamble, build by hand a master document
+  file with the preamble you want, without forgetting the
+  \verb|\usepackage{ocamlweb}|, and input each file in each directory
+  with the \verb|\input| or the \verb|\include| macro.
+  
+  Second alternative: the main problem with the first alternative is
+  that you will have an separate index for each libraries. If you want
+  a global index, you need the run only one \verb|ocamlweb| command.
+  If you don't want to put all source file names on one single command
+  line, you can use the \verb|--files| option which allows you to read
+  the source file names from a file. Example :
+\begin{verbatim}
+    ocamlweb --files lib1/source-files --files lib2/source-files
+\end{verbatim}
+  will produce documentation for files in \verb|lib1| and \verb|lib2|
+  provided that the files \verb|source-files| in each directory
+  contain the name of the documented source files.
 
 \end{enumerate}
 

@@ -126,8 +126,8 @@ let files_from_file f =
     let ch = open_in f in
     let l = files_from_channel "" [] ch in
     close_in ch;l
-  with Sys_error _ -> begin
-    eprintf "\nocamlweb: cannot read from file %s\n" f;
+  with Sys_error s -> begin
+    eprintf "\nocamlweb: cannot read from file %s (%s)\n" f s;
     exit 1
   end
 
