@@ -189,18 +189,20 @@ ocaml-parser/parser.mli ocaml-parser/parser.ml: ocaml-parser/parser.mly
 # clean and depend
 ##################
 
+GENERATED = doclexer.ml pretty.ml version.ml \
+            ocaml-parser/lexer.ml ocaml-parser/linenum.ml \
+	    ocaml-parser/parser.mli ocaml-parser/parser.ml 
+
 clean:
 	rm -f *~ *.cm[iox] *.o 
-	rm -f ocamlweb doclexer.ml pretty.ml version.ml
 	rm -f ocaml-parser/*~ ocaml-parser/*.cm[iox] ocaml-parser/*.o
-	rm -f ocaml-parser/lexer.ml ocaml-parser/linenum.ml
-	rm -f ocaml-parser/parser.mli ocaml-parser/parser.ml 
+	rm -f ocamlweb 
+	rm -f $(GENERATED)
 	rm -f ocaml-parser/parser.output
 	make -C doc clean
 	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
 
-depend: doclexer.ml pretty.ml ocaml-parser/parser.ml ocaml-parser/lexer.ml \
-        ocaml-parser/linenum.ml
+depend: $(GENERATED)
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml ocaml-parser/*.ml ocaml-parser/*.mli > .depend
 
