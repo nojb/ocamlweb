@@ -2,7 +2,9 @@
 
 		      LIST OF CHANGES
 		      ===============
- 
+
+version 1.0, 15/06/2001 
+=======================
   o fixed bug with yacc token 'error'
   o adequacy to ocaml 3.01 parser
   o options -dvi, -ps and -html to produce DVI, PS and HTML directly
