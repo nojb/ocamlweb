@@ -52,8 +52,6 @@ Document LaTeX
 
  1. underscore plus fin dans les identificateurs
 
-*2. Afficher "This code is used in section(s) ..."
-
  3. Index des modules
 
  4. « rule » est composé comme un mot-clé à cause des fichiers LEX,
