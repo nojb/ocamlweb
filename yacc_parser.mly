@@ -1,6 +1,6 @@
 /*
  * ocamlweb - A WEB-like tool for ocaml
- * Copyright (C) 1999-2000 Jean-Christophe FILLIÂTRE and Claude MARCHÉ
+ * Copyright (C) 1999-2001 Jean-Christophe FILLIÂTRE and Claude MARCHÉ
  * 
  * This software is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
