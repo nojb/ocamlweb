@@ -116,10 +116,43 @@ Document LaTeX
  7. \leqslant et \geqslant pour <= et >= respectivement.
     pbm: il faut \usepackage{amssymb}. ca pose pbm ?
 
+    (Claude) a mon avis ce genre de truc serait subsumé par une
+    technique de pretty-printing configurable: l'utilisateur peut
+    déclarer des règles comme
+    
+        <=   -->  \leqslant
+        >=   -->  \geqslant 
+
+    mais aussi
+
+        x1   --> \ocwlowerid{x$_1$}
+        y2   --> \ocwlowerid{y$_2$}
+
+    ou encore mieux
+
+        x\([0-9]+\) --> \ocwlowerid{x$_\1$}
+
+    Enfin bref, du coup le \usepackage{amssymb} serait du ressort de
+    l'utilisateur.  
+
  8.  option pour ajouter un \usepackage
  8a. option pour changer de documentclass
 
     (Fabien Fleutot <Fabien.Fleutot@inria.fr>)
+
+    (Claude) a mon avis on s'en sortira jamais sur ces demandes, il
+    faut repondre d'utiliser l'option --no-preamble, comme je fait
+    pour CiME. Mettre dans la FAQ ?
+
+ 9. (Claude) les nombres en octal (et hexa aussi ?) ne sont pas
+    affiches correctement : dans 0o644, 0 est droit alors que o644 est
+    italique. Je suppose que o644 est reconnu comme identificateur
+   
+
+10. (Claude) mettre une option pour supprimer completement les
+    traductions par défaut vers des symboles spéciaux (exemples: ->,
+    *, 'a, =>, etc.) . Du coup l'option --nogreek serait subsumé. Voir
+    aussi 7 ci-dessus.
 
 
 Documentation ocamlweb
