@@ -20,8 +20,8 @@
 % using LaTeX sectioning commands.
 
 \newif\iflatexsectioning\latexsectioningfalse
-\DeclareOption{LaTeXsects}{\latexsectioningtrue}
-\DeclareOption{WEBsects}{\latexsectioningfalse}
+\DeclareOption{latex-sects}{\latexsectioningtrue}
+\DeclareOption{web-sects}{\latexsectioningfalse}
 
 % option for visible spaces
 
@@ -106,10 +106,10 @@
 %HEVEA\newcommand{\ocwbeginindex}{\section{Index}\begin{itemize}}
 %HEVEA\newcommand{\ocwendindex}{\end{itemize}}
 
-% index entry in WEBsects option
+% index entry in web-sects option
 \newcommand{\ocwwebindexentry}[3]{\item #1,\quad#2#3}
 
-% index entry in LaTeXsects option
+% index entry in latex-sects option
 
 %BEGIN LATEX
 \def\loopbody{%
@@ -134,4 +134,5 @@
 }
 %END LATEX
 
+% ca c'est du provisoire
 %HEVEA\newcommand{\ocwrefindexentry}[3]{\item #,\quad#2#3}
