@@ -41,6 +41,8 @@ ocamlweb: $(CAML_CMX) $(CMX)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
 	strip ocamlweb
 
+opt: ocamlweb
+
 byte: $(CAML_CMO) $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_CMO) $(CMO)
 
