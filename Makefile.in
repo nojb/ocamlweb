@@ -70,18 +70,23 @@ version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
 	echo "let date = \""`date`"\"" >> version.ml
 
-install:
+install-indep:
 	mkdir -p $(BINDIR)
-	if test @OCAMLBEST@ = opt ; then \
-		cp ocamlweb $(BINDIR) ; \
-	else \
-		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
-	fi
 	mkdir -p $(MANDIR)/man1
 	cp doc/ocamlweb.1 $(MANDIR)/man1
 	mkdir -p $(TEXDIR)
 	cp ocamlweb.sty $(TEXDIR)	
 	$(UPDATETEX)
+
+install: install-indep
+	if test @OCAMLBEST@ = opt ; then \
+		cp ocamlweb $(BINDIR) ; \
+	else \
+		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
+	fi
+
+install-byte: install-indep
+	cp ocamlweb.byte $(BINDIR)/ocamlweb
 
 local: ocamlweb
 	cp ocamlweb $$HOME/bin/$$OSTYPE
@@ -262,6 +267,9 @@ clean:
 	rm -f ocamllex-parser/lex_parser.output
 	make -C doc clean
 	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
+
+dist-clean:: clean
+	rm -f Makefile
 
 depend: $(GENERATED)
 	rm -f .depend
