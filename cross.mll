@@ -217,10 +217,10 @@ and def_ident = parse
 
 (* type definition *)
 and type_decl = parse
-  | '\'' lo_ident { type_decl lexbuf }
-  | lo_ident      { add_def (Lexing.lexeme lexbuf); type_def_body lexbuf }
-  | '(' | ',' | ')' | space*        
+  | '(' | ',' | ')' | space* | '\'' lo_ident   
                   { type_decl lexbuf }
+  | lo_ident      { add_def (Lexing.lexeme lexbuf); type_decl lexbuf }
+  | '='           { type_def_body lexbuf }
   | eof           { () }
   | _             { () }
 
