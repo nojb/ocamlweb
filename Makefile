@@ -2,7 +2,11 @@
 # Configuration part : where to install
 #########################################
 
+# where to install the binary executable
 BINDIR = $(HOME)/bin/$(OSTYPE)
+
+# where to put the style file
+TEXDIR = $(HOME)/tex/inputs
 
 #########################################
 # End of configuration part
@@ -55,6 +59,7 @@ version.ml: Makefile
 
 install:
 	cp ocamlweb $(BINDIR)
+	cp ocamlweb.sty $(TEXDIR)
 
 manual:
 	cd doc; make all
