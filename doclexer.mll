@@ -147,8 +147,8 @@
 
 (*s Shortcuts for regular expressions. *)
 
-let space = [' ' '\t']
-let space_or_nl = [' ' '\t' '\n']
+let space = [' ' '\r' '\t']
+let space_or_nl = [' ' '\t' '\r' '\n']
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"

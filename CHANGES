@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.34, 7/7/2003
+======================
+  o fixed behavior on DOS end-of-line
+
 version 1.33, 13/5/2003
 =======================
   o \penalty5000 instead of \nolinebreak in \ocweol (Ralf Treinen)
