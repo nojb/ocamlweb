@@ -144,10 +144,6 @@ Document LaTeX
     faut repondre d'utiliser l'option --no-preamble, comme je fait
     pour CiME. Mettre dans la FAQ ?
 
- 9. (Claude) les nombres en octal (et hexa aussi ?) ne sont pas
-    affiches correctement : dans 0o644, 0 est droit alors que o644 est
-    italique. Je suppose que o644 est reconnu comme identificateur
-   
 
 10. (Claude) mettre une option pour supprimer completement les
     traductions par défaut vers des symboles spéciaux (exemples: ->,
