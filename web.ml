@@ -16,7 +16,7 @@
 
 (* $Id$ *)
 
-(*i *)
+(*i*)
 
 open Printf
 open Cross
@@ -48,7 +48,7 @@ type file =
   | Interf of interf
   | Other  of string
 
-(* i*)
+(*i*)
 
 
 (*s Options of the engine. *)
@@ -71,10 +71,10 @@ let add_latex_option s =
 (*s Construction of the global index. *)
 
 let index_interf inte =
-  cross_interf inte.interf_file
+  cross_interf inte.interf_file inte.interf_name
 
 let index_implem imp =
-  cross_implem imp.implem_file;
+  cross_implem imp.implem_file imp.implem_name;
   begin match imp.implem_interf with
     | None -> ()
     | Some i -> index_interf i
@@ -83,12 +83,12 @@ let index_implem imp =
 let index_file = function 
   | Implem i -> index_implem i 
   | Interf i -> index_interf i
-  | Other f -> ()
+  | Other _ -> ()
 
 let build_index l = List.iter index_file l
 
 
-(*s The locations tables. *)
+(*s The locations tables. \label{counters} *)
 
 let sec_locations = ref Idmap.empty
 let code_locations = ref Idmap.empty
@@ -119,8 +119,8 @@ let add_intf_loc it =
 
 let add_impl_loc im =
   let f = Filename.basename im.implem_file in
-  List.iter (add_sec_loc f) im.implem_contents;
-  match im.implem_interf with None -> () | Some i -> add_intf_loc i
+  begin match im.implem_interf with None -> () | Some i -> add_intf_loc i end;
+  List.iter (add_sec_loc f) im.implem_contents
 
 let locations_for_a_file = function
   | Implem i -> add_impl_loc i
@@ -137,6 +137,15 @@ let find_where w =
 
 
 (*s Printing of the index. *)
+
+(*s Alphabetic order for index entries. 
+    To sort index entries, we define the following order relation 
+    [alpha_string]. It puts symbols first (identifiers that do not begin
+    with a letter), and symbols are compared using Caml's generic order 
+    relation. For real identifiers, we first normalize them by translating
+    lowercase characters to uppercase ones and by removing all the accents, 
+    and then we use Caml's comparison.
+ *)
 
 let norm_char c = match Char.uppercase c with
   | '\192'..'\198' -> 'A'
@@ -156,19 +165,69 @@ let norm_string s =
   done;
   u
 
-let alpha_string s1 s2 = norm_string s1 < norm_string s2
+let alpha_string s1 s2 = 
+  match what_is_first_char s1, what_is_first_char s2 with
+    | Symbol, Symbol -> s1 < s2
+    | Symbol, _ -> true
+    | _, Symbol -> false
+    | _,_ -> norm_string s1 < norm_string s2
+
+
+(*s The following function collects all the index entries and sort them
+    using [alpha_string], returning a list. *)
 
 let all_entries () =
   let s = Idmap.fold (fun x _ s -> Stringset.add x s) !used Stringset.empty in
   let s = Idmap.fold (fun x _ s -> Stringset.add x s) !defined s in
   Sort.list alpha_string (Stringset.elements s)
 
-let rec uniquize = function
-  | [] | [_] as l -> l
-  | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
+
+(*s When we are in \LaTeX\ style, an index entry only consists in two lists
+    of labels, which are treated by the \LaTeX\ macro \verb!\ocwrefindexentry!.
+    When we are in WEB style, we can do a bit better, replacing a list
+    like 1,2,3,4,7,8,10 by 1--4,7,8,10, as in usual \LaTeX\ indexes.
+    The following function [intervals] is used to group together the lists 
+    of at least three consecutive integers.
+ *)
+
+let intervals l =
+  let rec group = function
+    | (acc, []) -> List.rev acc
+    | (Interval (s1,(_,n2))::acc, (f,n)::rem) when n = succ n2 -> 
+	group (Interval (s1,(f,n))::acc, rem)
+    | ((Single _)::(Single (f1,n1) as s1)::acc, (f,n)::rem) when n = n1+2 ->
+	group (Interval ((f1,n1),(f,n))::acc, rem)
+    | (acc, (f,n)::rem) ->
+	group ((Single (f,n))::acc, rem)
+  in
+  group ([],l)
 
 let make_label_name (f,n) =
   (Filename.basename f) ^ ":" ^ (string_of_int n)
+
+let label_list l =
+  List.map (fun x -> make_label_name (fst x)) l
+
+let elem_map f = function
+  | Single x -> Single (f x)
+  | Interval (x,y) -> Interval (f x, f y)
+
+let web_list l =
+  let l = intervals l in
+  List.map (elem_map (fun x -> make_label_name (fst x))) l
+
+
+(*s Printing one index entry. 
+    The function call [(list_in_table id t)] collects all the sections for 
+    the identifier [id] in the table [t], using the function [find_where], 
+    and sort the result thanks to the counter which was associated to each
+    new location (see section~\ref{counters}). It also removes the duplicates
+    labels.
+  *)
+
+let rec uniquize = function
+  | [] | [_] as l -> l
+  | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
 
 let map_succeed_nf f l =
   let rec map = function
@@ -177,25 +236,27 @@ let map_succeed_nf f l =
   in
   map l
 
-let print_one_entry s =
-  let list_in_table t =
-    try 
-      let l = Whereset.elements (Idmap.find s t) in
-      let l = map_succeed_nf find_where l in
-      let l = Sort.list (fun (_,n) (_,n') -> n<n') l in
-      uniquize l
-    with Not_found -> 
-      []
-  in
-  let def = list_in_table !defined
-  and use = list_in_table !used in
+let list_in_table id t =
+  try 
+    let l = Whereset.elements (Idmap.find id t) in
+    let l = map_succeed_nf find_where l in
+    let l = Sort.list (fun x x' -> snd x < snd x') l in
+    uniquize l
+  with Not_found -> 
+    []
+
+let print_one_entry id =
+  let def = list_in_table id !defined
+  and use = list_in_table id !used in
   if !extern_defs || def <> [] then
     if !web then 
-      output_index_entry s def use
+      output_index_entry id (web_list def) (web_list use)
     else 
-      output_raw_index_entry s 
-	(List.map (fun x -> make_label_name (fst x)) def) 
-	(List.map (fun x -> make_label_name (fst x)) use) 
+      output_raw_index_entry id (label_list def) (label_list use)
+
+
+(*s Then printing the index is just iterating [print_one_entry] on all the
+    index entries, given by [(all_entries())]. *)
 
 let print_index () =
   begin_index ();
@@ -203,7 +264,7 @@ let print_index () =
   end_index ()
 
 
-(*s Production of the \LaTeX\ document. *)
+(*s Pretty-printing of the document. *)
 
 let pretty_print_paragraph f = function
   | Documentation s -> 
@@ -212,25 +273,32 @@ let pretty_print_paragraph f = function
       output_label (make_label_name (f,l));
       pretty_print_code s
 
-let pretty_print_section f s = 
+let pretty_print_section first f s = 
   if !web then begin_section ();
+  if first & s.sec_beg > 0 then output_label (make_label_name (f,0));
   output_label (make_label_name (f,s.sec_beg));
   List.iter (pretty_print_paragraph f) s.sec_contents
     
+let pretty_print_sections f = function
+  | [] -> ()
+  | s :: r -> 
+      pretty_print_section true f s; 
+      List.iter (pretty_print_section false f) r
+
 let pretty_print_implem imp =
   output_module imp.implem_name;
   begin match imp.implem_interf with
     | None -> ()
     | Some i -> 
 	interface_part ();
-	List.iter (pretty_print_section i.interf_file) i.interf_contents;
+	pretty_print_sections i.interf_file i.interf_contents;
 	code_part ()
   end;
-  List.iter (pretty_print_section imp.implem_file) imp.implem_contents
+  pretty_print_sections imp.implem_file imp.implem_contents
 
 let pretty_print_interf inte =
   output_interface inte.interf_name;
-  List.iter (pretty_print_section inte.interf_file) inte.interf_contents
+  pretty_print_sections inte.interf_file inte.interf_contents
 
 let pretty_print_file = function
   | Implem i -> pretty_print_implem i 

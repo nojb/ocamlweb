@@ -16,16 +16,21 @@
 
 (* $Id$ *)
 
+(*i*)
 {
 
   open Printf
   open Output
+  open Lexing
+(*i*)
+
+(*s Global variables and functions used by the lexer. *)
 
   let comment_depth = ref 0
 
   let bracket_depth = ref 0
 
-  let first_char lexbuf = Lexing.lexeme_char lexbuf 0
+  let first_char lexbuf = lexeme_char lexbuf 0
 
   let count_spaces s =
     let c = ref 0 in
@@ -55,7 +60,11 @@
     reset_output ();
     user_math_mode := false
 
+(*i*)
 }
+(*i*)
+
+(*s Shortcuts for regular expressions. *)
 
 let space = [' ' '\t']
 let lowercase = ['a'-'z' '\223'-'\246' '\248'-'\255' '_']
@@ -66,42 +75,47 @@ let identifier = (lowercase | uppercase) identchar*
 let tex_reserved = 
   '$' | '#' | '%' | '&' | '\\' | '{' | '}' | '^' | '_' | '~'
 let latex_special = 
-  ' ' | '*' | "->" | "<-" | "<=" | ">=" | "<>" | "[]" | "(" | ")"
+  ' ' | "*" | "->" | "<-" | "<=" | ">=" | "<>" | "[]" | "(" | ")" |
+  "&" | "&&" | "or" | "||" | "not"
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
 
 
-(*s The following function pretty-prints some code and assumes that we are
+(*s Pretty-printing of code.
+    The following function pretty-prints some code and assumes that we are
     at the beginning of a line. *)
 
 rule pr_code = parse
-  | space* { let n = count_spaces (Lexing.lexeme lexbuf) in indentation n;
+  | space* { let n = count_spaces (lexeme lexbuf) in indentation n;
 	     pr_code_inside lexbuf; pr_code lexbuf }
   | eof    { leave_math () }
+
    
-(*s  That function pretty-prints code anywhere else. *)
+(*s That function pretty-prints the code anywhere else. *)
 
 and pr_code_inside = parse
   | '\n' { () }
-  | (identifier '.')* identifier
-         { output_ident (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
-  | "'" ('a'|'b'|'c')
-         { output_greek_letter (Lexing.lexeme_char lexbuf 1); 
+  | "'" ('a'|'b'|'c'|'d')
+         { output_greek_letter (lexeme_char lexbuf 1); 
 	   pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
   | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
   | character
-         { output_verbatim (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
+         { output_verbatim (lexeme lexbuf); pr_code_inside lexbuf }
   | tex_reserved
          { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
   | latex_special  
-         { output_latex_special (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
+         { output_latex_special (lexeme lexbuf); pr_code_inside lexbuf }
+  | (identifier '.')* identifier
+         { output_ident (lexeme lexbuf); pr_code_inside lexbuf }
   | eof  { () }
   | _    { output_char (first_char lexbuf); pr_code_inside lexbuf }
 
-(* comments *)
+
+(*s Comments. *)
+
 and pr_comment = parse
   | "(*" { output_bc (); incr comment_depth; pr_comment lexbuf }
   | "*)" { output_ec (); decr comment_depth;
@@ -113,14 +127,16 @@ and pr_comment = parse
   | '$'  { user_math(); pr_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_comment lexbuf }
 
-(* strings in code *)
+
+(*s Strings in code. *)
+
 and pr_code_string = parse
   | '"'  { output_es () }
   | '\n' { indentation 0; pr_code_string lexbuf }
   | ' '  { output_vspace (); pr_code_string lexbuf }
   | '\\' ['"' 'n' 't' 'b' 'r']
          { output_escaped_char '\\'; 
-	   output_char (Lexing.lexeme_char lexbuf 1); 
+	   output_char (lexeme_char lexbuf 1); 
 	   pr_code_string lexbuf }
   | '\\' '\\'
          { output_escaped_char '\\'; output_escaped_char '\\'; 
@@ -130,7 +146,9 @@ and pr_code_string = parse
   | eof  { () }
   | _    { output_char (first_char lexbuf); pr_code_string lexbuf }
 
-(* escaped code *)
+
+(*s Escaped code. *)
+
 and escaped_code = parse
   | '['  { output_char '['; incr bracket_depth; escaped_code lexbuf }
   | ']'  { decr bracket_depth; 
@@ -140,29 +158,34 @@ and escaped_code = parse
 	     if not !user_math_mode then leave_math () }
   | '"'  { output_bs (); pr_code_string lexbuf; escaped_code lexbuf }
   | character
-         { output_verbatim (Lexing.lexeme lexbuf); escaped_code lexbuf }
-  | identifier
-         { output_ident (Lexing.lexeme lexbuf); escaped_code lexbuf }
+         { output_verbatim (lexeme lexbuf); escaped_code lexbuf }
   | tex_reserved
          { output_escaped_char (first_char lexbuf); escaped_code lexbuf }
   | latex_special  
-         { output_latex_special (Lexing.lexeme lexbuf); escaped_code lexbuf }
+         { output_latex_special (lexeme lexbuf); escaped_code lexbuf }
+  | identifier
+         { output_ident (lexeme lexbuf); escaped_code lexbuf }
   | eof  { if not !user_math_mode then leave_math () }
   | _    { output_char (first_char lexbuf); escaped_code lexbuf }
 
 
-(************************************************************************)
-(* DOCUMENTATION                                                        *)
-(************************************************************************)
+(*s Documentation. 
+    It is output `as is', except for quotations. *)
 
-(* pretty-print of documentation (output `as it', except for quotations *)
 and pr_doc = parse
   | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
   | eof { () }
   | _   { output_char (first_char lexbuf); pr_doc lexbuf }
 
+(*i*)
 {
+(*i*)
+
+(*s Then we can introduce two functions [pretty_print_code] and 
+    [pretty_print_doc], which pretty-print respectively code and
+    documentation parts. 
+ *)
 
   let pretty_print f x =
     reset_pretty ();
@@ -174,4 +197,6 @@ and pr_doc = parse
 
   let pretty_print_doc s = pretty_print pr_doc (Lexing.from_string s)
 
+(*i*)
 }
+(*i*)

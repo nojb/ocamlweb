@@ -17,6 +17,7 @@
 (* $Id$ *)
 
 (*i*)
+open Filename
 open Printf
 open Output
 open Web
@@ -87,16 +88,16 @@ let check_if_file_exists f =
 
 let what_file f =
   check_if_file_exists f;
-  if Filename.check_suffix f ".ml" then
-    let fi = f^"i" in
-    let intf = if Sys.file_exists fi then Some (make_intf fi) else None in
-    File_impl (make_impl f, intf)
-  else if Filename.check_suffix f ".mli" then
-    File_intf (make_intf f)
-   else if Filename.check_suffix f ".tex" then
+  if check_suffix f ".ml" or check_suffix f ".mll" then
+    let fi = (chop_extension f) ^ ".mli" in
+    let intf = if Sys.file_exists fi then Some (make_caml_file fi) else None in
+    File_impl (make_caml_file f, intf)
+  else if check_suffix f ".mli" then
+    File_intf (make_caml_file f)
+  else if check_suffix f ".tex" then
     File_other f
-   else begin
-     eprintf "\nocamlweb: don't know what to do with %s\n" f;
+  else begin
+    eprintf "\nocamlweb: don't know what to do with %s\n" f;
     exit 1
   end
 

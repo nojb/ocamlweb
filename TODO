@@ -12,13 +12,16 @@ Web (cross)
  3. supprimer tout de même les modules et fonctions de Pervasives de l'index
     lorsque l'on utilise l'option --extern-defs ?
 
+*4. Est-ce que les modules (correspondant aux fichiers) eux-mêmes doivent
+    apparaître dans l'index global, ou doivent-ils apparaître dans un index
+    particulier ?
 
 Document LaTeX
 ==============
 
  1. underscore plus fin dans les identificateurs
 
- 2. Afficher "This code is used in section(s) ..."
+*2. Afficher "This code is used in section(s) ..."
 
 
 Documentation ocamlweb

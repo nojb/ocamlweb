@@ -219,6 +219,20 @@ document.
   \texttt{ocamlweb.sty}. There are macros for keywords, identifiers,
   index entries, etc. with short comments explaining their role.
 
+\item \textbf{What about lexers?} ~\par
+
+  \textsf{ocamllex} files are identified by the suffix \verb!.mll! and
+  considered as implementation files. If \textit{file.mll} is such a
+  file, then the cross reference engine will traverse the file
+  \textit{file.ml}, if any. It is up to you to produce it using
+  \textsf{ocamllex} before calling \ocamlweb. (Notice that the symbol
+  \verb!*! in regular expressions appears as $\times$ in the final
+  document.)
+
+\item \textbf{What about parsers?} ~\par
+
+  This is currently no support for \textsf{ocamlyacc} parsers.
+
 \end{enumerate}
 
 

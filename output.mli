@@ -62,6 +62,9 @@ val leave_math : unit -> unit
     [output_latex_special] pretty-prints some mathematical symbols,
     like $\rightarrow$ for \texttt{->}. *)
 
+type char_type = Upper | Lower | Symbol
+val what_is_first_char : string -> char_type
+
 val is_keyword : string -> bool
 val output_ident : string -> unit
 val output_escaped_char : char -> unit
@@ -102,9 +105,11 @@ val end_paragraph : unit -> unit
     for function [f], where [def] is the list of sections where [f] is
     introduced and [use] the list of sections where [f] is used. *)
 
+type 'a elem = Single of 'a | Interval of 'a * 'a
+
 val begin_index : unit -> unit
 val output_index_entry : 
-  string -> ((string*int)*int) list -> ((string*int)*int) list -> unit
+  string -> string elem list -> string elem list -> unit
 val output_raw_index_entry : 
   string -> string list -> string list -> unit
 val end_index : unit -> unit

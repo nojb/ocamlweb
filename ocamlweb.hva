@@ -32,7 +32,7 @@
 \newcommand{\ocwbt}[1]{\textit{#1}}
 
 % macro for typesetting identifiers
-%\newcommand{\ocwid}[1]{\index[idents]{#1}\textit{#1\/}}
+\newcommand{\ocwsymbolid}[1]{{#1}}
 \newcommand{\ocwlowerid}[1]{\textit{#1\/}}
 \newcommand{\ocwupperid}[1]{\textit{#1\/}}
 

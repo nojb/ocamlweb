@@ -20,7 +20,7 @@
 open Printf
 (*i*)
 
-(* Low level output. 
+(*s \textbf{Low level output.} 
    [out_channel] is a reference on the current output channel.
    It is initialized to the standard output and can be 
    redirect to a file by the function [set_output_to_file]. 
@@ -82,7 +82,8 @@ let latex_trailer () =
   end
 
 
-(*s Math mode. We keep a boolean, [math_mode], to know if we are currently
+(*s \textbf{Math mode.}
+    We keep a boolean, [math_mode], to know if we are currently
     already in \TeX\ math mode. The functions [enter_math] and [leave_math]
     inserts \verb!$! if necessary, and switch that boolean.
  *)
@@ -102,8 +103,9 @@ let leave_math () =
   end
 
 
-(*s Indentation at the beginning of a line (for code only) is produced by
-    the following function. *)
+(*s \textbf{Indentation.}
+    An indentation at the beginning of a line of $n$ spaces 
+    is produced by [(indentation n)] (used for code only). *)
 
 let indentation n =
   leave_math ();
@@ -111,7 +113,7 @@ let indentation n =
   output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
 
 
-(*s Keywords.
+(*s \textbf{Keywords.}
     Caml keywords and base type are stored in two hash tables, and the two
     functions [is_caml_keyword] and [is_base_type] make the corresponding
     tests.
@@ -134,8 +136,8 @@ let is_caml_keyword =
       "or"; "parser";  "private"; "rec"; "sig";  "struct"; "then"; "to";
       "true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
-      (* ajoutés *)
-      "not"
+      (* added for lexers *)
+      "rule"; "parse"
     ]
 
 let is_base_type = 
@@ -154,7 +156,7 @@ let output_keyword s =
   output_string "}"
 
 
-(*s Identifiers.
+(*s \textbf{Identifiers.}
     The function [output_raw_ident] prints an identifier,
     escaping the \TeX\ reserved characters with [output_escaped_char].
     The function [output_ident] prints an identifier, calling 
@@ -176,16 +178,22 @@ let output_latex_id s =
     output_escaped_char s.[i]
   done
 
-let is_upper_char = function
-  | 'A'..'Z' | '\192'..'\214' | '\216'..'\222' -> true
-  | _ -> false
+type char_type = Upper | Lower | Symbol
 
-let is_upper_string s =
-  String.length s > 0 && is_upper_char s.[0]
+let what_char = function
+  | 'A'..'Z' | '\192'..'\214' | '\216'..'\222' -> Upper
+  | 'a'..'z' |'\223'..'\246' | '\248'..'\255' | '_' -> Lower
+  | _ -> Symbol
+
+let what_is_first_char s =
+  if String.length s > 0 then what_char s.[0] else Lower
 
 let output_raw_ident s =
-  output_string 
-    (if is_upper_string s then "\\ocwupperid{" else "\\ocwlowerid{"); 
+  begin match what_is_first_char s with
+    | Upper -> output_string "\\ocwupperid{"
+    | Lower -> output_string "\\ocwlowerid{"
+    | Symbol -> output_string "\\ocwsymbolid{"
+  end;
   output_latex_id s; 
   output_string "}"
 
@@ -201,7 +209,8 @@ let output_ident s =
   end
 
 
-(*s Symbols. Some mathematical symbols are printed in a nice way, in order
+(*s \textbf{Symbols.}
+    Some mathematical symbols are printed in a nice way, in order
     to get a more readable code.
     The type variables from \verb!'a! to \verb!'d! are printed as Greek
     letters for the same reason.
@@ -218,6 +227,11 @@ let output_latex_special = function
   | "<>" -> enter_math (); output_string "\\not="
   | "(" | ")" as s -> 
             enter_math (); output_string s
+  | "&" | "&&" ->
+            enter_math (); output_string "\\land{}"
+  | "or" | "||" ->
+            enter_math (); output_string "\\lor{}"
+  | "not" -> enter_math (); output_string "\\lnot{}"
   | "[]" -> output_string "[\\,]"
   | s    -> output_string s
 
@@ -229,14 +243,14 @@ let output_greek_letter = function
   | c   -> output_char '\''; output_char c
 
 
-(*s Comments. *)
+(*s \textbf{Comments.} *)
 
 let output_bc () = leave_math (); output_string "\\ocwbc{}"
 
 let output_ec () = leave_math (); output_string "\\ocwec{}"
 
 
-(*s Strings. *)
+(*s \textbf{Strings.} *)
 
 let output_bs () = leave_math (); output_string "\\texttt{\""
 
@@ -251,7 +265,7 @@ let reset_output () =
   math_mode := false
 
 
-(*s Sectioning commands. *)
+(*s \textbf{Sectioning commands.} *)
 
 let begin_section () =
   output_string "\\ocwsection\n"
@@ -279,7 +293,7 @@ let end_paragraph () =
   output_string "\n\n\\medskip{}\n"
 
 
-(*s Index. 
+(*s \textbf{Index.}
     It is opened and closed with the two macros \verb!ocwbeginindex! and
     \verb!ocwendindex!.
     The auxiliary function [print_list] is a generic function to print a 
@@ -301,45 +315,25 @@ let print_list print sep l =
   print_rec l
   
 
-(*s Index in WEB style. 
-    When we are in WEB style, the index is directly printed by the following
-    code, and consists in two lists of sections.
-    To get a nice output, we want a list like 1,2,3,4,7,8,10 to appear
-    as 1--4,7,8,10, as in usual \LaTeX\ indexes.
-    The following function [intervals] is used to group together the lists 
-    of at least three consecutive integers.
+(*s \textbf{Index in WEB style.}
+    The function [output_index_entry] prints one entry line, given the
+    name of the entry, and two lists of pre-formatted sections labels,
+    like 1--4,7,10--17, of type [string elem list].
+    The first list if printed in bold face (places where the identifier is
+    defined) and the second one in roman (places where it is used).
  *)
 
-type 'a elem =
-  | Single of 'a * int
-  | Interval of ('a * int) * ('a * int)
+type 'a elem = Single of 'a | Interval of 'a * 'a
 
-let intervals l =
-  let rec group = function
-    | (acc, []) -> List.rev acc
-    | (Interval (s1,(_,n2))::acc, (f,n)::rem) when n = succ n2 -> 
-	group (Interval (s1,(f,n))::acc, rem)
-    | ((Single _)::(Single (f1,n1) as s1)::acc, (f,n)::rem) when n = n1+2 ->
-	group (Interval ((f1,n1),(f,n))::acc, rem)
-    | (acc, (f,n)::rem) ->
-	group ((Single (f,n))::acc, rem)
-  in
-  group ([],l)
-
-
-(*s Then we can output the index entry, the first sections (where the 
-    identifier is defined) in bold face.
- *)
-
-let output_sec_ref ((f,l),_) = output_string (sprintf "\\ref{%s:%d}" f l)
+let output_ref r = output_string (sprintf "\\ref{%s}" r)
 
 let output_elem = function
-  | Single (f,n) -> 
-      output_sec_ref (f,n)
-  | Interval (s1,s2) -> 
-      output_sec_ref s1;
+  | Single r -> 
+      output_ref r
+  | Interval (r1,r2) -> 
+      output_ref r1;
       output_string "--";
-      output_sec_ref s2
+      output_ref r2
 
 let output_bf_elem n = 
   output_string "\\textbf{"; output_elem n; output_string "}"
@@ -349,14 +343,14 @@ let output_index_entry s def use =
   output_string "\\ocwwebindexentry{";
   output_raw_ident s;
   output_string "}{";
-  print_list output_bf_elem sep (intervals def);
+  print_list output_bf_elem sep def;
   output_string "}{";
   if def <> [] && use <> [] then output_string ", ";
-  print_list output_elem sep (intervals use);
+  print_list output_elem sep use;
   output_string "}\n"
 
 
-(*s Index in \LaTeX\ style. 
+(*s \textbf{Index in \LaTeX\ style.}
     When we are not in WEB style, the index in left to \LaTeX, and all
     the work is done by the macro \verb!\ocwrefindexentry!, which takes
     three arguments: the name of the entry and the two lists of labels where

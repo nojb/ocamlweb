@@ -54,6 +54,8 @@
 \fi
 
 % macro for typesetting identifiers
+\newcommand{\ocwsymbolid}[1]{{#1}}
+
 \expandafter\ifcase\webstylecase
 \newcommand{\ocwlowerid}[1]{\textit{#1\/}}
 \newcommand{\ocwupperid}[1]{\textit{#1\/}}
@@ -76,14 +78,14 @@
 \expandafter\ifcase\webstylecase
 \newcommand{\ocwmodule}[1]{\section*{Module #1}}
 \or
-\newcommand{\ocwmodule}[1]{\section{Implementation of module \ocwid{#1}}}
+\newcommand{\ocwmodule}[1]{\section{Implementation of module \ocwupperid{#1}}}
 \fi
 
 % macro for typesetting the title of a module interface
 \expandafter\ifcase\webstylecase
 \newcommand{\ocwinterface}[1]{\section*{Interface for module #1}}
 \or
-\newcommand{\ocwinterface}[1]{\section{Module \ocwid{#1}}}
+\newcommand{\ocwinterface}[1]{\section{Module \ocwupperid{#1}}}
 \fi
 
 % interface part of a module

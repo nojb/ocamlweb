@@ -16,7 +16,7 @@
 
 (* $Id$ *)
 
-(* That module exports to global tables [used] and [defined], indexed
+(*s That module exports to global tables [used] and [defined], indexed
    by identifiers (strings) and containing respectively the sets of locations
    where they are defined and used.
    Those locations are of type [where], which contain the name of the file
@@ -36,5 +36,5 @@ val defined : Whereset.t Idmap.t ref
 
 (*s The two following functions fill the above table for a given file. *)
 
-val cross_implem : string -> unit
-val cross_interf : string -> unit
+val cross_implem : string -> string -> unit
+val cross_interf : string -> string -> unit

@@ -16,11 +16,13 @@
 
 (* $Id$ *)
 
+(*i*)
 {
 
   open Lexing
   open Output
   open Web
+(*i*)
 
   let skip_header = ref true
 
@@ -39,7 +41,7 @@
     end;
     parlist := []
 
-  let first_char lexbuf = Lexing.lexeme_char lexbuf 0
+  let first_char lexbuf = lexeme_char lexbuf 0
 
   let docub = Buffer.create 8192
 
@@ -95,7 +97,7 @@ and implementation = parse
   | space* "(*" space_or_nl*
            { new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*s" space_or_nl*
-           { new_section (); section_beg := (Lexing.lexeme_start lexbuf);
+           { new_section (); section_beg := (lexeme_start lexbuf);
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
            { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
@@ -104,19 +106,19 @@ and implementation = parse
 	     comment lexbuf; code lexbuf; implementation lexbuf }
   | space* '\n'   
            { implementation lexbuf }
-  | _      { Buffer.clear codeb; code_beg := (Lexing.lexeme_start lexbuf);
+  | _      { Buffer.clear codeb; code_beg := (lexeme_start lexbuf);
 	     Buffer.add_char codeb (first_char lexbuf); 
 	     code lexbuf; implementation lexbuf }
   | eof    { new_section (); List.rev !seclist }
       
 (* inside the documentation part *)
 and documentation = parse
-  | "(*" { Buffer.add_string docub (Lexing.lexeme lexbuf);
+  | "(*" { Buffer.add_string docub (lexeme lexbuf);
 	   incr comment_depth; documentation lexbuf }
   | space* "*)" 
          { decr comment_depth;
            if !comment_depth > 0 then begin
-	     Buffer.add_string docub (Lexing.lexeme lexbuf);
+	     Buffer.add_string docub (lexeme lexbuf);
 	     documentation lexbuf 
 	   end else begin
 	     skip_until_nl lexbuf;
@@ -142,7 +144,7 @@ and code = parse
          { ignore lexbuf; skip_until_nl lexbuf; code lexbuf }
   | '"'  { Buffer.add_char codeb '"'; code_string lexbuf; code lexbuf }
   | character
-         { Buffer.add_string codeb (Lexing.lexeme lexbuf); code lexbuf }
+         { Buffer.add_string codeb (lexeme lexbuf); code lexbuf }
   | _    { Buffer.add_char codeb (first_char lexbuf); code lexbuf }
 
 (* to skip everything until a newline *)
@@ -178,7 +180,7 @@ and ignore = parse
 and code_string = parse
   | '"'      { Buffer.add_char codeb '"' }
   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
-             { Buffer.add_string codeb (Lexing.lexeme lexbuf); 
+             { Buffer.add_string codeb (lexeme lexbuf); 
 	       code_string lexbuf }
   | eof      { () }
   | _        { Buffer.add_char codeb (first_char lexbuf); code_string lexbuf }
@@ -191,13 +193,9 @@ type caml_file = { caml_filename : string; caml_module : string }
 
 let module_name f = String.capitalize (Filename.basename f)
 
-let make_impl f = 
+let make_caml_file f = 
   { caml_filename = f;
-    caml_module = module_name (Filename.chop_suffix f ".ml") }
-
-let make_intf f = 
-  { caml_filename = f;
-    caml_module = module_name (Filename.chop_suffix f ".mli") }
+    caml_module = module_name (Filename.chop_extension f) }
 
 type file_type =
   | File_impl  of caml_file * caml_file option

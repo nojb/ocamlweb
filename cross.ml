@@ -17,6 +17,7 @@
 (* $Id$ *)
 
 (*i*)
+open Filename
 open Location
 open Longident
 open Output
@@ -25,7 +26,7 @@ open Asttypes
 open Parsetree
 (*i*)
 
-(* Cross references inside Caml files are kept in the following two 
+(*s Cross references inside Caml files are kept in the following two 
    global tables, which keep the places where things are defined and
    used, to produce the final indexes.
  *)
@@ -64,7 +65,7 @@ let add_def loc s =
 
 (*s Another table, [locals], keeps the bound variables, in order to
     distinguish them from global identifiers. Then the function [add_uses]
-    registers that an identifier is used (in the table [used], taking care 
+    registers that an identifier is used (in the table [used]), taking care 
     of the fact that it is not a bound variable (in the table [locals]).
     [add_uses_q] iters [add_uses] on a qualified identifier.
  *)
@@ -148,8 +149,11 @@ let bind_variables ids f x =
     Each type [t] in those abstract 
     syntax trees is associated to a function [tr_t] which traverses it,
     declaring the identifiers used and defined. Those types are defined
-    in the Caml module [Paresetree.mli] contained in the Caml source
-    distribution. *)
+    in the Caml module interface [Paresetree.mli] contained in the Caml source
+    distribution. 
+ 
+    The following code is quite code, but systematic and easy to understand.
+ *)
 
 (*s Core types. *)
 
@@ -467,28 +471,25 @@ and tr_structure_item_desc loc = function
     [cross_implem] and [cross_interf] which respectively compute the 
     cross-references in implementations and interfaces. *)
 
-let add_module f suff = 
-  if Filename.check_suffix f suff then
-    let m = Filename.basename (Filename.chop_suffix f suff) in
-    add_def { loc_start = 0; loc_end = 0 } (String.capitalize m)
+let add_module m = 
+  add_def { loc_start = 0; loc_end = 0 } m
 
-let wrapper parsing_function traverse_function suff f =
+let wrapper parsing_function traverse_function f m =
   reset_cross ();
   current_file := f;
-  add_module f suff;
-  let c = open_in f in
+  add_module m;
+  let f' = if check_suffix f ".mll" then (chop_extension f) ^ ".ml" else f in
+  let c = open_in f' in
   let lexbuf = Lexing.from_channel c in
   try
     traverse_function (parsing_function lexbuf);
     close_in c
   with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
-    eprintf " ** warning: syntax error while parsing %s\n" f;
+    eprintf " ** warning: syntax error while parsing %s\n" f';
     close_in c
   end
 
-let cross_implem f = 
-  wrapper Parse.implementation tr_structure ".ml" f
+let cross_implem = wrapper Parse.implementation tr_structure
 
-let cross_interf f = 
-  wrapper Parse.interface tr_signature ".mli" f
+let cross_interf = wrapper Parse.interface tr_signature
 

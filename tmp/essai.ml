@@ -23,6 +23,10 @@ let ma_fonction x = function (yyy,z) ->
 
 let s c = "\\" ^ c ^ "autre chaine"
 
+let test x y z = x or y && not x = y
+
+let test xor ory = xor + ory
+
 let xxx = { champ1 = 1; champ2 = "toto" }
 
 let yyy = [| 1; xxx; 3 |]

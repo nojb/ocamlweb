@@ -40,6 +40,7 @@ ocamlweb: ocaml-parser-byte $(CMO)
 
 opt: ocaml-parser-opt $(CMX)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
+	-strip ocamlweb
 
 debug: ocaml-parser-byte $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
@@ -66,9 +67,11 @@ test: ocamlweb
 
 BOOTSTRAP= bootstrap.tex output.ml cross.ml web.ml main.ml
 
-bootstrap: ocamlweb $(BOOTSTRAP)
+bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; latex ocamlweb; latex ocamlweb
+
+check: bootstrap
 
 # export
 ########
@@ -80,7 +83,7 @@ FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 FILES = buffer.mli buffer.ml \
         doclexer.mll cross.ml cross.mli pretty.mli pretty.mll \
 	output.mli output.ml web.mli web.ml main.ml \
-	ocamlweb.sty \
+	ocamlweb.sty ocamlweb.hva bootstrap.tex \
 	Makefile .depend README INSTALL COPYING GPL CHANGES
 
 OCAMLFILES = misc.mli misc.ml clflags.ml \
@@ -102,9 +105,11 @@ export: source
 	cd doc; make all export
 
 source:
-	mkdir -p export/$(NAME)/ocaml-parser
+	mkdir -p export/$(NAME)
+	cd export; mkdir ocaml-parser; mkdir test
 	cp $(FILES) export/$(NAME)
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
+	cd export/$(NAME)/test; ln -s ../ocamlweb.sty
 	(cd export ; tar cf $(NAME).tar $(NAME) ; \
 	gzip -f --best $(NAME).tar)
 	cp export/$(NAME).tar.gz $(FTP)
