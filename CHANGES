@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.35, 23/8/2004
+=======================
+  o port to ocaml 3.08
   o symbol | now displayed in math mode; no use of package T1 anymore
   o option --class-options to set the document class options 
     (defaults to `12pt')
