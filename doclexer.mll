@@ -24,7 +24,7 @@
 
 (*s Global variables and functions used by the lexer. *)
 
-(* [skip_header] telles whether option \verb|--header| has been
+(* [skip_header] tells whether option \verb|--header| has been
    selected by the user. *)
 
   let skip_header = ref true
@@ -47,6 +47,10 @@
   let doublepercentcounter = ref 0
   let brace_depth = ref 0
   let lexyacc_brace_start = ref 0
+
+(* [web_style] records if web sections were used anywhere in any file. *)
+
+  let web_style = ref false
 
 (* global variables for temporarily recording data, for building
    the [Web.file] structure. *)
@@ -339,7 +343,7 @@ and start_of_documentation = parse
   | space_or_nl+   
       { in_documentation lexbuf }
   | 's' space_or_nl*
-      { push_section (); 
+      { web_style := true; push_section (); 
 	section_beg := lexeme_start lexbuf;
 	in_documentation lexbuf }
   | 'i' 
@@ -354,7 +358,7 @@ and start_of_yacc_documentation = parse
   | space_or_nl+   
       { in_yacc_documentation lexbuf }
   | 's' space_or_nl*
-      { push_section (); 
+      { web_style := true; push_section (); 
 	section_beg := lexeme_start lexbuf;
 	in_yacc_documentation lexbuf }
   | 'i' 

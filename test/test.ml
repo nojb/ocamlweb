@@ -7,31 +7,27 @@
 open Toto
 (*i*)
 
-(* documentation $\beta$ 1 *)
+(* Constantes numériques. *)
+
+let hexa = 0X4fff 
+let hexa = 0x12BC 
+let octal = 0O455 
+let octal = 0o455 
+let binary = 0B01010111001 
+let binary = 0b00101011000
+let float = 1.5152E-4
+let float = 1.5152e-4
+
+(*s Documentation 1 *)
 
 type truc = AA | BB | CC
 
-exception 'a AAA of 'a aatoto * 'b aatruc * aamachin
+exception AAA of 'a aatoto * 'b aatruc * aamachin
 
 type machin = { champ1 : int;
 		champ2 : string }
 
 let (C (x,y)) = x != y
-
-(*s Voila un commentaire dans lequel je cite du code : *)
-(*i(*i*)
-
-    let f x = x + 1
-    let rec g x = if x = 0 then 1 else g (f (x-1))
-
-(*i*)i*)
-(* et voila c'est fait ! *)
-
-let const = 0X4fff + 0O455 + 0B01010111001 + 1.5152E-4
-let autrec = 0xafaf125
-let f x = x land 0x4fffff
-
-let f toto toto' = c := !c + 8
 
 (*s documentation 2 où je parle de [ma_fonction x] ci-dessous définie
     et de bien d'autres choses que j'aimerais voir s'afficher sur un
@@ -66,7 +62,7 @@ let xxx = { champ1 = 1; champ2 = "toto" }
 
 let yyy = [| 1; xxx; 3 |]
 
-(*s un vrai commentaire *)
+(* un vrai commentaire *)
 
 let autre_bout x =
   if x <= 0 then x+1 else x+2;          (*r un vrai commentaire *)
@@ -79,7 +75,7 @@ let chaine =
   '"' + "une autre chaine"
   '\134' + '\n' + toto
 
-(*s    documentation 3 : cette fonction a pour effet de mettre dans la 
+(*    documentation 3 : cette fonction a pour effet de mettre dans la 
   référence [x1] la valeur [x2]. *)
 
 let mon_autre_fonction x1 x2 =
@@ -93,10 +89,10 @@ let test_pat = function
   | BB -> toto
   | CC -> CC.f
 
-(*s *)
+(* *)
 
 let y = tagada
 
-(*s *)
+(* *)
 
 let x = toto

@@ -154,9 +154,7 @@ let parse () =
 
     | ("-header" | "--header") :: rem ->
 	skip_header := false; parse_rec rem
-    | ("-noweb" | "--noweb" | "-no-web" | "--no-web" |
-       "-latexsects" | "-latex-sects" | "--latex-sects") :: rem ->
-	add_latex_option "latex-sects";
+    | ("-noweb" | "--noweb" | "-no-web" | "--no-web") :: rem ->
 	web := false; parse_rec rem
     | ("-web" | "--web") :: rem ->
 	web := true; parse_rec rem
@@ -230,6 +228,8 @@ let main () =
   if not !quiet then banner();
   if List.length files > 0 then begin
     let l = List.map read_one_file files in
+    if not !web_style then web := false;
+    if not !web then add_latex_option "noweb";
     produce_document l
   end
 

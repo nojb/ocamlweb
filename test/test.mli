@@ -18,4 +18,5 @@ type 'a mon_type' =
   | C of (foo -> bar)
   | D of foo * (bar -> bar)
 
+type toto = mon_type
 

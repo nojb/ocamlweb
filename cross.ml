@@ -127,7 +127,7 @@ let iter_fst f = List.iter (fun x -> f (fst x))
     
 let iter_snd f = List.iter (fun x -> f (snd x))
     
-let option_iter f = function None -> ()  | Some x -> f x
+let option_iter f = function None -> () | Some x -> f x
 
 
 (*s When traversing a pattern, we must collect all its identifiers, in order
@@ -306,7 +306,8 @@ and tr_value_description vd =
 (*s Type declarations. *)
 
 and tr_type_declaration td =
-  tr_type_kind td.ptype_loc td.ptype_kind
+  tr_type_kind td.ptype_loc td.ptype_kind;
+  option_iter tr_core_type td.ptype_manifest
 
 and tr_type_kind loc = function
   | Ptype_abstract -> ()

@@ -13,7 +13,7 @@ UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/n
 
 # Version
 MAJORVN=0
-MINORVN=8
+MINORVN=9
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = @OCAMLC@
@@ -120,10 +120,7 @@ NAME=ocamlweb-$(VERSION)
 
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
-FILES = doclexer.mli doclexer.mll cross.ml cross.mli		\
-	pretty.mli pretty.mll \
-	output.mli output.ml web.mli web.ml main.ml	        \
-	ocamlweb.sty bootstrap.tex				\
+FILES = *.ml* ocamlweb.sty bootstrap.tex				\
 	Makefile.in configure .depend README INSTALL COPYING GPL CHANGES
 
 OCAMLFILES = misc.mli misc.ml clflags.ml	\
@@ -153,7 +150,7 @@ export-bootstrap: bootstrap
 	gzip -c test/ocamlweb.ps > $(FTP)/ocamlweb.ps.gz
 	cp test/ocamlweb.html $(FTP)
 
-source: manual
+source: clean manual
 	mkdir -p export/$(NAME)/test
 	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p ocamllex-parser; mkdir -p test; \
 	  mkdir -p doc; mkdir -p support

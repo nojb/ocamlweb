@@ -37,9 +37,12 @@ type file_type =
 (*s The following function [read_one_file] reads a Caml file,
   separating the sections, and separating the paragraphs inside the
   sections. The boolean reference [skip_header] indicates whether the
-  header must be skipped. *)
+  header must be skipped. [web_style] records if web sections were
+  used anywhere in any file. *)
 
 val skip_header : bool ref
+
+val web_style : bool ref
 
 val read_one_file : file_type -> Web.file
 

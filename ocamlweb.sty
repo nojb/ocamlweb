@@ -20,7 +20,6 @@
 % using LaTeX sectioning commands.
 
 \newif\iflatexsectioning\latexsectioningfalse
-\DeclareOption{latex-sects}{\latexsectioningtrue}
 \DeclareOption{noweb}{\latexsectioningtrue}
 \DeclareOption{web-sects}{\latexsectioningfalse}
 
@@ -31,8 +30,9 @@
 
 % option for index by pages
 
-\newif\ifbypage\bypagefalse
+\newif\ifbypage\bypagetrue
 \DeclareOption{bypages}{\bypagetrue}
+\DeclareOption{bysections}{\bypagefalse}
 
 
 \ProcessOptions
@@ -188,7 +188,7 @@
 % index entry in web-sects option
 \newcommand{\ocwwebindexentry}[3]{\item #1,\quad#2#3}
 
-% index entry in latex-sects option
+% index entry in noweb option
 
 %BEGIN LATEX
 \def\loopbody{%

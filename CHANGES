@@ -3,6 +3,13 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 0.9, 18/12/2000
+=======================
+  o support for lex and yacc files (-impl option deprecated on these files)
+  o when not in WEB style, index is by pages by default
+  o noweb style is used if no sectioning command (*s at all
+    so that ocamlweb can be used naively as a pretty-printer
+  o option -latex-sects renamed into -noweb
   o bytecode compilation if no ocamlopt available
   o adequacy to ocaml 3.00 parser; labels are now indexed
   o installation: $(BINDIR) and $(TEXDIR) created if they don't exist
