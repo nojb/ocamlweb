@@ -1,0 +1,94 @@
+Lex({ content_file = lex3.mll ;
+ content_name = Lex3 ;
+ contents_contents =
+ [
+{
+ sec_beg = 0 ; 
+ sec_contents = 
+[
+Documentation(account for "(*")Code(255,
+ [
+CamlCode(let comment_cpt = ref 0)]
+)Documentation(account for "{")Code(302,
+ [
+CamlCode(let brace_cpt = ref 0)]
+)Code(325,
+ [
+CamlCode(let camlb = Buffer.create 8192)]
+)Code(357,
+ [
+CamlCode(let token_table = ref Stringset.empty)]
+)Code(397,
+ [
+LexCode(})]
+)Documentation(regular expressions)Code(426,
+ [
+LexCode(let space = [' ' '\t'])]
+)]
+}{
+ sec_beg = 450 ; 
+ sec_contents = 
+[
+Documentation(LEX Analyser)Code(470,
+ [
+LexCode(rule index_lex = parse
+  | "rule" | "and" 
+	{)CamlCode( (* look for an identifier name *)
+	  index_lex_ident lexbuf;
+	  index_lex lexbuf;
+	)LexCode(}
+  | "let" {)CamlCode( get_lex_defs lexbuf; index_lex lexbuf; )LexCode(}
+  | "\""
+  | "|"
+  | "'"   {)CamlCode( ignore_regexpr lexbuf; index_lex lexbuf; )LexCode(}
+  | "{"   {)CamlCode( in_action := true; offset_action := (lexeme_start lexbuf); (* we enter an action *)
+	    incr brace_cpt; Buffer.clear camlb; caml_braces lexbuf;
+	    index_lex lexbuf; )LexCode(}
+  | "(*"  {)CamlCode( incr comment_cpt ; ignore_caml_comments lexbuf; index_lex lexbuf; )LexCode(}
+  | eof   {)CamlCode( () )LexCode(}
+  | _     {)CamlCode( index_lex lexbuf; )LexCode(})]
+)Code(1039,
+ [
+LexCode(and index_yacc_token = parse
+  | space* identifier space*
+      {)CamlCode(
+	let lxb = from_string(lexeme lexbuf) in
+	let token = enleve_blanc_pipe_dp lxb in
+	let loc = { Location.loc_start = lexeme_start lexbuf;
+                    Location.loc_end = 0; (* BIDON *)
+                    Location.loc_ghost = false (* BIDON *) }
+	in
+	  add_def loc Token token;
+	  token_table := Stringset.add token !token_table;
+	  index_yacc_token lexbuf; (* return to caller *)
+      )LexCode(}
+  | "/*"  {)CamlCode( ignore_yacc_comments lexbuf; index_yacc_token lexbuf; )LexCode(}
+  | "\n"  {)CamlCode( ()  )LexCode(}
+  | "<"   {)CamlCode( index_yacc_type lexbuf; index_yacc_token lexbuf; )LexCode(}
+  | eof   {)CamlCode( () )LexCode(}
+  | _     {)CamlCode( index_yacc_token lexbuf )LexCode(})]
+)Code(1742,
+ [
+LexCode(and enleve_blanc_pipe_dp = parse
+  | "|" | ":"
+  | space*     {)CamlCode( enleve_blanc_pipe_dp lexbuf; )LexCode(}
+  | identifier {)CamlCode( lexeme lexbuf; )LexCode(})]
+)Documentation(TRAILER)Code(1886,
+ [
+LexCode({)]
+)Code(1889,
+ [
+CamlCode(let cross_yacc f m =
+  reset_cross ();
+  current_file := f;
+  add_module m;
+  let c = open_in f in
+  let lexbuf = Lexing.from_channel c in
+    index_yacc lexbuf)]
+)Code(2052,
+ [
+LexCode(}
+)]
+)]
+}]
+})

@@ -1,0 +1,1056 @@
+\documentclass[12pt]{article}
+\usepackage{ocamlweb}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\begin{document}
+\ocwmodule{Caml}
+\ocwsection
+\label{caml.ml:0}%
+\label{caml.ml:757}%
+Cross references inside Caml files are kept in the following two 
+   global tables, which keep the places where things are defined and
+   used, to produce the final indexes.
+
+
+\label{caml.ml:940}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:944}%
+section
+
+\label{caml.ml:958}%
+\medskip
+\codeline\ocwindent{0.50em}
+$\ocwlowerid{essaif}~\ocwlowerid{x}~=~3$\medskip
+
+\label{caml.ml:973}%
+\codeline\ocwindent{0.50em}
+\ocwkw{let}~$\ocwlowerid{essaig}~\ocwlowerid{x}~=~5$\medskip
+
+\label{caml.ml:1051}%
+\codeline\ocwindent{0.00em}
+\ocwkw{type}~$\ocwlowerid{where}~=~\{~\ocwlowerid{w\_filename}~:~$\ocwbt{string};~$\ocwlowerid{w\_loc}~:~$\ocwbt{int}~\codeline\ocwindent{0.00em}
+\ocwkw{module}~$\ocwupperid{Whereset}~=~\ocwupperid{Set.Make}($\ocwkw{struct}~\ocwkw{type}~$\ocwlowerid{t}~=~\ocwlowerid{where}~$\ocwkw{let}~$\ocwlowerid{compare}~=~\ocwlowerid{compare}~$\ocwkw{end}$)$\medskip
+
+\label{caml.ml:1128}%
+\codeline\ocwindent{0.00em}
+\ocwkw{type}~$\ocwlowerid{entry\_type}~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Value}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Constructor}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Field}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Type}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Exception}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Module}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{ModuleType}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Class}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Method}$\medskip
+
+\label{caml.ml:1321}%
+\codeline\ocwindent{0.00em}
+\ocwkw{type}~$\ocwlowerid{index\_entry}~=~\{~\ocwlowerid{e\_name}~:~$\ocwbt{string};~$\ocwlowerid{e\_type}~:~\ocwlowerid{entry\_type}~$\codeline\ocwindent{0.00em}
+\ocwkw{module}~$\ocwupperid{Idmap}~=~\ocwupperid{Map.Make}($\ocwkw{struct}~\ocwkw{type}~$\ocwlowerid{t}~=~\ocwlowerid{index\_entry}~$\ocwkw{let}~$\ocwlowerid{compare}~=~\ocwlowerid{compare}~$\ocwkw{end}$)$\medskip
+
+\label{caml.ml:1404}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{defined}~=~$\ocwbt{ref}~$\ocwupperid{Idmap.}\ocwlowerid{empty}$\endcodeline\ocweol
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{used}~=~$\ocwbt{ref}~$\ocwupperid{Idmap.}\ocwlowerid{empty}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:1462}%
+The function $\ocwlowerid{add\_global}$ is a generic function to add an entry in one 
+    table. $\ocwlowerid{add\_def}$ is used to add the definition of an identifier (so in the
+    table $\ocwlowerid{defined}$).
+
+\noindent{}c'est dans cette putain de fonction qu'il faut tester $\ocwlowerid{in\_action}$
+
+\label{caml.ml:1721}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{add\_global}~\ocwlowerid{table}~\ocwlowerid{k}~\ocwlowerid{i}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{try}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+\ocwkw{let}~$\ocwlowerid{s}~=~\ocwupperid{Idmap.}\ocwlowerid{find}~\ocwlowerid{k}~!\ocwlowerid{table}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{table}~:=~\ocwupperid{Idmap.}\ocwlowerid{add}~\ocwlowerid{k}~(\ocwupperid{Whereset.}\ocwlowerid{add}~\ocwlowerid{i}~\ocwlowerid{s})~!\ocwlowerid{table}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{with}~$\ocwupperid{Not\_found}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{table}~:=~\ocwupperid{Idmap.}\ocwlowerid{add}~\ocwlowerid{k}~(\ocwupperid{Whereset.}\ocwlowerid{singleton}~\ocwlowerid{i})~!\ocwlowerid{table}$\medskip
+
+\label{caml.ml:1922}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{current\_file}~=~$\ocwbt{ref}~\texttt{""}\medskip
+
+\label{caml.ml:2124}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{current\_location}~\ocwlowerid{loc}~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\{~$\ocwlowerid{w\_filename}~=~!\ocwlowerid{current\_file};~\ocwlowerid{w\_loc}~=~\ocwlowerid{loc.}\ocwlowerid{loc\_start}~$\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwlowerid{t}~\ocwlowerid{s}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{if}~$\ocwupperid{String.}\ocwlowerid{length}~\ocwlowerid{s}~>~1~$\ocwkw{then}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+\ocwkw{let}~$\ocwlowerid{e}~=~\{~\ocwlowerid{e\_name}~=~\ocwlowerid{s};~\ocwlowerid{e\_type}~=~\ocwlowerid{t}~$\codeline\ocwindent{0.50em}
+\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{add\_global}~\ocwlowerid{defined}~\ocwlowerid{e}~(\ocwlowerid{current\_location}~\ocwlowerid{loc})$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:2178}%
+Another table, $\ocwlowerid{locals}$, keeps the bound variables, in order to
+    distinguish them from global identifiers. Then the function $\ocwlowerid{add\_uses}$
+    registers that an identifier is used (in the table $\ocwlowerid{used}$), taking care 
+    of the fact that it is not a bound variable (in the table $\ocwlowerid{locals}$).
+    $\ocwlowerid{add\_uses\_q}$ iters $\ocwlowerid{add\_uses}$ on a qualified identifier.
+
+\label{caml.ml:2542}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{module}~$\ocwupperid{Stringset}~=~\ocwupperid{Set.Make}($\ocwkw{struct}~\ocwkw{type}~$\ocwlowerid{t}~=~$\ocwbt{string}~\ocwkw{let}~$\ocwlowerid{compare}~=~\ocwlowerid{compare}~$\ocwkw{end}$)$\medskip
+
+\label{caml.ml:2628}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{locals}~=~$\ocwbt{ref}~$\ocwupperid{Stringset.}\ocwlowerid{empty}$\medskip
+
+\label{caml.ml:2662}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{reset\_cross}~()~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{locals}~:=~\ocwupperid{Stringset.}\ocwlowerid{empty}$\medskip
+
+\label{caml.ml:2712}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{add\_local}~\ocwlowerid{s}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{locals}~:=~\ocwupperid{Stringset.}\ocwlowerid{add}~\ocwlowerid{s}~!\ocwlowerid{locals}$\medskip
+
+\label{caml.ml:2767}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{is\_uppercase}~=~$\ocwkw{function}~\verb!'A'!..\verb!'Z'!~$\rightarrow{}~$\ocwkw{true}~|~\_~$\rightarrow{}~$\ocwkw{false}\medskip
+
+\label{caml.ml:2985}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwlowerid{t}~\ocwlowerid{s}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{if}~$\ocwupperid{String.}\ocwlowerid{length}~\ocwlowerid{s}~>~1~\land{}~$\endcodeline\ocweol
+\codeline\ocwindent{2.50em}
+$\lnot{}~(\ocwlowerid{is\_keyword}~\ocwlowerid{s})~\land{}~\lnot{}~(\ocwupperid{Stringset.}\ocwlowerid{mem}~\ocwlowerid{s}~!\ocwlowerid{locals})~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{then}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+\ocwkw{let}~$\ocwlowerid{e}~=~\{~\ocwlowerid{e\_name}~=~\ocwlowerid{s};~\ocwlowerid{e\_type}~=~\ocwlowerid{t}~$\codeline\ocwindent{0.50em}
+\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{add\_global}~\ocwlowerid{used}~\ocwlowerid{e}~(\ocwlowerid{current\_location}~\ocwlowerid{loc})$\medskip
+
+\label{caml.ml:3036}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwlowerid{t}~\ocwlowerid{q}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~\ocwkw{rec}~$\ocwlowerid{addmod}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Lident}~\ocwlowerid{s}~\rightarrow{}~\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{s}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ldot}~(\ocwlowerid{q},\ocwlowerid{s})~\rightarrow{}~\ocwlowerid{addmod}~\ocwlowerid{q};~\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{s}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Lapply}~(\ocwlowerid{q1},\ocwlowerid{q2})~\rightarrow{}~\ocwlowerid{addmod}~\ocwlowerid{q1};~\ocwlowerid{addmod}~\ocwlowerid{q2}~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{match}~$\ocwlowerid{q}~$\ocwkw{with}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Lident}~\ocwlowerid{s}~\rightarrow{}~\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwlowerid{t}~\ocwlowerid{s}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ldot}~(\ocwlowerid{q},\ocwlowerid{s})~\rightarrow{}~\ocwlowerid{addmod}~\ocwlowerid{q};~\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwlowerid{t}~\ocwlowerid{s}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Lapply}~(\ocwlowerid{q1},\ocwlowerid{q2})~\rightarrow{}~\ocwlowerid{addmod}~\ocwlowerid{q1};~\ocwlowerid{addmod}~\ocwlowerid{q2}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:3375}%
+Some useful functions.
+
+\label{caml.ml:3406}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{iter\_fst}~\ocwlowerid{f}~=~\ocwupperid{List.}\ocwlowerid{iter}~($\ocwkw{fun}~$\ocwlowerid{x}~\rightarrow{}~\ocwlowerid{f}~(\ocwlowerid{fst}~\ocwlowerid{x}))$\medskip
+
+\label{caml.ml:3459}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{iter\_snd}~\ocwlowerid{f}~=~\ocwupperid{List.}\ocwlowerid{iter}~($\ocwkw{fun}~$\ocwlowerid{x}~\rightarrow{}~\ocwlowerid{f}~(\ocwlowerid{snd}~\ocwlowerid{x}))$\medskip
+
+\label{caml.ml:3512}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{option\_iter}~\ocwlowerid{f}~=~$\ocwkw{function}~$\ocwupperid{None}~\rightarrow{}~()~|~\ocwupperid{Some}~\ocwlowerid{x}~\rightarrow{}~\ocwlowerid{f}~\ocwlowerid{x}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:3571}%
+When traversing a pattern, we must collect all its identifiers, in order
+    to declare them as bound variables (or definitions behind a \textsf{let}
+    construction). That is the job of the function $\ocwlowerid{ids\_of\_a\_pattern}$.
+    Then $\ocwlowerid{pattern\_for\_def}$ declares all the identifiers of a pattern as
+    new definitions.
+
+\label{caml.ml:3893}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{ids\_of\_a\_pattern}~\ocwlowerid{p}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{r}~=~$\ocwbt{ref}~$[\,]~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{add}~\ocwlowerid{id}~=~\ocwlowerid{r}~:=~\ocwlowerid{id}~::~!\ocwlowerid{r}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~\ocwkw{rec}~$\ocwlowerid{pattern\_d}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_any}~\rightarrow{}~()$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_var}~\ocwlowerid{id}~\rightarrow{}~\ocwlowerid{add}~\ocwlowerid{id}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_alias}~(\ocwlowerid{p},\ocwlowerid{id})~\rightarrow{}~\ocwlowerid{add}~\ocwlowerid{id};~\ocwlowerid{pattern}~\ocwlowerid{p}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_constant}~\_~\rightarrow{}~()$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_tuple}~\ocwlowerid{pl}~\rightarrow{}~\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{pattern}~\ocwlowerid{pl}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_construct}~(\_,\ocwlowerid{po},\_)~\rightarrow{}~\ocwlowerid{option\_iter}~\ocwlowerid{pattern}~\ocwlowerid{po}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_record}~\ocwlowerid{l}~\rightarrow{}~\ocwlowerid{iter\_snd}~\ocwlowerid{pattern}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_array}~\ocwlowerid{pl}~\rightarrow{}~\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{pattern}~\ocwlowerid{pl}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_or}~(\ocwlowerid{p1},\ocwlowerid{p2})~\rightarrow{}~\ocwlowerid{pattern}~\ocwlowerid{p1};~\ocwlowerid{pattern}~\ocwlowerid{p2}$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+|~$\ocwupperid{Ppat\_constraint}~(\ocwlowerid{p},\_)~\rightarrow{}~\ocwlowerid{pattern}~\ocwlowerid{p}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{and}~$\ocwlowerid{pattern}~\ocwlowerid{p}~=~$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{pattern\_d}~\ocwlowerid{p.}\ocwlowerid{ppat\_desc}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{pattern}~\ocwlowerid{p};~!\ocwlowerid{r}$\medskip
+
+\label{caml.ml:4465}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{pattern\_for\_def}~\ocwlowerid{p}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{loc}~=~\ocwlowerid{p.}\ocwlowerid{ppat\_loc}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{ids}~=~\ocwlowerid{ids\_of\_a\_pattern}~\ocwlowerid{p}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~(\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Value})~\ocwlowerid{ids}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:4587}%
+The following function locally adds some given variables to the set of
+    bound variables, during the time of the application of a given function
+    on a given argument.
+
+\label{caml.ml:4767}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{bind\_variables}~\ocwlowerid{ids}~\ocwlowerid{f}~\ocwlowerid{x}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{save}~=~!\ocwlowerid{locals}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{add\_local}~\ocwlowerid{ids};$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{f}~\ocwlowerid{x};$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{locals}~:=~\ocwlowerid{save}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:4873}%
+\textbf{Traversing of Caml abstract syntax trees.}
+    Each type $\ocwlowerid{t}$ in those abstract 
+    syntax trees is associated to a function $\ocwlowerid{tr\_t}$ which traverses it,
+    declaring the identifiers used and defined. Those types are defined
+    in the Caml module interface $\ocwupperid{Paresetree}.\ocwlowerid{mli}$ contained in the Caml source
+    distribution. 
+ 
+    The following code is quite code, but systematic and easy to understand.
+
+
+\ocwsection
+\label{caml.ml:5291}%
+Core types.
+
+\label{caml.ml:5311}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~\ocwkw{rec}~$\ocwlowerid{tr\_core\_type}~\ocwlowerid{t}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_core\_type\_desc}~\ocwlowerid{t.}\ocwlowerid{ptyp\_loc}~\ocwlowerid{t.}\ocwlowerid{ptyp\_desc}$\medskip
+
+\label{caml.ml:5380}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_core\_type\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_any}~|~\ocwupperid{Ptyp\_var}~\_~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$()$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_arrow}~(\ocwlowerid{t1},\ocwlowerid{t2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{t1};~\ocwlowerid{tr\_core\_type}~\ocwlowerid{t2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_tuple}~\ocwlowerid{tl}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{tl}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_constr}~(\ocwlowerid{q},\ocwlowerid{tl})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Type}~\ocwlowerid{q};~\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{tl}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_object}~\ocwlowerid{l}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_field\_type}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_class}~(\ocwlowerid{id},\ocwlowerid{l})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Class}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptyp\_alias}~(\ocwlowerid{ct},\_)~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct}$\medskip
+
+\label{caml.ml:5849}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_core\_field\_type}~\ocwlowerid{ft}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_core\_field\_desc}~\ocwlowerid{ft.}\ocwlowerid{pfield\_loc}~\ocwlowerid{ft.}\ocwlowerid{pfield\_desc}$\medskip
+
+\label{caml.ml:5928}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_core\_field\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pfield}~(\ocwlowerid{id},\ocwlowerid{ct})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwupperid{Method}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pfield\_var}~\rightarrow{}~()$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:6062}%
+Type expressions for the class language.
+
+\label{caml.ml:6111}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{tr\_class\_infos}~\ocwlowerid{f}~\ocwlowerid{p}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{p.}\ocwlowerid{pci\_loc}~\ocwupperid{Class}~\ocwlowerid{p.}\ocwlowerid{pci\_name};$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{f}~\ocwlowerid{p.}\ocwlowerid{pci\_expr}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:6190}%
+Value expressions for the core language.
+
+\label{caml.ml:6239}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{bind\_pattern}~\ocwlowerid{f}~(\ocwlowerid{p},\ocwlowerid{e})~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{bind\_variables}~(\ocwlowerid{ids\_of\_a\_pattern}~\ocwlowerid{p})~\ocwlowerid{f}~\ocwlowerid{e}$\medskip
+
+\label{caml.ml:6309}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{bind\_patterns}~\ocwlowerid{f}~\ocwlowerid{pl}~\ocwlowerid{e}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{ids}~=~\ocwupperid{List.}\ocwlowerid{flatten}~(\ocwupperid{List.}\ocwlowerid{map}~\ocwlowerid{ids\_of\_a\_pattern}~\ocwlowerid{pl})~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{bind\_variables}~\ocwlowerid{ids}~\ocwlowerid{f}~\ocwlowerid{e}$\medskip
+
+\label{caml.ml:6422}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~\ocwkw{rec}~$\ocwlowerid{tr\_expression}~\ocwlowerid{e}~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_expression\_desc}~\ocwlowerid{e.}\ocwlowerid{pexp\_loc}~\ocwlowerid{e.}\ocwlowerid{pexp\_desc}$\medskip
+
+\label{caml.ml:6494}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_expression\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_ident}~\ocwlowerid{q}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Value}~\ocwlowerid{q}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_apply}~(\ocwlowerid{e},\ocwlowerid{el})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e};~\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{el}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_ifthenelse}~(\ocwlowerid{e1},\ocwlowerid{e2},\ocwlowerid{e3})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e1};~\ocwlowerid{tr\_expression}~\ocwlowerid{e2};~\ocwlowerid{option\_iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{e3}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_sequence}~(\ocwlowerid{e1},\ocwlowerid{e2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e1};~\ocwlowerid{tr\_expression}~\ocwlowerid{e2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_while}~(\ocwlowerid{e1},\ocwlowerid{e2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e1};~\ocwlowerid{tr\_expression}~\ocwlowerid{e2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_tuple}~\ocwlowerid{el}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{el}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_construct}~(\ocwlowerid{q},\ocwlowerid{e},\_)~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Constructor}~\ocwlowerid{q};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{option\_iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_function}~\ocwlowerid{pel}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~(\ocwlowerid{bind\_pattern}~\ocwlowerid{tr\_expression})~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_match}~(\ocwlowerid{e},\ocwlowerid{pel})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e};~\ocwupperid{List.}\ocwlowerid{iter}~(\ocwlowerid{bind\_pattern}~\ocwlowerid{tr\_expression})~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_try}~(\ocwlowerid{e},\ocwlowerid{pel})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e};~\ocwupperid{List.}\ocwlowerid{iter}~(\ocwlowerid{bind\_pattern}~\ocwlowerid{tr\_expression})~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_let}~(\ocwlowerid{recf},\ocwlowerid{pel},\ocwlowerid{e})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{let}~$\ocwlowerid{pl}~=~\ocwupperid{List.}\ocwlowerid{map}~\ocwlowerid{fst}~\ocwlowerid{pel}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{if}~$\ocwlowerid{recf}~=~\ocwupperid{Recursive}~$\ocwkw{then}~\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$\ocwlowerid{iter\_snd}~(\ocwlowerid{bind\_patterns}~\ocwlowerid{tr\_expression}~\ocwlowerid{pl})~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{else}\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_expression}~\ocwlowerid{pel};~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{bind\_patterns}~\ocwlowerid{tr\_expression}~\ocwlowerid{pl}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_record}~(\ocwlowerid{l},\ocwlowerid{e})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_fst}~(\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Field})~\ocwlowerid{l};~\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_expression}~\ocwlowerid{l};~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{option\_iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_field}~(\ocwlowerid{e},\ocwlowerid{q})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e};~\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Field}~\ocwlowerid{q}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_setfield}~(\ocwlowerid{e1},\ocwlowerid{q},\ocwlowerid{e2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e1};~\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Field}~\ocwlowerid{q};~\ocwlowerid{tr\_expression}~\ocwlowerid{e2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_array}~\ocwlowerid{el}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{el}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_for}~(\ocwlowerid{i},\ocwlowerid{e1},\ocwlowerid{e2},\_,\ocwlowerid{e})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e1};~\ocwlowerid{tr\_expression}~\ocwlowerid{e2};~\ocwlowerid{bind\_variables}~[\ocwlowerid{i}]~\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_constraint}~(\ocwlowerid{e},\ocwlowerid{t1},\ocwlowerid{t2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e};~\ocwlowerid{option\_iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{t1};~\ocwlowerid{option\_iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{t2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_when}~(\ocwlowerid{e1},\ocwlowerid{e2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e1};~\ocwlowerid{tr\_expression}~\ocwlowerid{e2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_letmodule}~(\ocwlowerid{x},\ocwlowerid{m},\ocwlowerid{e})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_expr}~\ocwlowerid{m};~\ocwlowerid{bind\_variables}~[\ocwlowerid{x}]~\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_constant}~\_~\rightarrow{}~()$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_send}~(\ocwlowerid{e},\ocwlowerid{id})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwupperid{Method}~\ocwlowerid{id};~\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_new}~\ocwlowerid{id}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Class}~\ocwlowerid{id}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_setinstvar}~(\ocwlowerid{id},\ocwlowerid{e})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwupperid{Value}~\ocwlowerid{id};~\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pexp\_override}~\ocwlowerid{l}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_fst}~(\ocwlowerid{add\_uses}~\ocwlowerid{loc}~\ocwupperid{Method})~\ocwlowerid{l};~\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_expression}~\ocwlowerid{l}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:8569}%
+Value descriptions.
+
+\label{caml.ml:8597}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_value\_description}~\ocwlowerid{vd}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{vd.}\ocwlowerid{pval\_type}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:8656}%
+Type declarations.
+
+\label{caml.ml:8683}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_type\_declaration}~\ocwlowerid{td}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_type\_kind}~\ocwlowerid{td.}\ocwlowerid{ptype\_loc}~\ocwlowerid{td.}\ocwlowerid{ptype\_kind}$\medskip
+
+\label{caml.ml:8755}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_type\_kind}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptype\_abstract}~\rightarrow{}~()$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptype\_variant}~\ocwlowerid{cl}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_fst}~(\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Constructor})~\ocwlowerid{cl};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_snd}~(\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type})~\ocwlowerid{cl}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Ptype\_record}~\ocwlowerid{fl}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~($\ocwkw{fun}~$(\ocwlowerid{f},\_,\ocwlowerid{t})~\rightarrow{}~\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Field}~\ocwlowerid{f};~\ocwlowerid{tr\_core\_type}~\ocwlowerid{t})~\ocwlowerid{fl}$\medskip
+
+\label{caml.ml:9020}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_exception\_declaration}~\ocwlowerid{ed}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{ed}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:9083}%
+Type expressions for the class language.
+
+\label{caml.ml:9132}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_type}~\ocwlowerid{c}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_class\_type\_desc}~\ocwlowerid{c.}\ocwlowerid{pcty\_loc}~\ocwlowerid{c.}\ocwlowerid{pcty\_desc}$\medskip
+
+\label{caml.ml:9199}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_type\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcty\_constr}~(\ocwlowerid{id},\ocwlowerid{l})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Class}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcty\_signature}~\ocwlowerid{cs}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_signature}~\ocwlowerid{cs}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcty\_fun}~(\ocwlowerid{co},\ocwlowerid{cl})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{co};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_type}~\ocwlowerid{cl}$\medskip
+
+\label{caml.ml:9449}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_signature}~(\ocwlowerid{ct},\ocwlowerid{l})~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct};$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_class\_type\_field}~\ocwlowerid{l}$\medskip
+
+\label{caml.ml:9536}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_type\_field}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pctf\_inher}~\ocwlowerid{ct}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_type}~\ocwlowerid{ct}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pctf\_val}~(\ocwlowerid{id},\_,\ocwlowerid{ct},\ocwlowerid{loc})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Value}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{option\_iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pctf\_virt}~(\ocwlowerid{id},\_,\ocwlowerid{ct},\ocwlowerid{loc})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Method}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pctf\_meth}~(\ocwlowerid{id},\_,\ocwlowerid{ct},\ocwlowerid{loc})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Method}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pctf\_cstr}~(\ocwlowerid{ct1},\ocwlowerid{ct2},\_)~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct1};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct2}$\medskip
+
+\label{caml.ml:9949}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_description}~\ocwlowerid{x}~=~\ocwlowerid{tr\_class\_infos}~\ocwlowerid{tr\_class\_type}~\ocwlowerid{x}$\medskip
+
+\label{caml.ml:10010}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_type\_declaration}~\ocwlowerid{x}~=~\ocwlowerid{tr\_class\_infos}~\ocwlowerid{tr\_class\_type}~\ocwlowerid{x}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:10077}%
+Value expressions for the class language.
+
+\label{caml.ml:10127}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_expr}~\ocwlowerid{ce}~=~\ocwlowerid{tr\_class\_expr\_desc}~\ocwlowerid{ce.}\ocwlowerid{pcl\_loc}~\ocwlowerid{ce.}\ocwlowerid{pcl\_desc}$\medskip
+
+\label{caml.ml:10193}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_expr\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcl\_constr}~(\ocwlowerid{id},\ocwlowerid{l})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Class}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_core\_type}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcl\_structure}~\ocwlowerid{cs}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_structure}~\ocwlowerid{cs}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcl\_fun}~(\ocwlowerid{p},\ocwlowerid{ce})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{bind\_variables}~(\ocwlowerid{ids\_of\_a\_pattern}~\ocwlowerid{p})~\ocwlowerid{tr\_class\_expr}~\ocwlowerid{ce}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcl\_apply}~(\ocwlowerid{ce},\ocwlowerid{l})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_expr}~\ocwlowerid{ce};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_expression}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcl\_let}~(\ocwlowerid{recf},\ocwlowerid{pel},\ocwlowerid{ce})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{let}~$\ocwlowerid{pl}~=~\ocwupperid{List.}\ocwlowerid{map}~\ocwlowerid{fst}~\ocwlowerid{pel}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{if}~$\ocwlowerid{recf}~=~\ocwupperid{Recursive}~$\ocwkw{then}~\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$\ocwlowerid{iter\_snd}~(\ocwlowerid{bind\_patterns}~\ocwlowerid{tr\_expression}~\ocwlowerid{pl})~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{else}\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_expression}~\ocwlowerid{pel};~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{bind\_patterns}~\ocwlowerid{tr\_class\_expr}~\ocwlowerid{pl}~\ocwlowerid{ce}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcl\_constraint}~(\ocwlowerid{ce},\ocwlowerid{ct})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_expr}~\ocwlowerid{ce};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_type}~\ocwlowerid{ct}$\medskip
+
+\label{caml.ml:10835}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_structure}~(\ocwlowerid{p},\ocwlowerid{l})~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~($\ocwkw{fun}~$\ocwlowerid{f}~\rightarrow{}~\ocwlowerid{bind\_pattern}~\ocwlowerid{tr\_class\_field}~(\ocwlowerid{p},\ocwlowerid{f}))~\ocwlowerid{l}$\medskip
+
+\label{caml.ml:10927}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_field}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_inher}~(\ocwlowerid{ce},\_)~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_class\_expr}~\ocwlowerid{ce}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_val}~(\ocwlowerid{id},\_,\ocwlowerid{e},\ocwlowerid{loc})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Value}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_virt}(\ocwlowerid{id},\_,\ocwlowerid{ct},\ocwlowerid{loc})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Method}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_meth}~(\ocwlowerid{id},\_,\ocwlowerid{e},\ocwlowerid{loc})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Method}~\ocwlowerid{id};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_cstr}~(\ocwlowerid{ct1},\ocwlowerid{ct2},\_)~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct1};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_core\_type}~\ocwlowerid{ct2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_let}~(\ocwlowerid{recf},\ocwlowerid{pel},\_)~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{let}~$\ocwlowerid{pl}~=~\ocwupperid{List.}\ocwlowerid{map}~\ocwlowerid{fst}~\ocwlowerid{pel}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{if}~$\ocwlowerid{recf}~=~\ocwupperid{Recursive}~$\ocwkw{then}~\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$\ocwlowerid{iter\_snd}~(\ocwlowerid{bind\_patterns}~\ocwlowerid{tr\_expression}~\ocwlowerid{pl})~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+\ocwkw{else}\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_expression}~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pcf\_init}~\ocwlowerid{e}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\medskip
+
+\label{caml.ml:11540}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_class\_declaration}~\ocwlowerid{x}~=~\ocwlowerid{tr\_class\_infos}~\ocwlowerid{tr\_class\_expr}~\ocwlowerid{x}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:11601}%
+Type expressions for the module language.
+
+\label{caml.ml:11651}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_module\_type\_desc}~\ocwlowerid{mt.}\ocwlowerid{pmty\_loc}~\ocwlowerid{mt.}\ocwlowerid{pmty\_desc}$\medskip
+
+\label{caml.ml:11723}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_module\_type\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmty\_ident}~\ocwlowerid{id}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{ModuleType}~\ocwlowerid{id}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmty\_signature}~\ocwlowerid{s}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_signature}~\ocwlowerid{s}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmty\_functor}~(\ocwlowerid{id},\ocwlowerid{mt1},\ocwlowerid{mt2})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt1};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{bind\_variables}~[\ocwlowerid{id}]~\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmty\_with}~(\ocwlowerid{mt},\ocwlowerid{cl})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~$\endcodeline\ocweol
+\codeline\ocwindent{4.00em}
+$($\ocwkw{fun}~$(\ocwlowerid{id},\ocwlowerid{c})~\rightarrow{}~\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Type}~\ocwlowerid{id};~\ocwlowerid{tr\_with\_constraint}~\ocwlowerid{loc}~\ocwlowerid{c})~\ocwlowerid{cl}$\medskip
+
+\label{caml.ml:12107}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_signature}~\ocwlowerid{s}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_signature\_item}~\ocwlowerid{s}$\medskip
+
+\label{caml.ml:12161}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_signature\_item}~\ocwlowerid{i}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_signature\_item\_desc}~\ocwlowerid{i.}\ocwlowerid{psig\_loc}~\ocwlowerid{i.}\ocwlowerid{psig\_desc}$\medskip
+
+\label{caml.ml:12236}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_signature\_item\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_value}~(\ocwlowerid{x},\ocwlowerid{vd})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Value}~\ocwlowerid{x};~\ocwlowerid{tr\_value\_description}~\ocwlowerid{vd}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_type}~\ocwlowerid{l}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_fst}~(\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Type})~\ocwlowerid{l};~\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_type\_declaration}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_exception}~(\ocwlowerid{id},\ocwlowerid{ed})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Exception}~\ocwlowerid{id};~\ocwlowerid{tr\_exception\_declaration}~\ocwlowerid{ed}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_module}~(\ocwlowerid{id},\ocwlowerid{mt})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{id};~\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_modtype}~(\ocwlowerid{id},\ocwlowerid{mtd})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{ModuleType}~\ocwlowerid{id};~\ocwlowerid{tr\_modtype\_declaration}~\ocwlowerid{mtd}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_open}~\ocwlowerid{q}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{q}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_include}~\ocwlowerid{mt}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_class}~\ocwlowerid{l}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_class\_description}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Psig\_class\_type}~\ocwlowerid{l}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_class\_type\_declaration}~\ocwlowerid{l}$\medskip
+
+\label{caml.ml:12920}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_modtype\_declaration}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmodtype\_abstract}~\rightarrow{}~()$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmodtype\_manifest}~\ocwlowerid{mt}~\rightarrow{}~\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt}$\medskip
+
+\label{caml.ml:13033}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_with\_constraint}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pwith\_type}~\ocwlowerid{td}~\rightarrow{}~\ocwlowerid{tr\_type\_declaration}~\ocwlowerid{td}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pwith\_module}~\ocwlowerid{id}~\rightarrow{}~\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{id}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:13164}%
+Value expressions for the module language.
+
+\label{caml.ml:13215}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_module\_expr}~\ocwlowerid{me}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_module\_expr\_desc}~\ocwlowerid{me.}\ocwlowerid{pmod\_loc}~\ocwlowerid{me.}\ocwlowerid{pmod\_desc}$\medskip
+
+\label{caml.ml:13287}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_module\_expr\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmod\_ident}~\ocwlowerid{id}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{id}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmod\_structure}~\ocwlowerid{s}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_structure}~\ocwlowerid{s}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmod\_functor}~(\ocwlowerid{id},\ocwlowerid{mt},\ocwlowerid{me})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{bind\_variables}~[\ocwlowerid{id}]~\ocwlowerid{tr\_module\_expr}~\ocwlowerid{me}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmod\_apply}~(\ocwlowerid{me1},\ocwlowerid{me2})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_expr}~\ocwlowerid{me1};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_expr}~\ocwlowerid{me2}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pmod\_constraint}~(\ocwlowerid{me},\ocwlowerid{mt})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_expr}~\ocwlowerid{me};$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt}$\medskip
+
+\label{caml.ml:13685}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_structure}~\ocwlowerid{l}~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_structure\_item}~\ocwlowerid{l}$\medskip
+
+\label{caml.ml:13740}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_structure\_item}~\ocwlowerid{i}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{tr\_structure\_item\_desc}~\ocwlowerid{i.}\ocwlowerid{pstr\_loc}~\ocwlowerid{i.}\ocwlowerid{pstr\_desc}$\medskip
+
+\label{caml.ml:13815}%
+\codeline\ocwindent{0.00em}
+\ocwkw{and}~$\ocwlowerid{tr\_structure\_item\_desc}~\ocwlowerid{loc}~=~$\ocwkw{function}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_eval}~\ocwlowerid{e}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{tr\_expression}~\ocwlowerid{e}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_value}~(\_,\ocwlowerid{pel})~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_fst}~\ocwlowerid{pattern\_for\_def}~\ocwlowerid{pel};~\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_expression}~\ocwlowerid{pel}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_primitive}~(\ocwlowerid{id},\ocwlowerid{vd})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Value}~\ocwlowerid{id};~\ocwlowerid{tr\_value\_description}~\ocwlowerid{vd}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_type}~\ocwlowerid{l}~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{iter\_fst}~(\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Type})~\ocwlowerid{l};~\ocwlowerid{iter\_snd}~\ocwlowerid{tr\_type\_declaration}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_exception}~(\ocwlowerid{id},\ocwlowerid{ed})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Exception}~\ocwlowerid{id};~\ocwlowerid{tr\_exception\_declaration}~\ocwlowerid{ed}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_module}~(\ocwlowerid{id},\ocwlowerid{me})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{id};~\ocwlowerid{tr\_module\_expr}~\ocwlowerid{me}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_modtype}~(\ocwlowerid{id},\ocwlowerid{mt})~\rightarrow{}$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_def}~\ocwlowerid{loc}~\ocwupperid{ModuleType}~\ocwlowerid{id};~\ocwlowerid{tr\_module\_type}~\ocwlowerid{mt}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_open}~\ocwlowerid{m}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{add\_uses\_q}~\ocwlowerid{loc}~\ocwupperid{Module}~\ocwlowerid{m}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_class}~\ocwlowerid{l}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_class\_declaration}~\ocwlowerid{l}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+|~$\ocwupperid{Pstr\_class\_type}~\ocwlowerid{l}~\rightarrow{}~$\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwupperid{List.}\ocwlowerid{iter}~\ocwlowerid{tr\_class\_type\_declaration}~\ocwlowerid{l}$\endcodeline\ocweol
+\ocwsection
+\label{caml.ml:14583}%
+Given all that collecting functions, we can now define two functions
+    $\ocwlowerid{cross\_implem}$ and $\ocwlowerid{cross\_interf}$ which respectively compute the 
+    cross-references in implementations and interfaces.
+
+\label{caml.ml:14865}%
+\medskip
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{add\_module}~\ocwlowerid{m}~=~$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{add\_def}~\{~\ocwlowerid{loc\_start}~=~0;~\ocwlowerid{loc\_end}~=~0;~\ocwlowerid{loc\_ghost}~=~$\ocwkw{false}~\codeline\ocwindent{0.50em}
+$\ocwupperid{Module}~\ocwlowerid{m}$\medskip
+
+\label{caml.ml:14876}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{wrapper}~\ocwlowerid{parsing\_function}~\ocwlowerid{traverse\_function}~\ocwlowerid{f}~\ocwlowerid{m}~=$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{reset\_cross}~();$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{current\_file}~:=~\ocwlowerid{f};$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+$\ocwlowerid{add\_module}~\ocwlowerid{m};$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{c}~=~\ocwlowerid{open\_in}~\ocwlowerid{f}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{let}~$\ocwlowerid{lexbuf}~=~\ocwupperid{Lexing.}\ocwlowerid{from\_channel}~\ocwlowerid{c}~$\ocwkw{in}\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{try}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{traverse\_function}~(\ocwlowerid{parsing\_function}~\ocwlowerid{lexbuf});$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{close\_in}~\ocwlowerid{c}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{with}~$\ocwupperid{Syntaxerr.Error}~\_~|~\ocwupperid{Syntaxerr.Escape\_error}~|~\ocwupperid{Lexer.Error}~\_~\rightarrow{}~$\ocwkw{begin}\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+\ocwkw{if}~$\lnot{}~!\ocwlowerid{quiet}~$\ocwkw{then}\endcodeline\ocweol
+\codeline\ocwindent{3.00em}
+$\ocwlowerid{eprintf}~$\texttt{"\ocwvspace{}**\ocwvspace{}warning:\ocwvspace{}syntax\ocwvspace{}error\ocwvspace{}while\ocwvspace{}parsing\ocwvspace{}(while\ocwvspace{}making\ocwvspace{}the\ocwvspace{}index\ocwvspace{}of\ocwvspace{}\%s)\symbol{92}n"}~$\ocwlowerid{f};$\endcodeline\ocweol
+\codeline\ocwindent{2.00em}
+$\ocwlowerid{close\_in}~\ocwlowerid{c}$\endcodeline\ocweol
+\codeline\ocwindent{1.00em}
+\ocwkw{end}\medskip
+
+\label{caml.ml:15355}%
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{cross\_implem}~=~\ocwlowerid{wrapper}~\ocwupperid{Parse.}\ocwlowerid{implementation}~\ocwlowerid{tr\_structure}$\endcodeline\ocweol
+\codeline\ocwindent{0.00em}
+\ocwkw{let}~$\ocwlowerid{cross\_interf}~=~\ocwlowerid{wrapper}~\ocwupperid{Parse.}\ocwlowerid{interface}~\ocwlowerid{tr\_signature}$\endcodeline\ocweol
+
+
+\ocwbeginindex{}
+\ocwwebindexentry{$\ocwlowerid{add\_def}$}{\textbf{\ref{caml.ml:1462}}}{, \ref{caml.ml:3571}, \ref{caml.ml:6062}, \ref{caml.ml:8656}--\ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwlowerid{add\_global}$}{\textbf{\ref{caml.ml:1462}}}{, \ref{caml.ml:1462}, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwlowerid{add\_local}$}{\textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:4587}}
+\ocwwebindexentry{$\ocwlowerid{add\_module}$}{\textbf{\ref{caml.ml:14583}}}{, \ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwlowerid{add\_uses}$}{\textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:2178}, \ref{caml.ml:5291}, \ref{caml.ml:6190}}
+\ocwwebindexentry{$\ocwlowerid{add\_uses\_q}$}{\textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:5291}, \ref{caml.ml:6190}, \ref{caml.ml:9083}--\ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{bind\_pattern}$}{\textbf{\ref{caml.ml:6190}}}{, \ref{caml.ml:6190}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{bind\_patterns}$}{\textbf{\ref{caml.ml:6190}}}{, \ref{caml.ml:6190}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{bind\_variables}$}{\textbf{\ref{caml.ml:4587}}}{, \ref{caml.ml:6190}, \ref{caml.ml:10077}--\ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwupperid{Class}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:5291}--\ref{caml.ml:6190}, \ref{caml.ml:9083}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{compare}$}{\textbf{\ref{caml.ml:944}}, \textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:944}, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwupperid{Constructor}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:6190}, \ref{caml.ml:8656}}
+\ocwwebindexentry{$\ocwlowerid{cross\_implem}$}{\textbf{\ref{caml.ml:14583}}}{}
+\ocwwebindexentry{$\ocwlowerid{cross\_interf}$}{\textbf{\ref{caml.ml:14583}}}{}
+\ocwwebindexentry{$\ocwlowerid{current\_file}$}{\textbf{\ref{caml.ml:1462}}}{, \ref{caml.ml:1462}, \ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwlowerid{current\_location}$}{\textbf{\ref{caml.ml:1462}}}{, \ref{caml.ml:1462}, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwlowerid{defined}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:1462}}
+\ocwwebindexentry{$\ocwlowerid{entry\_type}$ (type)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:944}}
+\ocwwebindexentry{$\ocwlowerid{essaif}$}{\textbf{\ref{caml.ml:944}}}{}
+\ocwwebindexentry{$\ocwlowerid{essaig}$}{\textbf{\ref{caml.ml:944}}}{}
+\ocwwebindexentry{$\ocwupperid{Exception}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{e\_name}$ (label)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:1462}, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwlowerid{e\_type}$ (label)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:1462}, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwupperid{Field}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:6190}, \ref{caml.ml:8656}}
+\ocwwebindexentry{$\ocwupperid{Idmap}$ (module)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:944}, \ref{caml.ml:1462}}
+\ocwwebindexentry{$\ocwlowerid{ids\_of\_a\_pattern}$}{\textbf{\ref{caml.ml:3571}}}{, \ref{caml.ml:3571}, \ref{caml.ml:6190}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{index\_entry}$ (type)}{\textbf{\ref{caml.ml:944}}}{}
+\ocwwebindexentry{$\ocwlowerid{is\_uppercase}$}{\textbf{\ref{caml.ml:2178}}}{}
+\ocwwebindexentry{$\ocwlowerid{iter\_fst}$}{\textbf{\ref{caml.ml:3375}}}{, \ref{caml.ml:6190}, \ref{caml.ml:8656}, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{iter\_snd}$}{\textbf{\ref{caml.ml:3375}}}{, \ref{caml.ml:3571}, \ref{caml.ml:6190}, \ref{caml.ml:8656}, \ref{caml.ml:10077}--\ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{locals}$}{\textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:2178}, \ref{caml.ml:4587}}
+\ocwwebindexentry{$\ocwupperid{Method}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:5291}, \ref{caml.ml:6190}, \ref{caml.ml:9083}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwupperid{Module}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:2178}, \ref{caml.ml:11601}--\ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwupperid{ModuleType}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{option\_iter}$}{\textbf{\ref{caml.ml:3375}}}{, \ref{caml.ml:3571}, \ref{caml.ml:6190}, \ref{caml.ml:9083}}
+\ocwwebindexentry{$\ocwlowerid{pattern\_for\_def}$}{\textbf{\ref{caml.ml:3571}}}{, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{reset\_cross}$}{\textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwupperid{Stringset}$ (module)}{\textbf{\ref{caml.ml:2178}}}{, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_declaration}$}{\textbf{\ref{caml.ml:10077}}}{, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_description}$}{\textbf{\ref{caml.ml:9083}}}{, \ref{caml.ml:11601}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_expr}$}{\textbf{\ref{caml.ml:10077}}}{, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_expr\_desc}$}{\textbf{\ref{caml.ml:10077}}}{, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_field}$}{\textbf{\ref{caml.ml:10077}}}{, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_infos}$}{\textbf{\ref{caml.ml:6062}}}{, \ref{caml.ml:9083}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_signature}$}{\textbf{\ref{caml.ml:9083}}}{, \ref{caml.ml:9083}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_structure}$}{\textbf{\ref{caml.ml:10077}}}{, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_type}$}{\textbf{\ref{caml.ml:9083}}}{, \ref{caml.ml:9083}, \ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_type\_declaration}$}{\textbf{\ref{caml.ml:9083}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_type\_desc}$}{\textbf{\ref{caml.ml:9083}}}{, \ref{caml.ml:9083}}
+\ocwwebindexentry{$\ocwlowerid{tr\_class\_type\_field}$}{\textbf{\ref{caml.ml:9083}}}{, \ref{caml.ml:9083}}
+\ocwwebindexentry{$\ocwlowerid{tr\_core\_field\_desc}$}{\textbf{\ref{caml.ml:5291}}}{, \ref{caml.ml:5291}}
+\ocwwebindexentry{$\ocwlowerid{tr\_core\_field\_type}$}{\textbf{\ref{caml.ml:5291}}}{, \ref{caml.ml:5291}}
+\ocwwebindexentry{$\ocwlowerid{tr\_core\_type}$}{\textbf{\ref{caml.ml:5291}}}{, \ref{caml.ml:5291}, \ref{caml.ml:6190}--\ref{caml.ml:10077}}
+\ocwwebindexentry{$\ocwlowerid{tr\_core\_type\_desc}$}{\textbf{\ref{caml.ml:5291}}}{, \ref{caml.ml:5291}}
+\ocwwebindexentry{$\ocwlowerid{tr\_exception\_declaration}$}{\textbf{\ref{caml.ml:8656}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_expression}$}{\textbf{\ref{caml.ml:6190}}}{, \ref{caml.ml:6190}, \ref{caml.ml:10077}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_expression\_desc}$}{\textbf{\ref{caml.ml:6190}}}{, \ref{caml.ml:6190}}
+\ocwwebindexentry{$\ocwlowerid{tr\_modtype\_declaration}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}}
+\ocwwebindexentry{$\ocwlowerid{tr\_module\_expr}$}{\textbf{\ref{caml.ml:13164}}}{, \ref{caml.ml:6190}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_module\_expr\_desc}$}{\textbf{\ref{caml.ml:13164}}}{, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_module\_type}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_module\_type\_desc}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}}
+\ocwwebindexentry{$\ocwlowerid{tr\_signature}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}, \ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwlowerid{tr\_signature\_item}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}}
+\ocwwebindexentry{$\ocwlowerid{tr\_signature\_item\_desc}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}}
+\ocwwebindexentry{$\ocwlowerid{tr\_structure}$}{\textbf{\ref{caml.ml:13164}}}{, \ref{caml.ml:13164}, \ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwlowerid{tr\_structure\_item}$}{\textbf{\ref{caml.ml:13164}}}{, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_structure\_item\_desc}$}{\textbf{\ref{caml.ml:13164}}}{, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_type\_declaration}$}{\textbf{\ref{caml.ml:8656}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_type\_kind}$}{\textbf{\ref{caml.ml:8656}}}{, \ref{caml.ml:8656}}
+\ocwwebindexentry{$\ocwlowerid{tr\_value\_description}$}{\textbf{\ref{caml.ml:8569}}}{, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{tr\_with\_constraint}$}{\textbf{\ref{caml.ml:11601}}}{, \ref{caml.ml:11601}}
+\ocwwebindexentry{$\ocwupperid{Type}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:5291}, \ref{caml.ml:11601}, \ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{used}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:2178}}
+\ocwwebindexentry{$\ocwupperid{Value}$}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:3571}, \ref{caml.ml:6190}, \ref{caml.ml:9083}--\ref{caml.ml:13164}}
+\ocwwebindexentry{$\ocwlowerid{where}$ (type)}{\textbf{\ref{caml.ml:944}}}{}
+\ocwwebindexentry{$\ocwupperid{Whereset}$ (module)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:1462}}
+\ocwwebindexentry{$\ocwlowerid{wrapper}$}{\textbf{\ref{caml.ml:14583}}}{, \ref{caml.ml:14583}}
+\ocwwebindexentry{$\ocwlowerid{w\_filename}$ (label)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:1462}}
+\ocwwebindexentry{$\ocwlowerid{w\_loc}$ (label)}{\textbf{\ref{caml.ml:944}}}{, \ref{caml.ml:1462}}
+
+
+\ocwendindex{}
+\end{document}

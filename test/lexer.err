@@ -1,0 +1,93 @@
+This is ocamlweb version 0.7, compiled on lun jui 3 11:52:13 CEST 2000
+Copyright (c) 2000 by 
+FILLIATRE Jean-Christophe
+DORLAND Anne
+MULLER Guillaume 
+This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)
+comment
+comment
+vu accolade
+comment
+vu let
+add_def  RegExpr space
+vu let
+add_def  RegExpr lowercase
+vu let
+add_def  RegExpr uppercase
+vu let
+add_def  RegExpr identchar
+vu let
+add_def  RegExpr identifier
+add_uses RegExp(def) lowercase
+add_uses RegExp(def) uppercase
+add_uses RegExp(def) identchar
+comment
+vu rule ou and
+vu ident
+add_def  EntryL index_lex
+vu parse
+
+  | vu "rule"
+ | vu "and"
+ 
+	vu ident juste apres parse
+vu accolade
+vu chaine, pipe...
+ vu "let"
+ vu accolade
+vu chaine, pipe...
+ vu "\""
+
+  | vu "|"
+
+  | vu "'"
+   vu accolade
+vu chaine, pipe...
+ vu "{"
+   vu accolade
+vu chaine, pipe...
+ vu "(*"
+  vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) eof
+   vu accolade
+vu chaine, pipe...
+ vu _
+     vu accolade
+vu rule ou and
+vu ident
+add_def  EntryL index_lex_ident
+vu parse
+
+  | vu "parse"
+ vu ident juste apres parse
+vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) identifier
+
+      vu accolade
+vu chaine, pipe...
+ vu "(*"
+ vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) eof
+  vu accolade
+vu chaine, pipe...
+ vu _
+    vu accolade
+vu rule ou and
+vu ident
+add_def  EntryL enleve_blanc_pipe_dp
+vu parse
+
+  | vu "|"
+ | vu ":"
+
+  | add_uses RegExp(corps) space
+*     vu ident juste apres parse
+vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) identifier
+ vu accolade
+comment
+vu accolade

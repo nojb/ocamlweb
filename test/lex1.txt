@@ -1,0 +1,226 @@
+Lex({ content_file = lex1.mll ;
+ content_name = Lex1 ;
+ contents_contents =
+ [
+{
+ sec_beg = 0 ; 
+ sec_contents = 
+[
+Code(21,
+ [
+LexCode({)CamlCode(
+  open Var)]
+)Code(36,
+ [
+CamlCode(  open Exceptions)]
+)Code(56,
+ [
+CamlCode(  open Parser)]
+)Documentation(Le type token est defini dans le module parser.mli)Code(136,
+ [
+CamlCode(  open Printf)]
+)]
+}{
+ sec_beg = 154 ; 
+ sec_contents = 
+[
+Documentation(Pour l'option -dump-tokens)Code(188,
+ [
+CamlCode(let rec print_token = function
+  | EOF         -> printf "EOF"
+  | PLUS        -> printf "PLUS ; "
+  | MOINS       -> printf "MOINS ; "
+  | MULT        -> printf "MULT ; "
+  | DIV         -> printf "DIV ; "
+  | PARENT_G    -> printf "PARENT_G ; "
+  | PARENT_D    -> printf "PARENT_D ; "
+  | IDENT(s)    -> printf "IDENT(%s) ; " s
+  | CSTE(n)     -> printf "CSTE(%d) ; " n
+  | CHAINE(s)   -> printf "CHAINE(%s) ; " s
+  | TRUE        -> printf "TRUE ; "
+  | FALSE       -> printf "FALSE ; "
+  | LET         -> printf "LET ; "
+  | NOT         -> printf "NOT ; "
+  | IN          -> printf "IN ; "
+  | REC         -> printf "REC ; "
+  | IF          -> printf "IF ; "
+  | THEN        -> printf "THEN ; "
+  | ELSE        -> printf "ELSE ; "
+  | INT         -> printf "INT ; "
+  | BOOL        -> printf "BOOL ; "
+  | STRING      -> printf "STRING ; "
+  | VIRGULE     -> printf "VIRGULE ; "
+  | DEUX_POINTS -> printf "DEUX_POINTS ; "
+  | ET          -> printf "ET ; "
+  | OU          -> printf "OU ; "
+  | EXP         -> printf "EXP ; "
+  | SUP         -> printf "SUP ; "
+  | SUPEGAL     -> printf "SUPEGAL ; "
+  | INF         -> printf "INF ; "
+  | INFEGAL     -> printf "INFEGAL ; "
+  | EGAL        -> printf "EGAL ; "
+  | DIFF        -> printf "DIFF ; "
+  | LIFULA      -> printf "LIFULA ; "
+)]
+)]
+}{
+ sec_beg = 1479 ; 
+ sec_contents = 
+[
+Documentation(Crée une table de hachage pour les tokens, cela a pour effet de réduire énormément 
+ l'automate de l'analyse lexicale.)Code(1605,
+ [
+CamlCode(let keyword_table = Hashtbl.create 29)]
+)]
+}{
+ sec_beg = 2239 ; 
+ sec_contents = 
+[
+Documentation(Définitions de variables pour la lisibilité du lexer)Code(2299,
+ [
+CamlCode(let _ =
+  List.iter (fun (kwd, tok) -> Hashtbl.add keyword_table kwd tok)
+    [ 
+      "let"              , LET    ;
+      "not"              , NOT    ;
+      "in"               , IN     ;
+      "rec"              , REC    ;
+      "if"               , IF     ;
+      "then"             , THEN   ;
+      "else"             , ELSE   ;
+      "int"              , INT    ;
+      "bool"             , BOOL   ;
+      "string"           , STRING ;
+      "not"              , NOT    ;
+      "true"             , TRUE   ;
+      "false"            , FALSE  ;
+      "lifula"           , LIFULA ;
+    ]
+)LexCode(let blanc      = [' ' '\n' '\t']
+let lettre_min = ['a'-'z']
+let lettre_maj = ['A'-'Z']
+let lettre     = lettre_min | lettre_maj
+let chiffre    = ['0'-'9']
+let mot_cle    = lettre (lettre | chiffre | '_'| '\'')*
+let chaine     = '"' ([^'"' '\\'] | "\\n" | "\\t" | "\\\\" | "\\\"")* '"')]
+)]
+}{
+ sec_beg = 2586 ; 
+ sec_contents = 
+[
+Documentation(Lexer 1)Documentation(Analyseur lexical. 
+  Si la chaine est du type [mot_cle], on la cherche dans la table de 
+  hachage. Si on ne trouve pas de mots-clé correspondant, on la considère comme 
+  un identificateur. Sinon on analyse directement la chaine.
+)Code(2842,
+ [
+LexCode(rule token = parse
+    mot_cle
+    {)CamlCode( 
+      let id = Lexing.lexeme lexbuf in
+        (try
+           Hashtbl.find keyword_table id
+         with Not_found ->
+           IDENT(id)) 
+    )LexCode(}
+  | blanc               
+      {)CamlCode(
+ 	if (Lexing.lexeme_char lexbuf 0 = '\n')
+	then
+	  begin
+	    incr ligne  ;
+	    car := Lexing.lexeme_end lexbuf ;
+	  end ;
+	  token lexbuf 
+      )LexCode(}
+  | "(*"                
+      {)CamlCode(
+ 	incr compteur  ; 
+	comment lexbuf ;
+	token lexbuf 
+      )LexCode(}
+  | ","                {)CamlCode( VIRGULE     )LexCode(}
+  | ":"                {)CamlCode( DEUX_POINTS )LexCode(}
+  | "="                {)CamlCode( EGAL        )LexCode(}
+  | "+"                {)CamlCode( PLUS        )LexCode(}
+  | "-"                {)CamlCode( MOINS       )LexCode(}
+  | "*"                {)CamlCode( MULT        )LexCode(}
+  | "/"                {)CamlCode( DIV         )LexCode(}
+  | "("                {)CamlCode( PARENT_G    )LexCode(}
+  | ")"                {)CamlCode( PARENT_D    )LexCode(}
+  | "^"                {)CamlCode( EXP         )LexCode(}
+  | "&"                {)CamlCode( ET          )LexCode(}
+  | "|"                {)CamlCode( OU          )LexCode(}
+  | ">"                {)CamlCode( SUP         )LexCode(}
+  | ">="               {)CamlCode( SUPEGAL     )LexCode(}
+  | "<"                {)CamlCode( INF         )LexCode(}
+  | "<="               {)CamlCode( INFEGAL     )LexCode(}
+  | "<>"               {)CamlCode( DIFF        )LexCode(}
+  | "!="               {)CamlCode( DIFF        )LexCode(}
+  | chiffre+  (* les chiffres négatifs seront reconnus lors de l'analyse syntaxique *)
+      {)CamlCode( 
+	try 
+	  CSTE(int_of_string(Lexing.lexeme lexbuf)) 
+	with _ ->
+          begin
+	    debut := Lexing.lexeme_start lexbuf - !car + 1 ;
+	    fin := Lexing.lexeme_end lexbuf - !car + 1 ;
+	    let error = Lexer_error(!ligne , !debut , !fin , "Problème lié à l'entier")
+ 	    in raise error
+	  end
+      )LexCode(}
+  | chaine              
+      {)CamlCode( 
+	CHAINE(Lexing.lexeme lexbuf) 
+      )LexCode(} 
+  | eof      {)CamlCode( EOF )LexCode(}   
+  | _         
+      {)CamlCode(
+ 	debut := Lexing.lexeme_start lexbuf - !car + 1 ;
+	fin := Lexing.lexeme_end lexbuf - !car + 1 ;
+	let error = Lexer_error(!ligne , !debut , !fin , "token non reconnu") in raise error 
+      )LexCode(})]
+)Code(4717,
+ [
+LexCode(and)]
+)]
+}{
+ sec_beg = 4722 ; 
+ sec_contents = 
+[
+Documentation(Lexer 2)Documentation(Reconnait et ignore les commentaires.Si on a autant de commentaires fermants 
+   que d'ouvrants, on sort de toutes facons, le surplus de fermants eventuels etants 
+   consideres comme MULT [PARENT_D].)Code(4944,
+ [
+LexCode(comment = parse
+    chaine   
+      {)CamlCode( comment lexbuf )LexCode(}
+  | "*)"
+      {)CamlCode(
+        decr compteur      ;
+        if (!compteur <> 0)
+	then comment lexbuf
+      )LexCode(}
+  | "(*"
+      {)CamlCode(
+        incr compteur ;
+	comment lexbuf
+      )LexCode(}
+  | '\n'
+      {)CamlCode( 
+	incr ligne  ;
+	car := Lexing.lexeme_end lexbuf ;
+	comment lexbuf
+      )LexCode(}
+  | eof 
+      {)CamlCode(
+        debut := Lexing.lexeme_start lexbuf - !car + 1 ;
+	fin := Lexing.lexeme_end lexbuf - !car + 1 ;
+	let error = Lexer_error(!ligne , !debut , !fin , "commentaire fermant attendu") in
+	  raise error )LexCode(}
+  | _  
+      {)CamlCode( comment lexbuf )LexCode(}
+)]
+)]
+}]
+})

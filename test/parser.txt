@@ -1,0 +1,113 @@
+Yacc({ content_file = parser.mly ;
+ content_name = Parser ;
+ contents_contents =
+ [
+{
+ sec_beg = 0 ; 
+ sec_contents = 
+[
+Documentation(Header Yacc en \LaTeX\)Code(51,
+ [
+YaccCode(%{)CamlCode(
+  open Exceptions)]
+)Code(74,
+ [
+CamlCode(  open Asa_expr)]
+)Code(93,
+ [
+CamlCode(  let parse_error s =
+    let error = Parser_error()]
+)Code(146,
+ [
+CamlCode(				Parsing.symbol_start(),
+				Parsing.symbol_end(),
+				"" ) 
+    in raise error
+  )]
+)]
+}{
+ sec_beg = 234 ; 
+ sec_contents = 
+[
+Documentation(Une petite section caml pour voir ...)Code(280,
+ [
+CamlCode(  let warning = ref false)]
+)Code(308,
+ [
+YaccCode(%})]
+)Code(337,
+ [
+YaccCode(%token EOF LIFULA
+%token <)CamlCode(string(*mettre une fleche ici*))YaccCode(> IDENT
+%right LET
+%left IN)]
+)]
+}{
+ sec_beg = 398 ; 
+ sec_contents = 
+[
+Documentation(Une petite section pour voir 1...)Code(475,
+ [
+YaccCode(%nonassoc UMINUS
+%start main
+%type <)CamlCode(Asa_expr.asa_expr)YaccCode(> main)]
+)Code(501,
+ [
+YaccCode(%%
+)]
+)]
+}{
+ sec_beg = 504 ; 
+ sec_contents = 
+[
+Documentation(Une petite section pour voir 2...)Code(546,
+ [
+YaccCode(let while= 3)]
+)]
+}{
+ sec_beg = 561 ; 
+ sec_contents = 
+[
+Documentation(Une petite section pour voir 3...)Code(603,
+ [
+YaccCode(main:
+  LIFULA expr EOF  
+       {)CamlCode( 
+	 let parse_error2 s =
+	   let error = Parser_error(
+	     Parsing.symbol_start(),
+	     Parsing.symbol_end(),
+	     "" ) 
+	   in raise error )YaccCode(})]
+)Documentation(une doc pour voir)Code(814,
+ [
+YaccCode(| expr EOF               
+      {)CamlCode( 
+    	warning:=true;
+	$1
+      )YaccCode(}/* com de code */ 
+;)]
+)Code(903,
+ [
+YaccCode(t_type:
+|  INT        
+    {)CamlCode( Int    )YaccCode(}
+| BOOL    
+    {)CamlCode( Bool   )YaccCode(}
+| STRING   
+    {)CamlCode( String )YaccCode(}
+;)]
+)Code(997,
+ [
+YaccCode(%%)]
+)Code(1001,
+ [
+CamlCode(let parse_error3 s =
+  let error = Parser_error(
+    Parsing.symbol_start(),
+    Parsing.symbol_end(),
+    "" ) 
+  in raise error)]
+)]
+}]
+})

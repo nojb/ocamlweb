@@ -1,0 +1,56 @@
+Interf({ content_file = ../cross.mli ;
+ content_name = Cross ;
+ contents_contents =
+ [
+{
+ sec_beg = 648 ; 
+ sec_contents = 
+[
+Documentation(That module exports to global tables [used] and [defined], indexed
+   by identifiers (strings) and containing respectively the sets of locations
+   where they are defined and used.
+   Those locations are of type [where], which contain the name of the file
+   and the absolute position in the source.
+)Code(1007,
+ [
+CamlCode(type where = { w_filename : string; w_loc : int )CamlCode(type entry_type = 
+  | Value
+  | Constructor
+  | Field
+  | Type
+  | Exception
+  | Module
+  | ModuleType
+  | Class
+  | Method
+  | YaccEP
+  | LexEP    (*r Lex entry points *)
+  | RegExpr  (*r Lex regular expressions *)
+  | Token    (*r Yacc terminal Token *))]
+)Code(1369,
+ [
+CamlCode(type index_entry = { e_name : string; e_type : entry_type )CamlCode(module Idmap : Map.S with type key = index_entry)]
+)Code(1419,
+ [
+CamlCode(module Stringset : Set.S with type elt = string)]
+)Code(1468,
+ [
+CamlCode(module Whereset : Set.S with type elt = where)]
+)Code(1515,
+ [
+CamlCode(val used : Whereset.t Idmap.t ref
+val defined : Whereset.t Idmap.t ref)]
+)]
+}{
+ sec_beg = 1587 ; 
+ sec_contents = 
+[
+Documentation(The two following functions fill the above table for a given file.)Code(1662,
+ [
+CamlCode(val cross_implem : string -> string -> unit
+val cross_interf : string -> string -> unit
+val cross_lex : string -> string -> unit
+val cross_yacc : string -> string -> unit)]
+)]
+}]
+})

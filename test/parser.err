@@ -1,0 +1,17 @@
+This is ocamlweb version 0.7, compiled on lun jui 3 11:52:13 CEST 2000
+Copyright (c) 2000 by 
+FILLIATRE Jean-Christophe
+DORLAND Anne
+MULLER Guillaume 
+This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)
+add_def  Token EOF
+add_def  Token LIFULA
+add_use  Type string
+add_def  Token IDENT
+add_def  Token LET
+add_def  Token IN
+add_def  Token UMINUS
+add_def  EntryY main
+add_uses Token LIFULA
+add_uses Token EOF
+add_def  EntryY t_type

@@ -1,0 +1,145 @@
+This is ocamlweb version 0.7, compiled on dim jui 2 17:09:21 CEST 2000
+Copyright (c) 2000 by 
+FILLIATRE Jean-Christophe
+DORLAND Anne
+MULLER Guillaume 
+This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)
+comment
+vu accolade
+comment
+vu let
+add_def  RegExpr blanc
+vu let
+add_def  RegExpr lettre_min
+vu let
+add_def  RegExpr lettre_maj
+vu let
+add_def  RegExpr lettre
+add_uses RegExp(def) lettre_min
+add_uses RegExp(def) lettre_maj
+vu let
+add_def  RegExpr chiffre
+vu let
+add_def  RegExpr mot_cle
+add_uses RegExp(def) lettre
+add_uses RegExp(def) lettre
+add_uses RegExp(def) chiffre
+vu let
+add_def  RegExpr chaine
+comment
+comment
+vu rule ou and
+vu ident
+add_def  EntryL token
+vu parse
+
+    add_uses RegExp(corps) mot_cle
+
+    vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) blanc
+               
+      vu accolade
+vu chaine, pipe...
+ vu "(*"
+                
+      vu accolade
+vu chaine, pipe...
+ vu ","
+                vu accolade
+vu chaine, pipe...
+ vu ":"
+                vu accolade
+vu chaine, pipe...
+ vu "="
+                vu accolade
+vu chaine, pipe...
+ vu "+"
+                vu accolade
+vu chaine, pipe...
+ vu "-"
+                vu accolade
+vu chaine, pipe...
+ vu "*"
+                vu accolade
+vu chaine, pipe...
+ vu "/"
+                vu accolade
+vu chaine, pipe...
+ vu "("
+                vu accolade
+vu chaine, pipe...
+ vu ")"
+                vu accolade
+vu chaine, pipe...
+ vu "^"
+                vu accolade
+vu chaine, pipe...
+ vu "&"
+                vu accolade
+vu chaine, pipe...
+ vu "|"
+                vu accolade
+vu chaine, pipe...
+ vu ">"
+                vu accolade
+vu chaine, pipe...
+ vu ">="
+               vu accolade
+vu chaine, pipe...
+ vu "<"
+                vu accolade
+vu chaine, pipe...
+ vu "<="
+               vu accolade
+vu chaine, pipe...
+ vu "<>"
+               vu accolade
+vu chaine, pipe...
+ vu "!="
+               vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) chiffre
++  
+      vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) chaine
+              
+      vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) eof
+      vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) _
+         
+      vu accolade
+vu rule ou and
+vu comment
+vu comment
+vu ident
+add_def  EntryL comment
+vu parse
+
+    add_uses RegExp(corps) chaine
+   
+      vu accolade
+vu chaine, pipe...
+ vu "*)"
+
+      vu accolade
+vu chaine, pipe...
+ vu "(*"
+
+      vu accolade
+vu chaine, pipe...
+ vu '\n'
+
+      vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) eof
+ 
+      vu accolade
+vu chaine, pipe...
+ add_uses RegExp(corps) _
+  
+      vu accolade
