@@ -70,7 +70,7 @@ BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml
 bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; latex ocamlweb; latex ocamlweb
-	-hevea -o test/ocamlweb.html ocamlweb.sty test/ocamlweb.tex
+	cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
 
 check: bootstrap
 
