@@ -276,6 +276,7 @@ clean:
 
 dist-clean:: clean
 	rm -f Makefile
+	rm -f config.status config.cache config.log
 
 depend: $(GENERATED)
 	rm -f .depend
