@@ -9,6 +9,8 @@ $Id$
 Parsing fichiers
 ================
 
+ 1. implanter une option -pp reprenant celle d'ocaml (cf sources ocaml)
+
  4. possibilité d'échapper [ ou ] dans les quotations de code
     (actuellement ce n'est pas possible et cela provoque des incohérences)
 
