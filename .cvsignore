@@ -6,3 +6,4 @@ export
 vrac
 config.cache
 config.status
+Makefile
