@@ -282,7 +282,8 @@ i*)
   | '['  { if !user_math_mode then 
 	     output_char '['
 	   else begin
-	     bracket_depth := 1; escaped_code lexbuf
+	     bracket_depth := 1; 
+	     begin_code (); escaped_code lexbuf; end_code ()
 	   end; 
 	   pr_comment lexbuf }
   | eof  { () }
@@ -298,7 +299,8 @@ and pr_yacc_comment = parse
   | '['  { if !user_math_mode then 
 	     output_char '['
 	   else begin
-	     bracket_depth := 1; escaped_code lexbuf
+	     bracket_depth := 1; 
+	     begin_code (); escaped_code lexbuf; end_code ()
 	   end; 
 	   pr_yacc_comment lexbuf }
   | eof  { () }
@@ -365,7 +367,8 @@ and pr_doc = parse
       { if !user_math_mode then 
 	  output_char '['
 	else begin
-	  bracket_depth := 1; escaped_code lexbuf
+	  bracket_depth := 1; 
+	  begin_code (); escaped_code lexbuf; end_code ()
 	end; 
 	pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
@@ -411,7 +414,9 @@ and pr_verbatim = parse
 
   let pretty_print_code is_last_paragraph s = 
     begin_code_paragraph ();
+    begin_code ();
     pr_camlcode (Lexing.from_string s);
+    end_code ();
     end_code_paragraph is_last_paragraph
 
   let pretty_print_doc is_first_paragraph s = 
@@ -420,5 +425,3 @@ and pr_verbatim = parse
     end_doc_paragraph ()
 
 }
-
-

@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o insertion into LaTeX preamble with option -p and (*p
+  o macros \ocwbegincode and \ocwendcode before and after code pieces
+    (no more use of \codeline and \endcodeline)
+
 version 0.9, 18/12/2000
 =======================
   o support for lex and yacc files (-impl option deprecated on these files)

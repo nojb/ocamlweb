@@ -143,6 +143,8 @@ let space_or_nl = [' ' '\t' '\n']
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
+let up_to_end_of_comment =
+  [^ '*']* '*' (([^ '*' ')'] [^ '*']* '*') | '*')* ')'
 
 (*s Entry point to skip the headers. Returns when headers are skipped. *)
 rule header = parse
@@ -346,6 +348,9 @@ and start_of_documentation = parse
       { web_style := true; push_section (); 
 	section_beg := lexeme_start lexbuf;
 	in_documentation lexbuf }
+  | 'p' up_to_end_of_comment
+      { let s = lexeme lexbuf in
+	push_in_preamble (String.sub s 1 (String.length s - 3)) }
   | 'i' 
       { ignore lexbuf }
   | _
@@ -361,6 +366,9 @@ and start_of_yacc_documentation = parse
       { web_style := true; push_section (); 
 	section_beg := lexeme_start lexbuf;
 	in_yacc_documentation lexbuf }
+  | 'p' up_to_end_of_comment
+      { let s = lexeme lexbuf in
+	push_in_preamble (String.sub s 1 (String.length s - 3)) }
   | 'i' 
       { yacc_ignore lexbuf }
   | _
@@ -773,7 +781,7 @@ let read header entry m =
     content_contents = raw_read_file header entry m.caml_filename; }
 
 let read_one_file = function
-  | File_impl m -> Implem(read header caml_implementation m)
+  | File_impl m -> Implem (read header caml_implementation m)
   | File_intf m -> Interf (read header caml_implementation m)
   | File_lex  m -> Lex (read header lex_description m)
   | File_yacc m -> Yacc (read yacc_header yacc_description m)

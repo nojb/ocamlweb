@@ -42,6 +42,7 @@ let usage () =
   prerr_endline "  --tex <file>   consider <file> as a .tex file";
   prerr_endline "  --latex-option <opt>";
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
+  prerr_endline "  -p <string>    insert something in LaTeX preamble";
   prerr_endline "  --files <file> read file names to process in <file>";
   prerr_endline "  --quiet        quiet mode";
   prerr_endline "  --no-greek     disable use of greek letters for type variables";
@@ -162,6 +163,10 @@ let parse () =
 	web := true; parse_rec rem
     | ("-nopreamble" | "--nopreamble" | "--no-preamble") :: rem ->
 	set_no_preamble true; parse_rec rem
+    | ("-p" | "--preamble") :: s :: rem ->
+	push_in_preamble s; parse_rec rem
+    | ("-p" | "--preamble") :: [] ->
+	usage ()
     | ("-noindex" | "--noindex" | "--no-index") :: rem ->
 	index := false; parse_rec rem
     | ("-o" | "--output") :: f :: rem ->

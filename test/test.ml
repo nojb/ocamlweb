@@ -4,10 +4,14 @@
 (*i $Id$ i*)
 
 (*i*)
-open Toto
+open Hidden
 (*i*)
 
-(* Constantes numériques. *)
+(*p \newcommand{\mymacro}{Test macro in preamble} %my macro *)
+
+(*s \mymacro. *)
+
+(*s Constants. *)
 
 let hexa = 0X4fff 
 let hexa = 0x12BC 
@@ -18,81 +22,64 @@ let binary = 0b00101011000
 let float = 1.5152E-4
 let float = 1.5152e-4
 
-(*s Documentation 1 *)
+let a_string = "this is a constant string"
 
-type truc = AA | BB | CC
+let a_longer_string = "this is a longer string\
+    including newlines \
+    and 4 leading spaces for the last two lines"
 
-exception AAA of 'a aatoto * 'b aatruc * aamachin
+let an_array = [| [| 1; 3; 2 |]; [| 4; 5; 6 |] |]
 
-type machin = { champ1 : int;
-		champ2 : string }
+(*s More types and exceptions declarations. *)
 
-let (C (x,y)) = x != y
+type stuff = AA | BB | CC
 
-(*s documentation 2 où je parle de [ma_fonction x] ci-dessous définie
-    et de bien d'autres choses que j'aimerais voir s'afficher sur un
-    paragraphe un tant soit peu grand, comme celui-ci. 
-    Je peux aussi parler de \verb!@x! si je veux... 
-    ou encore << échapper >> cette ["chaine de caractères"]. *)
+exception Exception of 'a foo * 'b bar * gee
 
-let l = 
-  [|[|1;3;2|];
-    [|4;5;6|]|]
+type record = { 
+  field1 : int;
+  field2 : string 
+}
 
-let t = 1 ** 2
+(*s Test of symbols pretty-print. *)
 
-let une_grande_chaine = "tatdn jgj gjhg jfjh \
-    kjhsljkh hglg lglj gljb lgjh \
-    skjhk hmkjhmlkhj mkjl kj"
+let test_and x y = x && y
 
-let une_autre_grande_chaine = "tatdn jgj gjhg jfjh
-    kjhsljkh hglg lglj gljb lgjh
-    skjhk hmkjhmlkhj mkjl kj"
+let test_or x y = x || y
 
-let ma_fonction x = function (yyy,z) ->
-  x + yyy*z (* commentaire : $y\not=0$ *) + toto
+let test_not x = not x
 
-let s c = "\\" ^ c ^ "autre chaine"
+let test_not_equal x y = x <> y
 
-let test x y z = x or y && not x = y
+let test_physical_equality x y = x == y
 
-let test xor ory = xor + (*c commentaire *) ory
+let test_physical_disequality x y = x != y
 
-let xxx = { champ1 = 1; champ2 = "toto" }
+(*s A bit of documentation. I quote a function call [foo x] and I
+    spend a few minutes speaking about [foo] and [x].  
+    I can quote ["a string"] or a record value [{ x = 1; y = 2 }] 
+    for instance. *) 
 
-let yyy = [| 1; xxx; 3 |]
+(*s Test of comments inside code. *)
 
-(* un vrai commentaire *)
+let my_function x = function (y,z) ->
+  x + y * z (* comment: $y\not=0$ *)
+
+let test xor ory = xor + (*c comment *) ory
+
+(*s Some documentation (no more considered as a comment due to the newline). *)
+
+(*s Right-justified comments. *)
 
 let autre_bout x =
-  if x <= 0 then x+1 else x+2;          (*r un vrai commentaire *)
-  f 3;                                  (*r et hop *)
-  cool ()                               (*r et voilà une troisième ligne *)
+  if x <= 0 then x+1 else x+2;          (*r a comment *)
+  f 3;                                  (*r another *)
+  cool ()                               (*r and a third one *)
 
-let chaine =
-  "(* une grande chaine
-   qui se poursuit sur deux lignes"; while true do () done;
-  '"' + "une autre chaine"
-  '\134' + '\n' + toto
-
-(*    documentation 3 : cette fonction a pour effet de mettre dans la 
-  référence [x1] la valeur [x2]. *)
-
-let mon_autre_fonction x1 x2 =
-  x1 := x2;
-  ma_fonction !x1 (x2,x2/3)
-
-let toto = match truc with tagada -> ma_fonction champ1
+(*s Patterns. *)
 
 let test_pat = function
-    A1 -> 1
-  | BB -> toto
-  | CC -> CC.f
+  | A1 -> 1
+  | BB -> foo 2
+  | CC -> C.f 3
 
-(* *)
-
-let y = tagada
-
-(* *)
-
-let x = toto

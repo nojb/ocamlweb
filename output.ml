@@ -82,6 +82,10 @@ let no_preamble = ref false
 
 let set_no_preamble b = no_preamble := b
 
+let (preamble : string Queue.t) = Queue.create ()
+
+let push_in_preamble s = Queue.add s preamble
+
 let latex_header opt =
   if not !no_preamble then begin
     output_string "\\documentclass[12pt]{article}\n";
@@ -91,6 +95,7 @@ let latex_header opt =
     output_string "\\usepackage[latin1]{inputenc}\n";
     output_string "\\usepackage[T1]{fontenc}\n";
     output_string "\\usepackage{fullpage}\n";
+    Queue.iter (fun s -> output_string s; output_string "\n") preamble;
     output_string "\\begin{document}\n"
   end;
   output_string 
@@ -136,7 +141,7 @@ let leave_math () =
 
 let indentation n =
   let space = 0.5 *. (float n) in
-  output_string (sprintf "\\codeline\\ocwindent{%2.2fem}\n" space)
+  output_string (sprintf "\ocwindent{%2.2fem}\n" space)
 
 
 (*s \textbf{End of lines.}
@@ -144,7 +149,7 @@ let indentation n =
 
 let end_line () =
   leave_math ();
-  output_string "\\endcodeline\\ocweol\n"
+  output_string "\\ocweol\n"
 
 let end_line_string () =
   output_string "\\endgraf\n"
@@ -465,19 +470,21 @@ let output_yaccmodule module_name =
       
 let last_is_code = ref false
 
+let begin_code () =
+  output_string "\\ocwbegincode{}"
+
+let end_code () =
+  output_string "\\ocwendcode{}"
+
 let begin_code_paragraph () =
   if not !last_is_code then output_string "\\medskip\n";
   last_is_code := true
 
 let end_code_paragraph is_last_paragraph =
-  if is_last_paragraph then 
-    end_line()            (*i Guillome Muller i*)
-  else 
-    output_string "\\medskip\n\n"
+  if is_last_paragraph then end_line() else output_string "\\medskip\n\n"
 
 let begin_doc_paragraph is_first_paragraph =
-  if not is_first_paragraph then
-    output_string "\\noindent{}";
+  if not is_first_paragraph then output_string "\\noindent{}";
   last_is_code := false
 
 let end_doc_paragraph () =

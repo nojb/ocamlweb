@@ -54,6 +54,7 @@ val output_verbatim : string -> unit
     package ocamlweb.sty. *)
 
 val set_no_preamble : bool -> unit
+val push_in_preamble : string -> unit
 val latex_header : string -> unit
 val latex_trailer : unit -> unit
 
@@ -131,6 +132,9 @@ val output_lexmodule : string -> unit
 val output_yaccmodule : string -> unit
 
 val begin_section : unit -> unit
+
+val begin_code : unit -> unit
+val end_code : unit -> unit
 
 val begin_code_paragraph : unit -> unit
 val end_code_paragraph : bool -> unit
