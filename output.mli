@@ -26,10 +26,14 @@
 val set_output_to_file : string -> unit
 val close_output : unit -> unit
 
-(* These mutable flags controls the output. If [quiet], no extra output is done on standard output, default is [false]. If [use_greek_letters] is true, greek letters are used to display (some of) the single-letter type variables, default is [true]. *)
+(* These mutable flags controls the output. If [quiet], no extra
+   output is done on standard output, default is [false]. If
+   [use_greek_letters] is true, greek letters are used to display (some
+   of) the single-letter type variables, default is [true]. *)
 
 val quiet : bool ref
 val use_greek_letters : bool ref
+val short : bool ref
 
 (* Then we introduce some low level output functions, for characters 
    and strings.

@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o option -s, --short (no titles for files)
   o update of the documentation
   o pretty-printing for == and !=
   o pretty underscores in identifiers (by redefinition of \_) 

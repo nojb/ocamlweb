@@ -40,6 +40,8 @@ let close_output () =
 
 let quiet = ref false
 
+let short = ref false
+
 let output_char c = Pervasives.output_char !out_channel c
 
 let output_string s = Pervasives.output_string !out_channel s
@@ -337,20 +339,24 @@ let begin_section () =
   output_string "\\ocwsection\n"
 
 let output_module s =
-  output_string "\\ocwmodule{";
-  let real_module_name =
-    if Filename.check_suffix s ".mll" || Filename.check_suffix s ".mly" then 
-      Filename.chop_extension s
-    else 
-      s
-  in 
-  output_latex_id real_module_name;
-  output_string "}\n"
-
+  if not !short then begin
+    output_string "\\ocwmodule{";
+    let real_module_name =
+      if Filename.check_suffix s ".mll" || Filename.check_suffix s ".mly" then 
+	Filename.chop_extension s
+      else 
+	s
+    in 
+    output_latex_id real_module_name;
+    output_string "}\n"
+  end
+      
 let output_interface s =
-  output_string "\\ocwinterface{";
-  output_latex_id s;
-  output_string "}\n"
+  if not !short then begin
+    output_string "\\ocwinterface{";
+    output_latex_id s;
+    output_string "}\n"
+  end
 
 let last_is_code = ref false
 

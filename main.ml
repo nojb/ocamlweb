@@ -31,6 +31,7 @@ let usage () =
   prerr_endline "";
   prerr_endline "Usage: ocamlweb <options and files>";
   prerr_endline "  -o <file>      write output in file <file>";
+  prerr_endline "  -s             (short) no titles for files";
   prerr_endline "  --latex-sects  use LaTeX sectioning, not WEB";
   prerr_endline "  --header       do not skip the headers of Caml file";
   prerr_endline "  --no-preamble  suppress LaTeX header and trailer";
@@ -162,6 +163,8 @@ let parse () =
 	set_output_to_file f; parse_rec rem
     | ("-o" | "--output") :: [] -> 
 	usage ()
+    | ("-s" | "--short") :: rem ->
+	short := true; parse_rec rem
     | ("-extern-defs" | "--extern-defs") :: rem ->
 	extern_defs := true; parse_rec rem
     | ("-q" | "-quiet" | "--quiet") :: rem ->
