@@ -154,6 +154,7 @@ export: source linux
 	cp README COPYING LGPL CHANGES $(FTP)
 	cd doc; make all export
 	make export-bootstrap
+	mail -s "nouvelle release d'ocamlweb" treinen@debian.org < /dev/null
 
 export-bootstrap: bootstrap
 	gzip -c test/ocamlweb.ps > $(FTP)/ocamlweb.ps.gz
