@@ -6,19 +6,22 @@
 % You can modify the following macros to customize the appearance
 % of the document.
 
+% the following comment tells HeVeA to ignore all this until END LATEX
+%BEGIN LATEX
+
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{ocamlweb}[1999/05/21]
 
 %      package options
 
-% we use internally two cases:
-% 0 : option plain, the standard Knuth web style (the default) 
-% 1 : option CiME, the CiME ad-hoc documentation style
-% other cases could be added
+% option for the sectioning style
+% if false, the sectioning is similar to the web sectioning, sections
+% numbered in sequences. If true, structured sectioning is allowed
+% using LaTeX sectioning commands.
 
-\def\webstylecase{0}
-\DeclareOption{plain}{\def\webstylecase{0}}
-\DeclareOption{CiME}{\def\webstylecase{1}}
+\newif\iflatexsectioning\latexsectioningfalse
+\DeclareOption{LaTeXsects}{\latexsectioningtrue}
+\DeclareOption{WEBsects}{\latexsectioningfalse}
 
 % option for visible spaces
 
@@ -32,6 +35,9 @@
 
 
 \ProcessOptions
+
+%END LATEX
+% HeVeA reads the following
 
 % own name
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
@@ -47,46 +53,37 @@
 \newcommand{\ocwkw}[1]{\textsf{#1}}
 
 % macro for typesetting base types (int, bool, string, etc.)
-\expandafter\ifcase\webstylecase
-\newcommand{\ocwbt}[1]{\textit{#1}}
-\or
-\newcommand{\ocwbt}[1]{\textsl{#1}}
-\fi
+\newcommand{\ocwbt}[1]{\textit{#1\/}}
 
 % macro for typesetting identifiers
 \newcommand{\ocwsymbolid}[1]{{#1}}
 
-\expandafter\ifcase\webstylecase
 \newcommand{\ocwlowerid}[1]{\textit{#1\/}}
 \newcommand{\ocwupperid}[1]{\textit{#1\/}}
-\or
-\newcommand{\ocwlowerid}[1]{\textsl{#1\/}}
-\newcommand{\ocwupperid}[1]{\textsl{#1\/}}
-\fi
 
 % newline with indentation of the next line as argument
+%BEGIN LATEX
 \newcommand{\ocwnl}[1]{\par\noindent\kern#1}
+%END LATEX
+%HEVEA\newcommand{\ocwnl}[1]{\\\hspace{#1}\hspace{#1}}
+
 
 % visible space in a string
+%BEGIN LATEX
 \ifvisiblespaces
 \newcommand{\ocwvspace}{{\tt\char`\ }}
 \else
 \newcommand{\ocwvspace}{{\tt ~}}
 \fi
+%END LATEX
+%HEVEA\newcommand{\ocwvspace}{\hspace{1em}}
+
 
 % macro for typesetting the title of a module implementation
-\expandafter\ifcase\webstylecase
 \newcommand{\ocwmodule}[1]{\section*{Module #1}}
-\or
-\newcommand{\ocwmodule}[1]{\section{Implementation of module \ocwupperid{#1}}}
-\fi
 
 % macro for typesetting the title of a module interface
-\expandafter\ifcase\webstylecase
 \newcommand{\ocwinterface}[1]{\section*{Interface for module #1}}
-\or
-\newcommand{\ocwinterface}[1]{\section{Module \ocwupperid{#1}}}
-\fi
 
 % interface part of a module
 \newcommand{\ocwinterfacepart}{\subsection*{Interface}}
@@ -102,14 +99,19 @@
 \bigskip\noindent{\bf\theocwcounter.}\kern1em}
 
 % index
+%BEGIN LATEX
 \newcommand{\ocwbeginindex}{\begin{theindex}}
 \newcommand{\ocwendindex}{\end{theindex}}
+%END LATEX
+%HEVEA\newcommand{\ocwbeginindex}{\section{Index}\begin{itemize}}
+%HEVEA\newcommand{\ocwendindex}{\end{itemize}}
 
-% index entry in WEB style
+% index entry in WEBsects option
 \newcommand{\ocwwebindexentry}[3]{\item #1,\quad#2#3}
 
-% index entry in LaTeX style
+% index entry in LaTeXsects option
 
+%BEGIN LATEX
 \def\loopbody{%
 \edef\ocwnext{%
 \@ifundefined{r@\ocwloop}{??}{\ifbypage\pageref{\ocwloop}\else
@@ -130,3 +132,6 @@
 \def\ocwprevious{0}%
 \@for\ocwloop:=#3\do{\loopbody}%
 }
+%END LATEX
+
+%HEVEA\newcommand{\ocwrefindexentry}[3]{\item #,\quad#2#3}
