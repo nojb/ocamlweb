@@ -20,6 +20,8 @@ Document LaTeX
 
  1. underscore plus fin dans les identificateurs
 
+ 2. indentation code et commentaire sur première ligne
+
 
 Documentation ocamlweb
 ======================

@@ -2,8 +2,8 @@
 % This is ocamlweb.sty, by Jean-Christophe Filliâtre
 % This LaTeX package is used by ocamlweb (http://www.lri.fr/~filliatr/ocamlweb)
 %
-% You can modify the following macros to modify the appearance
-% of the document
+% You can modify the following macros to customize the appearance
+% of the document.
 
 % underscore ?
 % \def\_{\kern.04em\vbox{\hrule width.3em height .6pt}\kern.08em}
@@ -17,5 +17,14 @@
 \newcommand{\ocwid}[1]{\textit{#1}}
 % newline with indentation of the next line as argument
 \newcommand{\ocwnl}[1]{\par\noindent\kern#1}
+
+% new module
+\newcommand{\ocwmodule}[1]{\section{Module #1}}
+% new interface
+\newcommand{\ocwinterface}[1]{\section{Interface for Module #1}}
+% interface part of a module
+\newcommand{\ocwinterfacepart}{\subsection*{Interface}}
+% code part of a module
+\newcommand{\ocwcodepart}{\subsection*{Code}}
 % new section
 \newcommand{\ocwsection}[1]{\bigskip\noindent{\bf#1.}{\kern1em}}

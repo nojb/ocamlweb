@@ -91,22 +91,32 @@ let check_if_file_exists f =
     exit 1
   end
 
+let raw_read_file f =
+  reset_lexer ();
+  let c = open_in f in
+  let buf = Lexing.from_channel c in
+  if !skip_header then header buf;
+  let contents = implementation buf in
+  close_in c;
+  contents
+
+let read_implem mo f =
+  let interf =
+    if Sys.file_exists (f^"i") then Some (raw_read_file (f^"i")) else None
+  in
+  Implem { implem_file = f; implem_name = mo;
+	   implem_contents = raw_read_file f;
+	   implem_interf = interf }
+
+let read_interf mo f =
+  Interf { interf_file = f; interf_name = mo; 
+	   interf_contents = raw_read_file f }
+    
 let read_one_file f =
   check_if_file_exists f;
   let (mo,suff) = what_file f in
   if suff = ".ml" or suff = ".mli" then begin
-    reset_lexer ();
-    let c = open_in f in
-    let buf = Lexing.from_channel c in
-    if !skip_header then header buf;
-    let file =
-      if suff = ".ml" then 
-	Implem { implem_name = mo; implem_contents = implementation buf }
-      else 
-	Interf { interf_name = mo; interf_contents = interface buf }
-    in
-    close_in c;
-    file
+    if suff = ".ml" then read_implem mo f else read_interf mo f
   end else
     Other f
 

@@ -28,13 +28,11 @@
 
   let parlist = ref ([] : paragraph list)
   let seclist = ref ([] : raw_section list)
-  let declist = ref ([] : decl list)
 
   let reset_lexer () =
     comment_depth := 0;
     parlist := [];
-    seclist := [];
-    declist := []
+    seclist := []
 
   let new_section () =
     if !parlist <> [] then begin
@@ -45,6 +43,8 @@
   let first_char lexbuf = Lexing.lexeme_char lexbuf 0
 
   let docub = Buffer.create 8192
+
+  let new_doc () = comment_depth := 1; Buffer.clear docub
 
   let push_doc () =
     if Buffer.length docub > 0 then begin
@@ -75,13 +75,13 @@ rule header = parse
 
 (* inside a module, at the beginning of a line) *)
 and implementation = parse
+  | "(*" '*'* "*)" space* '\n'
+           { implementation lexbuf }
   | "(*" space*
-           { comment_depth := 1; Buffer.clear docub; documentation lexbuf;
-	     implementation lexbuf }
+           { new_doc (); documentation lexbuf; implementation lexbuf }
   | "(*s" space*
            { new_section (); 
-	     comment_depth := 1; Buffer.clear docub; documentation lexbuf;
-	     implementation lexbuf }
+	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space+ { implementation lexbuf }
   | '\n'   { implementation lexbuf }
   | _      { Buffer.clear codeb; Buffer.add_char codeb (first_char lexbuf); 
@@ -128,7 +128,7 @@ and code_until_nl = parse
 
 (* inside an interface *)
 and interface = parse
-  | eof  { !declist }
+  | eof  { [] }
 
 (* to skip everything until a newline *)
 and skip_until_nl = parse

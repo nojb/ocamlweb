@@ -22,18 +22,16 @@ type paragraph =
 
 type raw_section = paragraph list
 
-type implem = { 
-  implem_name : string;
-  implem_contents : raw_section list }
-
-type decl = { 
-  decl_id : string;
-  decl_contents : string;
-  decl_spec : string }
-
 type interf = { 
+  interf_file : string;
   interf_name : string;
-  interf_contents : decl list }
+  interf_contents : raw_section list }
+
+type implem = { 
+  implem_file : string;
+  implem_name : string;
+  implem_contents : raw_section list;
+  implem_interf : (raw_section list) option } 
 
 type file = 
     Implem of implem

@@ -22,7 +22,8 @@ BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
 BUFFER = buffer.cmx
-OBJS = $(BUFFER) output.cmx pretty.cmx web.cmx lexer.cmx version.cmx main.cmx
+OBJS = $(BUFFER) output.cmx cross.cmx pretty.cmx web.cmx lexer.cmx \
+       version.cmx main.cmx
 
 all: ocamlweb
 
@@ -42,7 +43,7 @@ install:
 byte: $(OBJS:.cmx=.cmo)
 
 test: ocamlweb
-	cd tmp; ../ocamlweb essai.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb essai.ml foo.mli end.tex -o essai.tex ; \
 	latex essai
 
 # export

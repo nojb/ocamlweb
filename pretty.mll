@@ -48,8 +48,8 @@
       leave_math ()
     end
 
-  let check_user_math s =
-    if !user_math_mode then output_string s else output_string ("\\"^s)
+  let check_user_math c =
+    if !user_math_mode then output_char c else output_escaped_char c
 
 }
 
@@ -78,6 +78,7 @@ and pr_code_inside = parse
   | '\n' { () }
   | identifier
          { output_ident (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
+  | "'a" { output_string "\\alpha{}"; pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
   | latex_special  
@@ -93,7 +94,7 @@ and pr_comment = parse
   | '['  { bracket_depth := 1; escaped_code lexbuf; pr_comment lexbuf }
   | eof  { () }
   | '$'  { user_math(); pr_comment lexbuf }
-  | '_' | '^' { check_user_math (Lexing.lexeme lexbuf); pr_comment lexbuf }
+  | '_' | '^' { check_user_math (first_char lexbuf); pr_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_comment lexbuf }
 
 (* escaped code *)
@@ -120,7 +121,7 @@ and escaped_code = parse
 and pr_doc = parse
   | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
-  | '_' | '^' { check_user_math (Lexing.lexeme lexbuf); pr_doc lexbuf }
+  | '_' | '^' { check_user_math (first_char lexbuf); pr_doc lexbuf }
   | eof { () }
   | _   { output_char (first_char lexbuf); pr_doc lexbuf }
 

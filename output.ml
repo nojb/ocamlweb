@@ -34,6 +34,17 @@ let output_char c = Pervasives.output_char !out_channel c
 
 let output_string s = Pervasives.output_string !out_channel s
 
+let output_escaped_char c = 
+  Pervasives.output_char !out_channel '\\';
+  Pervasives.output_char !out_channel c
+
+let output_file f =
+  let ch = open_in f in
+  try
+    while true do
+      Pervasives.output_char !out_channel (input_char ch)
+    done
+  with End_of_file -> close_in ch
 
 (* high level output (LaTeX) ************************************************)
 
@@ -98,7 +109,7 @@ let is_keyword =
 
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
 
-      "string"; "int"; "array"; "unit"; "bool"
+      "string"; "int"; "array"; "unit"; "bool"; "char"
     ];
   function s -> try Hashtbl.find h s; true with Not_found -> false
 
@@ -156,3 +167,30 @@ let output_ec () = leave_math (); output_string "\\ocwec{}"
 let reset_pretty () =
   first_line := true;
   math_mode := false
+
+(* sectioning commands *)
+
+let output_section n =
+  output_string (sprintf "\\ocwsection{%d}\n" n)
+
+let output_module s =
+  output_string "\\ocwmodule{";
+  output_latex_id s;
+  output_string "}"
+
+let interface_part () =
+  output_string "\\ocwinterfacepart{}"
+
+let code_part () =
+  output_string "\\ocwcodepart{}"
+
+let output_interface s =
+  output_string "\\ocwinterface{";
+  output_latex_id s;
+  output_string "}"
+
+let begin_paragraph () =
+  output_string "\\noindent{}"
+
+let end_paragraph () =
+  output_string "\n\n\\medskip{}\n"

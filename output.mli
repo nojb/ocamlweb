@@ -16,11 +16,17 @@
 
 (* $Id$ *)
 
+(* In that module, we concentrate all the printing functions.
+   Thus, it will be easy to add another kind of output, HTML for instance,
+   by adapting the code of that module, and nothing else. *)
+
 val set_output_to_file : string -> unit
 val close_output : unit -> unit
 
 val output_char : char -> unit
 val output_string : string -> unit
+val output_escaped_char : char -> unit
+val output_file : string -> unit
 
 val set_no_doc : bool -> unit
 val latex_header : unit -> unit
@@ -30,9 +36,18 @@ val indentation : int -> unit
 val enter_math : unit -> unit
 val leave_math : unit -> unit
 
+val is_keyword : string -> bool
 val output_ident : string -> unit
 val output_bc : unit -> unit
 val output_ec : unit -> unit
 val output_latex_special : string -> unit
+
+val begin_paragraph : unit -> unit
+val end_paragraph : unit -> unit
+val output_section : int -> unit
+val output_module : string -> unit
+val interface_part : unit -> unit
+val code_part : unit -> unit
+val output_interface : string -> unit
 
 val reset_pretty : unit -> unit

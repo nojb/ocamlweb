@@ -26,18 +26,16 @@ type paragraph =
 
 type raw_section = paragraph list
 
-type implem = 
-    { implem_name : string;
-      implem_contents : raw_section list }
-
-type decl = { 
-  decl_id : string;
-  decl_contents : string;
-  decl_spec : string }
-
 type interf = { 
+  interf_file : string;
   interf_name : string;
-  interf_contents : decl list }
+  interf_contents : raw_section list }
+
+type implem = { 
+  implem_file : string;
+  implem_name : string;
+  implem_contents : raw_section list;
+  implem_interf : (raw_section list) option } 
 
 type file = 
     Implem of implem
@@ -49,31 +47,42 @@ type file =
 
 let pretty_print_paragraph = function
     Documentation s -> 
-      pretty_print_doc s;
-      output_string "\n\n"
+      pretty_print_doc s
   | Code s ->
-      pretty_print_code s;
-      output_string "\n\n"
+      pretty_print_code s
 
 let sec_number = ref 0
 
+let pretty_print_section s = 
+  incr sec_number;
+  output_section !sec_number;
+  List.iter 
+    (function p -> 
+       begin_paragraph ();
+       pretty_print_paragraph p;
+       end_paragraph())
+    s
+    
 let pretty_print_implem imp =
-  let pretty_print_section s = 
-    incr sec_number;
-    output_string (sprintf "\\ocwsection{%d}\n" !sec_number);
-    List.iter 
-      (function p -> 
-	 output_string "\\noindent{}";
-	 pretty_print_paragraph p;
-	 output_string "\\medskip{}\n")
-      s
-  in
+  output_module imp.implem_name;
+  begin match imp.implem_interf with
+      None -> ()
+    | Some l -> 
+	interface_part ();
+	List.iter pretty_print_section l;
+	code_part ()
+  end;
   List.iter pretty_print_section imp.implem_contents
+
+let pretty_print_interf inte =
+  output_interface inte.interf_name;
+  List.iter pretty_print_section inte.interf_contents
 
 let produce_document l =
   List.iter 
     (function 
 	 Implem i -> pretty_print_implem i 
-       | _ -> ())
+       | Interf i -> pretty_print_interf i
+       | Other f -> output_file f)
     l
 
