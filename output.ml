@@ -441,7 +441,7 @@ let reset_output () =
 (*s \textbf{Sectioning commands.} *)
 
 let begin_section () =
-  output_string "\\ocwsection\n"
+  output_string "\\allowbreak\\ocwsection\n"
 
 let output_typeout_command filename =
   output_string "\\typeout{OcamlWeb file ";
