@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o adequacy to ocaml 3.01 parser
   o options -dvi, -ps and -html to produce DVI, PS and HTML
   o page style with headings (thanks to Ralf Treinen)
   o insertion into LaTeX preamble with option -p and (*p

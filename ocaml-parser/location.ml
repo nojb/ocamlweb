@@ -86,6 +86,7 @@ let rec highlight_locations loc1 loc2 =
             Terminfo.standout false;
             (* Position cursor back to original location *)
             Terminfo.resume !num_loc_lines;
+            flush stdout;
             true;
           with Exit -> false
 
@@ -115,10 +116,16 @@ let print ppf loc =
   end
 
 let print_warning loc ppf w =
- if Warnings.is_active w then begin
-  fprintf ppf "%aWarning: %s@." print loc (Warnings.message w);
-  incr num_loc_lines;
- end
+  if Warnings.is_active w then begin
+    let printw ppf w =
+      let n = Warnings.print ppf w in
+      num_loc_lines := !num_loc_lines + n
+    in
+    fprintf ppf "%a" print loc;
+    fprintf ppf "Warning: %a@." printw w;
+    pp_print_flush ppf ();
+    incr num_loc_lines;
+  end
 ;;
 
 let prerr_warning loc w = print_warning loc err_formatter w;;

@@ -119,7 +119,7 @@ let get_stored_string () =
 
 let char_for_backslash =
   match Sys.os_type with
-  | "Unix" | "Win32" ->
+  | "Unix" | "Win32" | "Cygwin" ->
       begin function
       | 'n' -> '\010'
       | 'r' -> '\013'
@@ -146,6 +146,7 @@ let char_for_decimal_code lexbuf i =
 (* To store the position of the beginning of a string and comment *)
 let string_start_pos = ref 0;;
 let comment_start_pos = ref [];;
+let in_comment () = !comment_start_pos <> [];;
 
 (* Error report *)
 
@@ -292,8 +293,9 @@ rule token = parse
   | ">}" { GREATERRBRACE }
 
   | "!=" { INFIXOP0 "!=" }
-  | "-"  { SUBTRACTIVE "-" }
-  | "-." { SUBTRACTIVE "-." }
+  | "+"  { PLUS }
+  | "-"  { MINUS }
+  | "-." { MINUSDOT }
 
   | "!" symbolchar *
             { PREFIXOP(Lexing.lexeme lexbuf) }
@@ -322,7 +324,7 @@ and comment = parse
   | "*)"
       { match !comment_start_pos with
         | [] -> assert false
-        | [x] -> ()
+        | [x] -> comment_start_pos := [];
         | _ :: l -> comment_start_pos := l;
                     comment lexbuf;
        }

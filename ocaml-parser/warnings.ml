@@ -41,7 +41,8 @@ let check c =
   with _ -> raise (Arg.Bad (Printf.sprintf "unknown warning option %c" c))
 ;;    
 
-let flags = Array.create 26 true;;
+let active = Array.create 26 true;;
+let error = Array.create 26 false;;
 
 let translate c =
   check c;
@@ -51,7 +52,18 @@ let translate c =
     (Char.code c - Char.code 'a', false)
 ;;
 
-let parse_options s =
+let is_active x =
+  let (n, _) = translate (letter x) in
+  active.(n)
+;;
+
+let is_error x =
+  let (n, _) = translate (letter x) in
+  error.(n)
+;;
+
+let parse_options iserr s =
+  let flags = if iserr then error else active in
   for i = 0 to String.length s - 1 do
     if s.[i] = 'A' then Array.fill flags 0 (Array.length flags) true
     else if s.[i] = 'a' then Array.fill flags 0 (Array.length flags) false
@@ -60,11 +72,6 @@ let parse_options s =
       flags.(n) <- fl;
     end;
   done
-;;
-
-let is_active x =
-  let (n, _) = translate (letter x) in
-  flags.(n)
 ;;
 
 let message = function
@@ -87,4 +94,35 @@ let message = function
       "this expression should have type unit."
   | Comment s -> "this is " ^ s ^ "."
   | Other s -> s
+;;
+
+let nerrors = ref 0;;
+
+let print ppf w =
+  let msg = message w in
+  let newlines = ref 0 in
+  for i = 0 to String.length msg - 1 do
+    if msg.[i] = '\n' then incr newlines;
+  done;
+  let (out, flush, newline, space) =
+    Format.pp_get_all_formatter_output_functions ppf ()
+  in
+  let countnewline x = incr newlines; newline x in
+  Format.pp_set_all_formatter_output_functions ppf out flush countnewline space;
+  Format.fprintf ppf "%s" msg;
+  Format.pp_print_flush ppf ();
+  Format.pp_set_all_formatter_output_functions ppf out flush newline space;
+  let (n, _) = translate (letter w) in
+  if error.(n) then incr nerrors;
+  !newlines
+;;
+
+exception Errors of int;;
+
+let check_fatal () =
+  if !nerrors > 0 then begin
+    let e = Errors !nerrors in
+    nerrors := 0;
+    raise e;
+  end;
 ;;

@@ -286,7 +286,8 @@ and tr_expression_desc loc = function
       tr_expression e1; tr_expression e2
   | Pexp_letmodule (x,m,e) ->
       tr_module_expr m; bind_variables [x] tr_expression e
-  | Pexp_constant _ -> ()
+  | Pexp_constant _ -> 
+      ()
   | Pexp_send (e,id) ->
       add_uses loc Method id; tr_expression e
   | Pexp_new id ->
@@ -297,6 +298,10 @@ and tr_expression_desc loc = function
       iter_fst (add_uses loc Method) l; iter_snd tr_expression l
   | Pexp_variant (_,eo) ->
       option_iter tr_expression eo
+  | Pexp_assert e ->
+      tr_expression e
+  | Pexp_assertfalse ->
+      ()
 
 (*s Value descriptions. *)
 
@@ -519,6 +524,8 @@ and tr_structure_item_desc loc = function
   | Pstr_exn_rebind (id,q) ->
       add_def loc Exception id;
       add_uses_q loc Exception q
+  | Pstr_include me ->
+      tr_module_expr me
 
 (*s Given all that collecting functions, we can now define two functions
     [cross_implem] and [cross_interf] which respectively compute the 

@@ -20,9 +20,9 @@ exception Fatal_error
 val map_end: ('a -> 'b) -> 'a list -> 'b list -> 'b list
         (* [map_end f l t] is [map f l @ t], just more efficient. *)
 val for_all2: ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
-        (* Same as [List.for_all] but for a binary predicate. *)
-val filter: ('a -> bool) -> 'a list -> 'a list
-val mem_assq: 'a -> ('a * 'b) list -> bool
+        (* Same as [List.for_all] but for a binary predicate.
+           In addition, this [for_all2] never fails: given two lists
+           with different lengths, it returns false. *)
 val replicate_list: 'a -> int -> 'a list
         (* [replicate_list elem n] is the list with [n] elements
            all identical to [elem]. *)
@@ -39,6 +39,9 @@ val find_in_path: string list -> string -> string
         (* Search a file in a list of directories. *)
 val remove_file: string -> unit
         (* Delete the given file if it exists. Never raise an error. *)
+val expand_directory: string -> string -> string
+        (* [expand_directory alt file] eventually expands a [+] at the
+           beginning of file into [alt] (an alternate root directory) *)
 
 val create_hashtable: int -> ('a * 'b) list -> ('a, 'b) Hashtbl.t
         (* Create a hashtable of the given size and fills it with the

@@ -48,6 +48,7 @@ type 'a class_infos =
     pci_params: string list * Location.t;
     pci_name: string;
     pci_expr: 'a;
+    pci_variance: (bool * bool) list;
     pci_loc: Location.t }
 
 (* Value expressions for the core language *)
@@ -100,6 +101,8 @@ and expression_desc =
   | Pexp_setinstvar of string * expression
   | Pexp_override of (string * expression) list
   | Pexp_letmodule of string * module_expr * expression
+  | Pexp_assert of expression
+  | Pexp_assertfalse
 
 (* Value descriptions *)
 
@@ -114,6 +117,7 @@ and type_declaration =
     ptype_cstrs: (core_type * core_type * Location.t) list;
     ptype_kind: type_kind;
     ptype_manifest: core_type option;
+    ptype_variance: (bool * bool) list;
     ptype_loc: Location.t }
 
 and type_kind =
@@ -242,7 +246,7 @@ and structure_item_desc =
   | Pstr_open of Longident.t
   | Pstr_class of class_declaration list
   | Pstr_class_type of class_type_declaration list
-
+  | Pstr_include of module_expr
 
 (* Toplevel phrases *)
 

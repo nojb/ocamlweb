@@ -57,28 +57,10 @@ let ghpat d = { ppat_desc = d; ppat_loc = symbol_gloc () };;
 let ghtyp d = { ptyp_desc = d; ptyp_loc = symbol_gloc () };;
 
 let mkassert e =
-  let l = symbol_rloc () in
-  let triple = ghexp (Pexp_tuple
-                       [ghexp (Pexp_constant (Const_string !input_name));
-                        ghexp (Pexp_constant (Const_int l.loc_start));
-                        ghexp (Pexp_constant (Const_int l.loc_end))])
-  in
-  let excep = Ldot (Lident "Pervasives", "Assert_failure") in
-  let bucket = ghexp (Pexp_construct (excep, Some triple, false)) in
-  let raise_ = ghexp (Pexp_ident (Ldot (Lident "Pervasives", "raise"))) in
-  let raise_af = ghexp (Pexp_apply (raise_, ["", bucket])) in
-
-  let under = ghpat Ppat_any in
-  let false_ = ghexp (Pexp_construct (Lident "false", None, false)) in
-  let try_e = ghexp (Pexp_try (e, [(under, false_)])) in
-
-  let not_ = ghexp (Pexp_ident (Ldot (Lident "Pervasives", "not"))) in
-  let not_try_e = ghexp (Pexp_apply (not_, ["", try_e])) in
   match e with
-  | {pexp_desc = Pexp_construct (Lident "false", None, false) } -> raise_af
-  | _ -> if !Clflags.noassert
-         then mkexp (Pexp_construct (Lident "()", None, false))
-         else mkexp (Pexp_ifthenelse (not_try_e, raise_af, None))
+  | {pexp_desc = Pexp_construct (Lident "false", None, false) } ->
+         mkexp (Pexp_assertfalse)
+  | _ -> mkexp (Pexp_assert (e))
 ;;
 
 let mklazy e =
@@ -257,6 +239,8 @@ let bigarray_set arr arg newval =
 %token LPAREN
 %token MATCH
 %token METHOD
+%token MINUS
+%token MINUSDOT
 %token MINUSGREATER
 %token MODULE
 %token MUTABLE
@@ -267,6 +251,7 @@ let bigarray_set arr arg newval =
 %token <string> OPTLABEL
 %token OR
 %token PARSER
+%token PLUS
 %token <string> PREFIXOP
 %token PRIVATE
 %token QUESTION
@@ -283,7 +268,6 @@ let bigarray_set arr arg newval =
 %token STAR
 %token <string> STRING
 %token STRUCT
-%token <string> SUBTRACTIVE
 %token THEN
 %token TILDE
 %token TO
@@ -316,7 +300,7 @@ let bigarray_set arr arg newval =
 %left  INFIXOP0 EQUAL LESS GREATER      /* = < > etc */
 %right INFIXOP1                         /* @ ^ etc */
 %right COLONCOLON                       /* :: */
-%left  INFIXOP2 SUBTRACTIVE             /* + - */
+%left  INFIXOP2 PLUS MINUS MINUSDOT     /* + - */
 %left  INFIXOP3 STAR                    /* * / */
 %right INFIXOP4                         /* ** */
 %right prec_unary_minus                 /* - unary */
@@ -430,6 +414,8 @@ structure_item:
       { mkstr(Pstr_class (List.rev $2)) }
   | CLASS TYPE class_type_declarations
       { mkstr(Pstr_class_type (List.rev $3)) }
+  | INCLUDE module_expr
+      { mkstr(Pstr_include $2) }
 ;
 module_binding:
     EQUAL module_expr
@@ -504,7 +490,9 @@ class_declarations:
 ;
 class_declaration:
     virtual_flag class_type_parameters LIDENT class_fun_binding
-      { {pci_virt = $1; pci_params = $2; pci_name = $3; pci_expr = $4;
+      { let params, variance = List.split (fst $2) in
+        {pci_virt = $1; pci_params = params, snd $2;
+         pci_name = $3; pci_expr = $4; pci_variance = variance;
          pci_loc = symbol_rloc ()} }
 ;
 class_fun_binding:
@@ -689,7 +677,9 @@ class_descriptions:
 ;
 class_description:
     virtual_flag class_type_parameters LIDENT COLON class_type
-      { {pci_virt = $1; pci_params = $2; pci_name = $3; pci_expr = $5;
+      { let params, variance = List.split (fst $2) in
+        {pci_virt = $1; pci_params = params, snd $2;
+         pci_name = $3; pci_expr = $5; pci_variance = variance;
          pci_loc = symbol_rloc ()} }
 ;
 class_type_declarations:
@@ -698,7 +688,9 @@ class_type_declarations:
 ;
 class_type_declaration:
     virtual_flag class_type_parameters LIDENT EQUAL class_signature
-      { {pci_virt = $1; pci_params = $2; pci_name = $3; pci_expr = $5;
+      { let params, variance = List.split (fst $2) in
+        {pci_virt = $1; pci_params = params, snd $2;
+         pci_name = $3; pci_expr = $5; pci_variance = variance;
          pci_loc = symbol_rloc ()} }
 ;
 
@@ -800,8 +792,12 @@ expr:
       { mkinfix $1 $2 $3 }
   | expr INFIXOP4 expr
       { mkinfix $1 $2 $3 }
-  | expr SUBTRACTIVE expr
-      { mkinfix $1 $2 $3 }
+  | expr PLUS expr
+      { mkinfix $1 "+" $3 }
+  | expr MINUS expr
+      { mkinfix $1 "-" $3 }
+  | expr MINUSDOT expr
+      { mkinfix $1 "-." $3 }
   | expr STAR expr
       { mkinfix $1 "*" $3 }
   | expr EQUAL expr
@@ -820,7 +816,7 @@ expr:
       { mkinfix $1 "&&" $3 }
   | expr COLONEQUAL expr
       { mkinfix $1 ":=" $3 }
-  | SUBTRACTIVE expr %prec prec_unary_minus
+  | subtractive expr %prec prec_unary_minus
       { mkuminus $1 $2 }
   | simple_expr DOT label_longident LESSMINUS expr
       { mkexp(Pexp_setfield($1, $3, $5)) }
@@ -865,7 +861,7 @@ simple_expr:
   | BEGIN seq_expr END
       { $2 }
   | BEGIN END
-      { mkexp (Pexp_ident (Lident "()")) }
+      { mkexp (Pexp_construct (Lident "()", None, false)) }
   | BEGIN seq_expr error
       { unclosed "begin" 1 "end" 3 }
   | LPAREN seq_expr type_constraint RPAREN
@@ -1144,11 +1140,13 @@ type_declarations:
 ;
 type_declaration:
     type_parameters LIDENT type_kind constraints
-      { let (kind, manifest) = $3 in
-        ($2, {ptype_params = $1;
+      { let (params, variance) = List.split $1 in
+        let (kind, manifest) = $3 in
+        ($2, {ptype_params = params;
               ptype_cstrs = List.rev $4;
               ptype_kind = kind;
               ptype_manifest = manifest;
+              ptype_variance = variance;
               ptype_loc = symbol_rloc()}) }
 ;
 constraints:
@@ -1178,7 +1176,12 @@ type_parameters:
   | LPAREN type_parameter_list RPAREN           { List.rev $2 }
 ;
 type_parameter:
-    QUOTE ident                                 { $2 }
+    type_variance QUOTE ident                   { $3, $1 }
+;
+type_variance:
+    /* empty */                                 { false, false }
+  | PLUS                                        { true, false }
+  | MINUS                                       { false, true }
 ;
 type_parameter_list:
     type_parameter                              { [$1] }
@@ -1211,10 +1214,12 @@ with_constraints:
 ;
 with_constraint:
     TYPE type_parameters label_longident EQUAL core_type constraints
-      { ($3, Pwith_type {ptype_params = $2;
+      { let params, variance = List.split $2 in
+        ($3, Pwith_type {ptype_params = params;
                          ptype_cstrs = List.rev $6;
                          ptype_kind = Ptype_abstract;
                          ptype_manifest = Some $5;
+                         ptype_variance = variance;
                          ptype_loc = symbol_rloc()}) }
     /* used label_longident instead of type_longident to disallow
        functor applications in type path */
@@ -1227,8 +1232,8 @@ with_constraint:
 core_type:
     core_type2
       { $1 }
-  | core_type2 AS type_parameter
-      { mktyp(Ptyp_alias($1, $3)) }
+  | core_type2 AS QUOTE ident
+      { mktyp(Ptyp_alias($1, $4)) }
 ;
 core_type2:
     simple_core_type_or_tuple
@@ -1278,19 +1283,14 @@ simple_core_type:
   | LBRACKET GREATER opt_bar row_field_list RBRACKET
       { let l = List.rev $4 in
         mktyp(Ptyp_variant(l, false, List.map (fun (p,_,_) -> p) l)) }
-  | LBRACKETLESS opt_bar row_field_list opt_opened RBRACKET
-      { mktyp(Ptyp_variant(List.rev $3, not $4, [])) }
-  | LBRACKETLESS opt_bar row_field_list opt_opened GREATER name_tag_list
-    RBRACKET
-      { mktyp(Ptyp_variant(List.rev $3, not $4, List.rev $6)) }
+  | LBRACKETLESS opt_bar row_field_list RBRACKET
+      { mktyp(Ptyp_variant(List.rev $3, true, [])) }
+  | LBRACKETLESS opt_bar row_field_list GREATER name_tag_list RBRACKET
+      { mktyp(Ptyp_variant(List.rev $3, true, List.rev $5)) }
   | LBRACKET RBRACKET
       { mktyp(Ptyp_variant([],true,[])) }
-  | LBRACKETLESS opt_bar DOTDOT RBRACKET
+  | LBRACKET GREATER RBRACKET
       { mktyp(Ptyp_variant([],false,[])) }
-;
-opt_opened:
-    BAR DOTDOT                                  { true }
-  | /* empty */                                 { false }
 ;
 row_field_list:
     row_field                                   { [$1] }
@@ -1354,8 +1354,8 @@ constant:
 ;
 signed_constant:
     constant                                    { $1 }
-  | SUBTRACTIVE INT                             { Const_int(- $2) }
-  | SUBTRACTIVE FLOAT                           { Const_float("-" ^ $2) }
+  | MINUS INT                                   { Const_int(- $2) }
+  | subtractive FLOAT                           { Const_float("-" ^ $2) }
 ;
 /* Identifiers and long identifiers */
 
@@ -1379,7 +1379,9 @@ operator:
   | INFIXOP2                                    { $1 }
   | INFIXOP3                                    { $1 }
   | INFIXOP4                                    { $1 }
-  | SUBTRACTIVE                                 { $1 }
+  | PLUS                                        { "+" }
+  | MINUS                                       { "-" }
+  | MINUSDOT                                    { "-." }
   | STAR                                        { "*" }
   | EQUAL                                       { "=" }
   | LESS                                        { "<" }
@@ -1483,5 +1485,9 @@ opt_bar:
 opt_semi:
   | /* empty */                                 { () }
   | SEMI                                        { () }
+;
+subtractive:
+  | MINUS					{ "-" }
+  | MINUSDOT                                    { "-." }
 ;
 %%

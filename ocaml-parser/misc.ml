@@ -29,22 +29,8 @@ let rec map_end f l1 l2 =
 let rec for_all2 pred l1 l2 =
   match (l1, l2) with
     ([], []) -> true
-  | (hd1::tl1, hd2::tl2) -> pred hd1 hd2 & for_all2 pred tl1 tl2
+  | (hd1::tl1, hd2::tl2) -> pred hd1 hd2 && for_all2 pred tl1 tl2
   | (_, _) -> false
-
-let rec filter pred =
-  function
-    [] ->
-      []
-  | a::l ->
-      if pred a then
-        a::(filter pred l)
-      else
-        filter pred l
-
-let rec mem_assq x = function
-    [] -> false
-  | (a,b)::l -> a == x or mem_assq x l
 
 let rec replicate_list elem n =
   if n <= 0 then [] else elem :: replicate_list elem (n-1)
@@ -90,6 +76,15 @@ let remove_file filename =
     Sys.remove filename
   with Sys_error msg ->
     ()
+
+(* Expand a -I option: if it starts with +, make it relative to the standard
+   library directory *)
+
+let expand_directory alt s =
+  if String.length s > 0 && s.[0] = '+'
+  then Filename.concat alt
+                       (String.sub s 1 (String.length s - 1))
+  else s
 
 (* Hashtable functions *)
 
