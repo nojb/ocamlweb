@@ -90,7 +90,6 @@
 }
 
 let space = [' ' '\t']
-
 let lowercase = ['a'-'z' '\223'-'\246' '\248'-'\255' '_']
 let uppercase = ['A'-'Z' '\192'-'\214' '\216'-'\222']
 let identchar = 
@@ -98,6 +97,9 @@ let identchar =
 let lo_ident = lowercase identchar*
 let up_ident = uppercase identchar*
 let ident = (lowercase | uppercase ) identchar*
+let character = 
+  "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
+      | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
 
 (* Code *********************************************************************)
 
@@ -112,11 +114,17 @@ rule cross_code = parse
            { exn_decl lexbuf; inside_code lexbuf }
   | "open" { opens lexbuf; cross_code lexbuf }
   | "(*"   { comment_depth := 1; skip_comment lexbuf; cross_code lexbuf }
+  | character
+           { cross_code lexbuf }
+  | '"'    { skip_string lexbuf; cross_code lexbuf }
   | eof    { return_sets () }
   | _      { cross_code lexbuf }
 
 and inside_code = parse
   | "(*"   { comment_depth := 1; skip_comment lexbuf; inside_code lexbuf }
+  | '"'    { skip_string lexbuf; inside_code lexbuf }
+  | character
+           { inside_code lexbuf }
   | "exception"
            { exn_decl lexbuf; inside_code lexbuf }
   | "open" { opens lexbuf; inside_code lexbuf }
@@ -136,6 +144,8 @@ and pattern_defs = parse
   | up_ident { pattern_defs lexbuf }
   | eof      { () }
   | '='      { () }
+  | '"'      { skip_string lexbuf; pattern_defs lexbuf }
+  | character{ pattern_defs lexbuf }
   | space    { bindings lexbuf }
   | _        { pattern_defs lexbuf }
 
@@ -145,6 +155,8 @@ and bindings = parse
   | up_ident { bindings lexbuf }
   | eof      { () }
   | "="      { () }
+  | '"'      { skip_string lexbuf; bindings lexbuf }
+  | character{ bindings lexbuf }
   | _        { bindings lexbuf }
 
 and opens = parse
@@ -164,6 +176,7 @@ and cross_interf = parse
            { exn_decl lexbuf; cross_interf lexbuf }
   | "open" { opens lexbuf; cross_interf lexbuf }
   | "(*"   { comment_depth := 1; skip_comment lexbuf; cross_interf lexbuf }
+  | '"'    { skip_string lexbuf; cross_interf lexbuf }
   | ident  { add_uses (Lexing.lexeme lexbuf); cross_interf lexbuf }
   | eof    { return_sets () }
   | _      { cross_interf lexbuf }
@@ -190,10 +203,17 @@ and exn_decl = parse
   | eof           { () }
   | _             { () }
   
-(* Comments are ignored here ***********************************************)  
+(* Comments and strings are ignored here ***********************************)  
 and skip_comment = parse
   | "(*" { incr comment_depth; skip_comment lexbuf }
   | "*)" { decr comment_depth;
            if !comment_depth > 0 then skip_comment lexbuf }
   | eof  { () }
   | _    { skip_comment lexbuf }
+
+and skip_string = parse
+  | '"'      { () }
+  | '\\' '"' { skip_string lexbuf }
+  | eof      { () }
+  | _        { skip_string lexbuf }
+

@@ -27,18 +27,19 @@ val set_output_to_file : string -> unit
 val close_output : unit -> unit
 
 (* Then we introduce some low level output functions, for characters 
-   (with or without escape sequence) and strings.
-   [(output_file f)] copies the contents of file [f] on the output. *)
+   and strings.
+   [(output_file f)] copies the contents of file [f] on the output. 
+   [(output_verbatim s)] outputs the string [s] `as is'. *)
 
 val output_char : char -> unit
-val output_escaped_char : char -> unit
 val output_string : string -> unit
 val output_file : string -> unit
+val output_verbatim : string -> unit
 
 (*s The following functions are mainly useful for a \LaTeX\ output, but
     will work correctly in other cases. A call to [set_no_doc] suppresses
     the output of the header and trailer. [(indentation n)] introduces an
-    indentation of size [n] at the beggining of a new line. *)
+    indentation of size [n] at the beggining of a line. *)
 
 val set_no_doc : bool -> unit
 val latex_header : unit -> unit
@@ -53,12 +54,14 @@ val leave_math : unit -> unit
     [output_ident] outputs an identifier, in different faces for keywords 
     and other identifiers, escaping the characters that need it, 
     like _ for instance in \LaTeX. 
-    [output_latex_special] pretty-prints some reserved symbols 
-    of \LaTeX, like \verb!&! or \verb!$!, but also some mathematical symbols,
+    [output_escaped_char] pretty-prints the reserved char of \LaTeX, 
+    like \verb!&! or \verb!$!.
+    [output_latex_special] pretty-prints some mathematical symbols,
     like $\rightarrow$ for \texttt{->}. *)
 
 val is_keyword : string -> bool
 val output_ident : string -> unit
+val output_escaped_char : char -> unit
 val output_latex_special : string -> unit
 
 (* Comments inside code are opened and closed respectively by 

@@ -63,6 +63,9 @@
 }
 
 let space = [' ' '\t']
+let character = 
+  "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
+      | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
 
 (* to skip the headers *)
 rule header = parse
@@ -75,16 +78,17 @@ rule header = parse
 
 (* inside a module, at the beginning of a line) *)
 and implementation = parse
-  | "(*" '*'* "*)" space* '\n'
+  | space* "(*" '*'* "*)" space* '\n'
            { implementation lexbuf }
-  | "(*" space*
+  | space* "(*" space*
            { new_doc (); documentation lexbuf; implementation lexbuf }
-  | "(*s" space*
+  | space* "(*s" space*
            { new_section (); 
 	     new_doc (); documentation lexbuf; implementation lexbuf }
-  | "(*i"  { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
-  | space+ { implementation lexbuf }
-  | '\n'   { implementation lexbuf }
+  | space* "(*i"
+           { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
+  | space* '\n'   
+           { implementation lexbuf }
   | _      { Buffer.clear codeb; Buffer.add_char codeb (first_char lexbuf); 
 	     code_until_nl lexbuf; code lexbuf;
 	     implementation lexbuf }
@@ -117,6 +121,8 @@ and code = parse
   | eof  { push_code () }
   | '"'  { Buffer.add_char codeb '"'; code_string lexbuf;
 	   code_until_nl lexbuf; code lexbuf }
+  | character
+         { Buffer.add_string codeb (Lexing.lexeme lexbuf); code lexbuf }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf;
 	   code lexbuf }
 
@@ -128,6 +134,8 @@ and code_until_nl = parse
 	   comment lexbuf; code_until_nl lexbuf }
   | '"'  { Buffer.add_char codeb '"'; code_string lexbuf;
 	   code_until_nl lexbuf }
+  | character
+         { Buffer.add_string codeb (Lexing.lexeme lexbuf); code lexbuf }
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf }
 

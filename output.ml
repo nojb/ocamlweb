@@ -34,10 +34,6 @@ let output_char c = Pervasives.output_char !out_channel c
 
 let output_string s = Pervasives.output_string !out_channel s
 
-let output_escaped_char c = 
-  Pervasives.output_char !out_channel '\\';
-  Pervasives.output_char !out_channel c
-
 let output_file f =
   let ch = open_in f in
   try
@@ -45,6 +41,11 @@ let output_file f =
       Pervasives.output_char !out_channel (input_char ch)
     done
   with End_of_file -> close_in ch
+
+let output_verbatim s =
+  (* TODO : vérifier que "!" n'apparaît pas dans [s] *)
+  output_string "\\verb!"; output_string s; output_string "!"
+  
 
 (* high level output (LaTeX) ************************************************)
 
@@ -83,15 +84,10 @@ let leave_math () =
     math_mode := false
   end
 
-let first_line = ref true
-
 let indentation n =
   leave_math ();
-  if not !first_line then
-    let space = 0.5 *. (float n) in
-    output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
-  else
-    first_line := false
+  let space = 0.5 *. (float n) in
+  output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
 
 (* keywords and identifiers *)
 
@@ -107,10 +103,11 @@ let is_keyword =
       "or"; "parser";  "private"; "rec"; "sig";  "struct"; "then"; "to";
       "true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
 
-      "ref";
-
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
 
+      (* ajoutés *)
+      "ref"; "not";
+      (* types *)
       "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option"
     ];
   function s -> try Hashtbl.find h s; true with Not_found -> false
@@ -141,16 +138,15 @@ let output_ident s =
       output_raw_ident s
   end
 
+let output_escaped_char c = 
+  if c = '^' || c = '~' then leave_math();
+  match c with
+    | '\\' -> output_string "\\ensuremath{\\backslash}"
+    | _ -> output_char '\\'; output_char c; output_string "{}"
+
 let output_latex_special = function
     " " -> output_string "~" 
            (* if !math_mode then output_string "~" else output_char ' ' *)
-
-  | "^" -> output_string "\\^{}"
-  | "%" -> output_string "\\%{}"
-  | "&" -> output_string "\\&{}"
-  | "$" -> output_string "\\${}"
-  | "{" -> output_string "\\{{}"
-  | "}" -> output_string "\\}{}"
 
   | "*" -> enter_math (); output_string "\\times{}"
   | "->" -> enter_math (); output_string "\\rightarrow{}"
@@ -177,7 +173,6 @@ let output_vspace () = output_string "\\ocwvspace{}"
 (* coming back to initial values *)
 
 let reset_output () =
-  first_line := true;
   math_mode := false
 
 (* sectioning commands *)

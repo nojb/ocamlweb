@@ -63,10 +63,13 @@ let uppercase = ['A'-'Z' '\192'-'\214' '\216'-'\222']
 let identchar = 
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
 let identifier = (lowercase | uppercase) identchar*
-let latex_reserved = '^' | '%' | '&' | '$' | '{' | '}' | '\\'
+let tex_reserved = 
+  '$' | '#' | '%' | '&' | '\\' | '{' | '}' | '^' | '_' | '~'
 let latex_special = 
-    ' ' | '^' | '%' | '&' | '$' | '{' | '}' | '\\' (* TeX reserved chars *)
-  | '*' | "->" | "<-" | "<=" | ">=" | "<>"         (* math symbols *)
+  ' ' | '*' | "->" | "<-" | "<=" | ">=" | "<>"         (* math symbols *)
+let character = 
+  "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
+      | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
 
 (************************************************************************)
 (* CODE                                                                 *)
@@ -87,6 +90,10 @@ and pr_code_inside = parse
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
   | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
+  | character
+         { output_verbatim (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
+  | tex_reserved
+         { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
   | latex_special  
          { output_latex_special (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
   | eof  { () }
@@ -108,22 +115,26 @@ and pr_code_string = parse
   | '"'  { output_es () }
   | '\n' { indentation 0; pr_code_string lexbuf }
   | ' '  { output_vspace (); pr_code_string lexbuf }
-  | latex_reserved
+  | tex_reserved
          { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
   | eof  { () }
   | _    { output_char (first_char lexbuf); pr_code_string lexbuf }
 
 (* escaped code *)
 and escaped_code = parse
-  | '[' { output_char '['; incr bracket_depth; escaped_code lexbuf }
-  | ']' { decr bracket_depth; 
-	  if !bracket_depth > 0 then begin
-	    output_char ']'; escaped_code lexbuf
-          end else
-	    if not !user_math_mode then leave_math () }
+  | '['  { output_char '['; incr bracket_depth; escaped_code lexbuf }
+  | ']'  { decr bracket_depth; 
+	   if !bracket_depth > 0 then begin
+	     output_char ']'; escaped_code lexbuf
+           end else
+	     if not !user_math_mode then leave_math () }
   | '"'  { output_bs (); pr_code_string lexbuf; escaped_code lexbuf }
+  | character
+         { output_verbatim (Lexing.lexeme lexbuf); escaped_code lexbuf }
   | identifier
          { output_ident (Lexing.lexeme lexbuf); escaped_code lexbuf }
+  | tex_reserved
+         { output_escaped_char (first_char lexbuf); escaped_code lexbuf }
   | latex_special  
          { output_latex_special (Lexing.lexeme lexbuf); escaped_code lexbuf }
   | eof  { if not !user_math_mode then leave_math () }

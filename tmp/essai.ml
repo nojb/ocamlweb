@@ -17,7 +17,9 @@ let ma_fonction x = function (y,z) ->
 let autre_bout x =
   if x <= 0 then x+1 else x+2;
   "(* une grande chaine
-   qui se poursuit sur deux lignes"; while true do () done
+   qui se poursuit sur deux lignes"; while true do () done;
+  '"' + "une autre chaine"
+  '\134' + '\n' + toto
 
 (*s    documentation 3 : cette fonction a pour effet de mettre dans la 
   référence [x1] la valeur [x2]. *)

@@ -2,10 +2,9 @@
 Parsing ocaml
 =============
 
- 1. chaînes dans les commentaires
-
  2. caractères \xxx et caractères échappés
 
+ 3. (*x bla bla bla *) => met "bla bla bla" dans l'index (à cet endroit)
 
 Web (cross)
 ===========
@@ -24,8 +23,6 @@ Document LaTeX
 ==============
 
  1. underscore plus fin dans les identificateurs
-
- 2. indentation code et commentaire sur première ligne
 
 
 Documentation ocamlweb
