@@ -109,28 +109,27 @@ in the file named [f]. These file names must be separated by spaces,
 tabulations or newlines *)
 
 let files_from_file f =
-
   let rec files_from_channel accu_s accu_l ch =
     try
       let c = input_char ch in
-	match c with 
-	    ' ' | '\t' | '\n' ->
-	      files_from_channel 
-		"" (if accu_s="" then accu_l else accu_s::accu_l) ch
-	  | _ -> 
-	      files_from_channel (accu_s^(String.make 1 c)) accu_l ch
-    with
-	End_of_file ->
-	  List.rev (if accu_s="" then accu_l else accu_s::accu_l)
+      match c with 
+	| ' ' | '\t' | '\n' ->
+	    files_from_channel 
+	      "" (if accu_s="" then accu_l else accu_s::accu_l) ch
+	| _ -> 
+	    files_from_channel (accu_s^(String.make 1 c)) accu_l ch
+    with End_of_file ->
+      List.rev (if accu_s="" then accu_l else accu_s::accu_l)
   in
-    try
-      check_if_file_exists f;
-      let ch = open_in f in
-      let l = files_from_channel "" [] ch in
-	close_in ch;l
-    with Sys_error _ ->
-      eprintf "\nocamlweb: cannot read from file %s\n" f;
-      exit 1
+  try
+    check_if_file_exists f;
+    let ch = open_in f in
+    let l = files_from_channel "" [] ch in
+    close_in ch;l
+  with Sys_error _ -> begin
+    eprintf "\nocamlweb: cannot read from file %s\n" f;
+    exit 1
+  end
 
 (*s \textbf{Parsing of the command line.} *)
 
@@ -146,8 +145,8 @@ let parse () =
 	web := false; parse_rec rem
     | ("-web" | "--web") :: rem ->
 	web := true; parse_rec rem
-    | ("-nodoc" | "--nodoc" | "--no-doc") :: rem ->
-	set_no_doc true; parse_rec rem
+    | ("-nopreamble" | "--nopreamble" | "--no-preamble") :: rem ->
+	set_no_preamble true; parse_rec rem
     | ("-noindex" | "--noindex" | "--no-index") :: rem ->
 	index := false; parse_rec rem
     | ("-o" | "--output") :: f :: rem ->

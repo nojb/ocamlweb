@@ -60,12 +60,12 @@ let output_verbatim s =
   (*i TODO : vérifier que "!" n'apparaît pas dans [s] i*)
   output_string "\\verb!"; output_string s; output_string "!"
 
-let nodoc = ref false
+let no_preamble = ref false
 
-let set_no_doc b = nodoc := b
+let set_no_preamble b = no_preamble := b
 
 let latex_header opt =
-  if not !nodoc then begin
+  if not !no_preamble then begin
     output_string "\\documentclass[12pt]{article}\n";
     output_string "\\usepackage";
     if opt <> "" then output_string (sprintf "[%s]" opt);
@@ -77,7 +77,7 @@ let latex_header opt =
   end
 
 let latex_trailer () =
-  if not !nodoc then begin
+  if not !no_preamble then begin
     output_string "\\end{document}\n"
   end
 

@@ -44,7 +44,7 @@ val output_verbatim : string -> unit
     ocamlweb.sty.
 *)
 
-val set_no_doc : bool -> unit
+val set_no_preamble : bool -> unit
 val latex_header : string -> unit
 val latex_trailer : unit -> unit
 
