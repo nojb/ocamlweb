@@ -23,10 +23,11 @@ open Lexer
 
 let usage () =
   prerr_endline "";
-  prerr_endline "Usage: ocamlweb <options> <files>";
-  prerr_endline "  -header   do not skip the header";
-  prerr_endline "  -nodoc    suppress LaTeX header and trailer";
-  prerr_endline "  -o file   write output in file `file'";
+  prerr_endline "Usage: ocamlweb <options and files>";
+  prerr_endline "  -o file        write output in file `file'";
+  prerr_endline "  --header       do not skip the header";
+  prerr_endline "  --nodoc        suppress LaTeX header and trailer";
+  prerr_endline "  --extern-defs  keep extern definitions in the index";
   exit 1
 
 let copying () =
@@ -56,6 +57,8 @@ let parse () =
 	set_output_to_file f; parse_rec rem
     | ("-o" | "--output") :: [] -> 
 	usage ()
+    | ("-extern-defs" | "--extern-defs") :: rem ->
+	extern_defs := true; parse_rec rem
 
     | ("-h" | "-help" | "-?" | "--help") :: rem ->
 	usage ()

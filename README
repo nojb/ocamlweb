@@ -3,7 +3,7 @@ ocamlweb is a literate programming tool for Objective Caml
 
 The invocation is
 
-	ocamlweb <options> <files>
+	ocamlweb <options and files>
 
 It creates a single LaTeX document with both documentation and code
 (implementations and interfaces) extracted from the given files.
@@ -30,11 +30,11 @@ COMPILATION
 INSTALLATION
 ============
 
-  1. Copy this binary file where you want,
+  1. Copy the binary file "ocamlweb" where you want,
      either by editing the Makefile and doing "make install"
-     or by copying the file "by hand".
+     or by copying the file `by hand'.
 
-  2. Copy the LaTeX package `ocamlweb.sty' somewhere in your LaTeX
+  2. Copy the LaTeX package "ocamlweb.sty" somewhere in your LaTeX
      input path (one of the directories listed in $TEXINPUTS). This
      file is needed to compile the documents produced by ocamlweb
      with LaTeX.

@@ -86,7 +86,9 @@ and pr_code_inside = parse
   | '\n' { () }
   | (identifier '.')* identifier
          { output_ident (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
-  | "'a" { output_string "\\alpha{}"; pr_code_inside lexbuf }
+  | "'" ('a'|'b'|'c')
+         { output_greek_letter (Lexing.lexeme_char lexbuf 1); 
+	   pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
   | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }

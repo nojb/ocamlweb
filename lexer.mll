@@ -87,11 +87,13 @@ and implementation = parse
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
            { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
+  | space* "(*c"
+           { comment_depth := 1; Buffer.add_string codeb "(*";
+	     comment lexbuf; code lexbuf; implementation lexbuf }
   | space* '\n'   
            { implementation lexbuf }
   | _      { Buffer.clear codeb; Buffer.add_char codeb (first_char lexbuf); 
-	     code_until_nl lexbuf; code lexbuf;
-	     implementation lexbuf }
+	     code lexbuf; implementation lexbuf }
   | eof    { new_section (); List.rev !seclist }
       
 (* inside the documentation part *)
@@ -114,30 +116,19 @@ and documentation = parse
   | eof  { push_doc () }
   | _    { Buffer.add_char docub (first_char lexbuf); documentation lexbuf }
 
-(* inside the code part, at the beginning of a line *)
+(* inside the code part *)
 and code = parse
-  | '\n' { push_code () }
-  | ";;" { push_code () }
+  | '\n' space* '\n' 
+         { push_code () }
+  | ";;" { push_code (); skip_until_nl lexbuf }
   | eof  { push_code () }
-  | '"'  { Buffer.add_char codeb '"'; code_string lexbuf;
-	   code_until_nl lexbuf; code lexbuf }
+  | "(*" | "(*c"
+         { comment_depth := 1; Buffer.add_string codeb "(*";
+	   comment lexbuf; code lexbuf }
+  | '"'  { Buffer.add_char codeb '"'; code_string lexbuf; code lexbuf }
   | character
          { Buffer.add_string codeb (Lexing.lexeme lexbuf); code lexbuf }
-  | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf;
-	   code lexbuf }
-
-(* to read the code until the newline *)
-and code_until_nl = parse
-  | '\n' { Buffer.add_char codeb '\n' }
-  | ";;" { code_until_nl lexbuf }
-  | "(*" { comment_depth := 1; Buffer.add_string codeb "(*";
-	   comment lexbuf; code_until_nl lexbuf }
-  | '"'  { Buffer.add_char codeb '"'; code_string lexbuf;
-	   code_until_nl lexbuf }
-  | character
-         { Buffer.add_string codeb (Lexing.lexeme lexbuf); code lexbuf }
-  | eof  { () }
-  | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf }
+  | _    { Buffer.add_char codeb (first_char lexbuf); code lexbuf }
 
 (* to skip everything until a newline *)
 and skip_until_nl = parse
@@ -147,7 +138,8 @@ and skip_until_nl = parse
 
 (* to read a comment inside a piece of code *)
 and comment = parse
-  | "(*" { Buffer.add_string codeb "(*"; incr comment_depth; comment lexbuf }
+  | "(*" | "(*c"
+         { Buffer.add_string codeb "(*"; incr comment_depth; comment lexbuf }
   | "*)" { Buffer.add_string codeb "*)"; decr comment_depth;
            if !comment_depth > 0 then comment lexbuf }
   | eof  { () }

@@ -1,7 +1,9 @@
+buffer.cmo: buffer.cmi 
+buffer.cmx: buffer.cmi 
 cross.cmo: output.cmi 
 cross.cmx: output.cmx 
-lexer.cmo: output.cmi web.cmi 
-lexer.cmx: output.cmx web.cmx 
+lexer.cmo: buffer.cmi output.cmi web.cmi 
+lexer.cmx: buffer.cmx output.cmx web.cmx 
 main.cmo: lexer.cmo output.cmi version.cmo web.cmi 
 main.cmx: lexer.cmx output.cmx version.cmx web.cmx 
 output.cmo: output.cmi 

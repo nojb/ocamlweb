@@ -46,4 +46,8 @@ type file =
   | Interf of interf
   | Other  of string
 
+(*i*)
+val extern_defs : bool ref
+(*i*)
+
 val produce_document : file list -> unit

@@ -47,7 +47,12 @@ type file =
 
 (* i*)
 
-(* Construction of the global index. *)
+(*s Options of the engine. *)
+
+let extern_defs = ref false
+
+
+(*s Construction of the global index. *)
 
 let sec_number = ref 0
 
@@ -109,7 +114,8 @@ let print_one_entry s =
   in
   let def = list_in_table defined
   and use = list_in_table used in
-  output_index_entry s def use
+  if !extern_defs || def <> [] then
+    output_index_entry s def use
 
 let print_index () =
   begin_index ();

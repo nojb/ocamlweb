@@ -21,7 +21,7 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-BUFFER = 
+BUFFER = buffer.cmx
 OBJS = $(BUFFER) output.cmx cross.cmx pretty.cmx web.cmx lexer.cmx \
        version.cmx main.cmx
 
@@ -45,6 +45,9 @@ install:
 
 byte: $(OBJS:.cmx=.cmo)
 
+manual:
+	cd doc; make all
+
 test: ocamlweb
 	cd tmp; ../ocamlweb essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
 	latex essai
@@ -59,6 +62,7 @@ FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 FILES = lexer.mll main.ml Makefile .depend README COPYING GPL CHANGES
 
 export: source linux solaris
+	cd doc; make all export
 
 source: $(FILES)
 	mkdir -p export/$(NAME)

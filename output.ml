@@ -158,6 +158,12 @@ let output_latex_special = function
   | "[]" -> output_string "[\\,]"
   | s    -> output_string s
 
+let output_greek_letter = function
+    'a' -> enter_math (); output_string "\\alpha{}"
+  | 'b' -> enter_math (); output_string "\\beta{}"
+  | 'c' -> enter_math (); output_string "\\gamma{}"
+  | c   -> output_char '\''; output_char c
+
 (* comments *)
 
 let output_bc () = leave_math (); output_string "\\ocwbc{}"

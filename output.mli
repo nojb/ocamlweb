@@ -63,6 +63,7 @@ val is_keyword : string -> bool
 val output_ident : string -> unit
 val output_escaped_char : char -> unit
 val output_latex_special : string -> unit
+val output_greek_letter : char -> unit
 
 (* Comments inside code are opened and closed respectively by 
    [output_bc] and [output_ec]. *)

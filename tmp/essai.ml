@@ -14,8 +14,10 @@
 let ma_fonction x = function (y,z) ->
   x + y*z (* commentaire : $[y]\not=0$ *)
 
+(*c un vrai commentaire *)
+
 let autre_bout x =
-  if x <= 0 then x+1 else x+2;
+  if x <= 0 then x+1 else x+2; (*c un vrai commentaire *)
   "(* une grande chaine
    qui se poursuit sur deux lignes"; while true do () done;
   '"' + "une autre chaine"
