@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.33, 13/5/2003
+=======================
+  o \penalty5000 instead of \nolinebreak in \ocweol (Ralf Treinen)
   o new macros \ocwbegindcode and \ocwenddcode for code inside documentation
 
 version 1.32, 22/1/2003
