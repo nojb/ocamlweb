@@ -79,6 +79,7 @@ install:
 
 local: ocamlweb
 	cp ocamlweb $$HOME/bin/$$OSTYPE
+	cp ocamlweb.sty $$HOME/tex/inputs
 
 install-demons: ocamlweb
 	cp ocamlweb /users/demons/demons/bin/$$OSTYPE

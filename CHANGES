@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o page style with headings
   o insertion into LaTeX preamble with option -p and (*p
   o macros \ocwbegincode and \ocwendcode before and after code pieces
     (no more use of \codeline and \endcodeline)

@@ -89,12 +89,12 @@ let push_in_preamble s = Queue.add s preamble
 let latex_header opt =
   if not !no_preamble then begin
     output_string "\\documentclass[12pt]{article}\n";
-    output_string "\\usepackage";
-    if opt <> "" then output_string (sprintf "[%s]" opt);
-    output_string "{ocamlweb}\n";
     output_string "\\usepackage[latin1]{inputenc}\n";
     output_string "\\usepackage[T1]{fontenc}\n";
     output_string "\\usepackage{fullpage}\n";
+    output_string "\\usepackage";
+    if opt <> "" then output_string (sprintf "[%s]" opt);
+    output_string "{ocamlweb}\n";
     Queue.iter (fun s -> output_string s; output_string "\n") preamble;
     output_string "\\begin{document}\n"
   end;

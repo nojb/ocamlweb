@@ -40,6 +40,27 @@
 %END LATEX
 % HeVeA reads the following
 
+% Headings
+
+\usepackage{fancyhdr}
+
+\iflatexsectioning
+\newcommand{\ocwleftpageheader}{\thepage}
+\newcommand{\ocwrightpageheader}{\thepage}
+\else
+\newcommand{\ocwleftpageheader}{\thepage\qquad\S\,\theocwcounter}
+\newcommand{\ocwrightpageheader}{\S\,\theocwcounter\qquad\thepage}
+\fi
+
+\pagestyle{fancyplain}
+%BEGIN LATEX
+\plainheadrulewidth 0.4pt
+\plainfootrulewidth 0pt
+\lhead[\ocwleftpageheader]{\leftmark}
+\rhead[\leftmark]{\ocwrightpageheader}
+\cfoot{}
+%END LATEX
+
 % Hevea puts to much space with \medskip and \bigskip
 %HEVEA\renewcommand{\medskip}{}
 %HEVEA\renewcommand{\bigskip}{}
@@ -154,12 +175,12 @@
 %END LATEX
 %HEVEA\newcommand{\ocwvspace}{\hspace{1em}}
 
-
 % macro for typesetting the title of a module implementation
-\newcommand{\ocwmodule}[1]{\section*{Module #1}}
+\newcommand{\ocwmodule}[1]{\section*{Module #1}\markboth{Module #1}{}}
 
 % macro for typesetting the title of a module interface
-\newcommand{\ocwinterface}[1]{\section*{Interface for module #1}}
+\newcommand{\ocwinterface}[1]{\section*{Interface for module #1}%
+\markboth{Interface for module #1}{}}
 
 % interface part of a module
 \newcommand{\ocwinterfacepart}{\subsection*{Interface}}
@@ -168,10 +189,12 @@
 \newcommand{\ocwcodepart}{\subsection*{Code}}
 
 % macro for typesetting the title of a lex description
-\newcommand{\ocwlexmodule}[1]{\section*{Module #1 (Lex)}}
+\newcommand{\ocwlexmodule}[1]{\section*{Module #1 (Lex)}%
+\markboth{Module #1 (Lex)}{}}
 
 % macro for typesetting the title of a yacc description
-\newcommand{\ocwyaccmodule}[1]{\section*{Module #1 (Yacc)}}
+\newcommand{\ocwyaccmodule}[1]{\section*{Module #1 (Yacc)}%
+\markboth{Module #1 (Yacc)}{}}
 
 % new WEB section
 \newcounter{ocwcounter}
