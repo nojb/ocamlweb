@@ -1,5 +1,4 @@
 version.ml
-lexer.ml
+doclexer.ml
 ocamlweb
 pretty.ml
-cross.ml
