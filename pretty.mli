@@ -16,5 +16,5 @@
 
 (* $Id$ *)
 
-val pretty_print_code : string -> unit
-val pretty_print_doc  : string -> unit
+val pretty_print_code : bool -> string -> unit
+val pretty_print_doc  : bool -> string -> unit

@@ -261,18 +261,26 @@ let print_index () =
 
 (*s Pretty-printing of the document. *)
 
-let pretty_print_paragraph f = function
+let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
   | Documentation s -> 
-      pretty_print_doc s
+      pretty_print_doc is_first_paragraph s
   | Code (l,s) ->
       output_label (make_label_name (f,l));
-      pretty_print_code s
+      pretty_print_code is_last_paragraph s
 
 let pretty_print_section first f s = 
   if !web then begin_section ();
   if first & s.sec_beg > 0 then output_label (make_label_name (f,0));
   output_label (make_label_name (f,s.sec_beg));
-  List.iter (pretty_print_paragraph f) s.sec_contents
+  let rec loop is_first_paragraph = function
+      [] ->
+	()
+    | [ last_paragraph ] ->
+	pretty_print_paragraph is_first_paragraph true f last_paragraph
+    | paragraph :: rest ->
+	pretty_print_paragraph is_first_paragraph false f paragraph;
+	loop false rest in
+  loop true s.sec_contents
     
 let pretty_print_sections f = function
   | [] -> ()

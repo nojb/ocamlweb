@@ -114,8 +114,8 @@ val code_part : unit -> unit
 val begin_section : unit -> unit
 
 val begin_code_paragraph : unit -> unit
-val end_code_paragraph : unit -> unit
-val begin_doc_paragraph : unit -> unit
+val end_code_paragraph : bool -> unit
+val begin_doc_paragraph : bool -> unit
 val end_doc_paragraph : unit -> unit
 
 (*s Index functions. [(output_index_entry f def use)] outputs an entry line
