@@ -3,11 +3,15 @@
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
 \usepackage{fullpage}
+\usepackage{url}
 
 \newcommand{\WEB}{\textsf{WEB}}
 \newcommand{\Caml}{\textsf{Caml}}
 \newcommand{\OCaml}{\textsf{Objective Caml}}
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
+\newcommand{\monurl}[2]{\url{#1}}
+%HEVEA\renewcommand{\monurl}[2]{\url{#2}{#2}}
+
 
 \begin{document}
 
@@ -15,7 +19,7 @@
 \title{ocamlweb: a literate programming tool \\ 
                for Objective Caml}
 \author{Jean-Christophe Filli\^{a}tre and Claude March\'e \\
-        \normalsize\texttt{www.lri.fr/\~{}filliatr/ocamlweb}}
+        \normalsize\monurl{http://www.lri.fr/~filliatr/ocamlweb}{http://www.lri.fr/\~{}filliatr/ocamlweb}}
 \date{}
 \maketitle
 
@@ -145,14 +149,14 @@ also in front of the first pattern. Here is the difference:
 \begin{displaymath}
   \begin{array}{l}
     \mathsf{let}~\mathit{f}~=~\mathsf{function} \\
-    \kern2em\mathit{O}~\rightarrow~\dots \\
-    \kern1em|~(\mathit{S}~p)~\rightarrow~\dots
+    \hspace*{2em}\mathit{O}~\rightarrow~\dots \\
+    \hspace*{1em}|~(\mathit{S}~p)~\rightarrow~\dots
   \end{array}
   \qquad\qquad
   \begin{array}{l}
     \mathsf{let}~\mathit{f}~=~\mathsf{function} \\
-    \kern1em|~\mathit{O}~\rightarrow~\dots \\
-    \kern1em|~(\mathit{S}~p)~\rightarrow~\dots
+    \hspace*{1em}|~\mathit{O}~\rightarrow~\dots \\
+    \hspace*{1em}|~(\mathit{S}~p)~\rightarrow~\dots
   \end{array}
 \end{displaymath}
 
@@ -326,8 +330,8 @@ redefining some macros:
 
   Use \textsf{hevea}, the \LaTeX\ to HTML translator written by Luc
   Maranget (freely available at
-  \texttt{http://pauillac.inria.fr/hevea/}), with the following
-  command-line:
+  \monurl{http://pauillac.inria.fr/hevea/}{http://pauillac.inria.fr/hevea/}), 
+  with the following command-line:
   \begin{displaymath}
     \texttt{hevea} ~ \texttt{ocamlweb.sty} ~ \textit{file.tex}
   \end{displaymath}
