@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o comments' indentation now conforms to source files
+
 version 1.31, 3/6/2002
 ======================
   o manuals now contains version number in filenames
