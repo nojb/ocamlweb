@@ -9,12 +9,6 @@ open Toto
 
 (* documentation $\beta$ 1 *)
 
-qualif_qualif_process:
-  | qualif_process_with_instance   { $1 }
-  | path                           
-      { let (path, process_name) = $1
-	in (path, (process_name, None)) }
-
 type truc = AA | BB | CC
 
 exception 'a AAA of 'a aatoto * 'b aatruc * aamachin

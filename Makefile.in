@@ -88,8 +88,10 @@ manual:
 
 LATEX=TEXINPUTS=..: ; export TEXINPUTS ; latex
 
-test/test.tex: ocamlweb test/test.ml test/test.mli
-	cd test; ../ocamlweb test.mli test.ml -o test.tex
+TESTFILES=test/test.mli test/test.ml test/test_lex.mll test/test_yacc.mly
+
+test/test.tex: ocamlweb $(TESTFILES)
+	./ocamlweb $(TESTFILES) -o test/test.tex
 
 test: test/test.tex
 	cd test; $(LATEX) test 

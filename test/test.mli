@@ -6,16 +6,16 @@
 
 type t = int
 
-type t = int * int
+type u = int * int
 
-type t = int -> int
+type v = int -> int
 
-type 'a t = 'a -> 'a
+type 'a mon_type = 'a -> 'a
 
-type 'a t =
+type 'a mon_type' =
   | A
   | B of 'a
-  | C of foo -> bar
+  | C of (foo -> bar)
   | D of foo * (bar -> bar)
 
 
