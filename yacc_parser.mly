@@ -16,6 +16,8 @@
 
 /*i $Id$ i*/
 
+/*s In actions, we reuse the location type for lex files. */
+
 %{
 
   open Lex_syntax
@@ -29,7 +31,7 @@
 
 %}
 
-/*s yacc tokens */
+/*s Yacc tokens. */
 
 %token Ttoken Tstart Ttype Tleft Tright Tnonassoc Tprec Terror
 %token <Yacc_syntax.ident> Tident
@@ -42,32 +44,30 @@
 
 %%
 
-/*s start symbol for yacc description files */
+/*s Start symbol for yacc description files */
 
-yacc_definitions: 
+yacc_definitions : 
   header tokendecls Tmark rules header EOF 
   { { header = $1 ; 
       decls = $2;
       rules = $4;
       trailer = $5 } }
-;
-
 
 header :
   | Taction          
     { $1 }
   | /*epsilon*/      
     { dummy_loc }
-;
 
-tokendecls:
+/* Token declarations. */
+
+tokendecls :
   | tokendecl tokendecls   
     { $1::$2 }
   | /*epsilon*/
     { [] }
 
-
-tokendecl:
+tokendecl :
   | Ttoken Ttypedecl idlist
       { Typed_tokens($2,$3) }
   | Ttoken idlist
@@ -83,16 +83,15 @@ tokendecl:
   | Tright idlist
       { Tokens_assoc($2) }
 
-
-idlist:
+idlist :
   | Tident
     { [$1] }
   | Tident idlist
     { $1 :: $2 }
 
+/*s Parsing of rules. */
 
-/*s entry for rules */
-rules:
+rules :
   | rule Tsemicolon rules    
     { $1 :: $3 }
   | rule rules    
@@ -100,29 +99,22 @@ rules:
   | /*epsilon*/
     { [] }
 
-
-rule:
+rule :
   | Tident Tcolon right_part 
     { ($1,$3) }
   | Tident Tcolon Tor right_part 
     { ($1,$4) }
 
-
-right_part:
+right_part :
   | word Taction
     { [($1,$2)] }
   | word Taction Tor right_part
     { ($1,$2) :: $4 }
 
-
-word:
+word :
   | /*epsilon*/
     { [] }
   | Tident word
     { $1 :: $2 }
   | Tprec Tident word
     { $2 :: $3 }
-
-
-
-
