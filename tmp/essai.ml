@@ -18,6 +18,16 @@ type machin = { champ1 : int;
     Je peux aussi parler de \verb!@x! si je veux... 
     ou encore << échapper >> cette ["chaine de caractères"]. *)
 
+let l = [1;3;2]
+
+let une_grande_chaine = "tatdn jgj gjhg jfjh \
+    kjhsljkh hglg lglj gljb lgjh \
+    skjhk hmkjhmlkhj mkjl kj"
+
+let une_autre_grande_chaine = "tatdn jgj gjhg jfjh
+    kjhsljkh hglg lglj gljb lgjh
+    skjhk hmkjhmlkhj mkjl kj"
+
 let ma_fonction x = function (yyy,z) ->
   x + yyy*z (* commentaire : $[y]\not=0$ *) + toto
 

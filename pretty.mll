@@ -74,6 +74,8 @@ let uppercase = ['A'-'Z' '\192'-'\214' '\216'-'\222']
 let identchar = 
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
 let identifier = (lowercase | uppercase) identchar*
+let symbolchar =
+  ['!' '$' '%' '&' '*' '+' '-' '.' '/' ':' '<' '=' '>' '?' '@' '^' '|' '~']
 let tex_reserved = 
   '$' | '#' | '%' | '&' | '\\' | '{' | '}' | '^' | '_' | '~'
 let latex_special = 
@@ -135,11 +137,14 @@ and pr_comment = parse
 
 and pr_code_string = parse
   | '"'  { output_es () }
-  | '\n' { indentation 0; pr_code_string lexbuf }
+  | '\n' { end_line (); indentation 0; pr_code_string lexbuf }
   | ' '  { output_vspace (); pr_code_string lexbuf }
-  | '\\' ['"' 'n' 't' 'b' 'r']
+  | '\\' ['"' 't' 'b' 'r']
          { output_escaped_char '\\'; 
 	   output_char (lexeme_char lexbuf 1); 
+	   pr_code_string lexbuf }
+  | '\\' '\n'
+         { output_escaped_char '\\'; end_line (); indentation 0; 
 	   pr_code_string lexbuf }
   | '\\' '\\'
          { output_escaped_char '\\'; output_escaped_char '\\'; 

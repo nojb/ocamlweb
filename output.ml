@@ -253,7 +253,8 @@ let output_greek l =
   enter_math (); output_char '\\'; output_string l; output_string "{}"
 
 let output_type_variable id = 
-  if !use_greek_letters then output_tv id
+  if !use_greek_letters then 
+    output_tv id
   else
     match id with 
       | "a" -> output_greek "alpha"
@@ -269,7 +270,7 @@ let output_type_variable id =
       | "r" -> output_greek "rho"
       | "s" -> output_greek "sigma"
       | "t" -> output_greek "tau"
-      | id   -> output_string "\\ocwtv{"; output_latex_id id; output_char '}'
+      | _   -> output_tv id
 
 
 (*s \textbf{Comments.} *)

@@ -61,7 +61,7 @@ manual:
 LATEX=export TEXINPUTS=..: ; latex
 
 test: ocamlweb
-	cd tmp; ../ocamlweb --$(LATEX)-sects essai.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb --latex-sects essai.ml -o essai.tex ; \
 	$(LATEX) essai ; grep -q "Rerun" essai.log && $(LATEX) essai || true
 
 BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml 
