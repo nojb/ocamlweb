@@ -47,7 +47,7 @@ let num_loc_lines = ref 0 (* number of lines already printed after input *)
 let rec highlight_locations loc1 loc2 =
   match !status with
     Terminfo.Uninitialised ->
-      status := Terminfo.setup stdout; highlight_locations loc1 loc2
+      status := Terminfo.setup stderr; highlight_locations loc1 loc2
   | Terminfo.Bad_term ->
       false
   | Terminfo.Good_term num_lines ->
@@ -67,21 +67,21 @@ let rec highlight_locations loc1 loc2 =
             (* If too many lines, give up *)
             if !lines >= num_lines - 2 then raise Exit;
             (* Move cursor up that number of lines *)
-            flush stdout; Terminfo.backup !lines;
+            flush stderr; Terminfo.backup !lines;
             (* Print the input, switching to standout for the location *)
             let bol = ref false in
-            print_string "# ";
+            prerr_string "# ";
             for pos = 0 to String.length lb.lex_buffer - pos0 - 1 do
-              if !bol then (print_string "  "; bol := false);
+              if !bol then (prerr_string "  "; bol := false);
               if pos = loc1.loc_start || pos = loc2.loc_start then
-                (flush stdout; Terminfo.standout true);
+                (flush stderr; Terminfo.standout true);
               if pos = loc1.loc_end || pos = loc2.loc_end then
-                (flush stdout; Terminfo.standout false);
+                (flush stderr; Terminfo.standout false);
               let c = lb.lex_buffer.[pos + pos0] in
-              print_char c;
+              prerr_char c;
               bol := (c = '\n')
             done;
-            flush stdout;
+            flush stderr;
             (* Make sure standout mode is over *)
             Terminfo.standout false;
             (* Position cursor back to original location *)
@@ -90,8 +90,6 @@ let rec highlight_locations loc1 loc2 =
           with Exit -> false
 
 (* Print the location in some way or another *)
-
-open Format
 
 let reset () =
   num_loc_lines := 0
@@ -104,31 +102,31 @@ let (msg_file, msg_line, msg_chars, msg_to, msg_colon, warn_head) =
 let print loc =
   if String.length !input_name = 0 then
     if highlight_locations loc none then () else begin
-      print_string "Characters ";
-      print_int loc.loc_start; print_string "-";
-      print_int loc.loc_end; print_string ":";
-      force_newline()
+      prerr_string "Characters ";
+      prerr_int loc.loc_start; prerr_string "-";
+      prerr_int loc.loc_end; prerr_string ":";
+      prerr_newline()
     end
   else begin
     let (filename, linenum, linebeg) =
             Linenum.for_position !input_name loc.loc_start in
-    print_string msg_file; print_string filename;
-    print_string msg_line; print_int linenum;
-    print_string msg_chars; print_int (loc.loc_start - linebeg);
-    print_string msg_to; print_int (loc.loc_end - linebeg);
-    print_string msg_colon;
-    force_newline()
+    prerr_string msg_file; prerr_string filename;
+    prerr_string msg_line; prerr_int linenum;
+    prerr_string msg_chars; prerr_int (loc.loc_start - linebeg);
+    prerr_string msg_to; prerr_int (loc.loc_end - linebeg);
+    prerr_string msg_colon;
+    prerr_newline()
   end
 
 let print_warning loc w =
  if Warnings.is_active w then begin
   print loc;
-  print_string warn_head;
-  print_string "Warning: "; print_string (Warnings.message w); print_newline();
+  prerr_string warn_head;
+  prerr_string "Warning: "; prerr_string (Warnings.message w); prerr_newline();
   incr num_loc_lines
  end
 ;;
 
 let echo_eof () =
-  print_newline ();
+  prerr_newline ();
   incr num_loc_lines
