@@ -11,6 +11,7 @@ ocamlweb-man.ps: ocamlweb-man.dvi
 
 ocamlweb-man.dvi: ocamlweb-man.tex
 	latex ocamlweb-man
+	latex ocamlweb-man
 
 clean:
 	rm -f *~ *.aux *.log *.dvi *.ps
