@@ -55,6 +55,10 @@ let test_physical_equality x y = x == y
 
 let test_physical_disequality x y = x != y
 
+(*s test of identifiers pretty-print. *)
+
+let f x x' foo foo' = x + x' + foo + foo'
+
 (*s A bit of documentation. I quote a function call [foo x] and I
     spend a few minutes speaking about [foo] and [x].  
     I can quote ["a string"] or a record value [{ x = 1; y = 2 }] 
