@@ -9,8 +9,8 @@
 \newcommand{\Caml}{\textsf{Caml}}
 \newcommand{\OCaml}{\textsf{Objective Caml}}
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
-\newcommand{\monurl}[2]{\url{#1}}
-%HEVEA\renewcommand{\monurl}[2]{\url{#2}{#2}}
+\newcommand{\monurl}[1]{#1}
+%HEVEA\renewcommand{\monurl}[1]{\ahref{#1}{#1}}
 %HEVEA\newcommand{\lnot}{not}
 %HEVEA\newcommand{\lor}{or}
 %HEVEA\newcommand{\land}{\&}
@@ -21,7 +21,7 @@
 \title{ocamlweb: a literate programming tool \\ 
                for Objective Caml}
 \author{Jean-Christophe Filli\^{a}tre and Claude March\'e \\
-        \normalsize\monurl{http://www.lri.fr/~filliatr/ocamlweb}{http://www.lri.fr/\~{}filliatr/ocamlweb}}
+        \normalsize\monurl{\url{http://www.lri.fr/~filliatr/ocamlweb}}}
 \date{}
 \maketitle
 
@@ -400,7 +400,7 @@ redefining some macros:
 
   Use \textsf{hevea}, the \LaTeX\ to HTML translator written by Luc
   Maranget (freely available at
-  \monurl{http://pauillac.inria.fr/hevea/}{http://pauillac.inria.fr/hevea/}), 
+  \monurl{\url{http://pauillac.inria.fr/hevea/}}), 
   with the following command-line:
   \begin{displaymath}
     \texttt{hevea} ~ \texttt{ocamlweb.sty} ~ \textit{file.tex}
