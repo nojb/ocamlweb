@@ -170,6 +170,8 @@ and opens = parse
 and cross_interf = parse
   | space* { cross_interf lexbuf }
   | "val"  { val_decl lexbuf; cross_interf lexbuf }
+  | "with" space+ "type"
+           { cross_interf lexbuf }
   | "type" | "and"
            { type_decl lexbuf; cross_interf lexbuf }
   | "exception" 

@@ -49,7 +49,7 @@ manual:
 	cd doc; make all
 
 test: ocamlweb
-	cd tmp; ../ocamlweb essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb foo.ml essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
 	latex essai
 
 # export

@@ -63,15 +63,19 @@
 }
 
 let space = [' ' '\t']
+let space_or_nl = [' ' '\t' '\n']
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
+let rcs_keyword =
+  "Author" | "Date" | "Header" | "Id" | "Name" | "Locker" | "Log" |
+  "RCSfile" | "Revision" | "Source" | "State"
 
 (* to skip the headers *)
 rule header = parse
-  | "(*"   { comment_depth := 1; skip_comment lexbuf; header lexbuf }
-  | "\n\n" { () }
-  | "\n"   { header lexbuf }
+  | "(*"   { comment_depth := 1; skip_comment lexbuf;
+	     skip_until_nl lexbuf; header lexbuf }
+  | "\n"   { () }
   | space+ { header lexbuf }
   | _      { lexbuf.lex_curr_pos <- lexbuf.lex_curr_pos - 1 }
   | eof    { () }
@@ -80,9 +84,9 @@ rule header = parse
 and implementation = parse
   | space* "(*" '*'* "*)" space* '\n'
            { implementation lexbuf }
-  | space* "(*" space*
+  | space* "(*" space_or_nl*
            { new_doc (); documentation lexbuf; implementation lexbuf }
-  | space* "(*s" space*
+  | space* "(*s" space_or_nl*
            { new_section (); 
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
@@ -109,7 +113,7 @@ and documentation = parse
 	     skip_until_nl lexbuf;
 	     push_doc ()
 	   end}
-  | "$Id\058" [^ '$']* "$"
+  | "\036" rcs_keyword [^ '$']* "\036"
          { documentation lexbuf }
   | '\n' " * "
          { Buffer.add_string docub "\n "; documentation lexbuf }

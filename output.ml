@@ -91,10 +91,13 @@ let indentation n =
 
 (* keywords and identifiers *)
 
-let is_keyword = 
+let build_table l = 
   let h = Hashtbl.create 101 in
-  List.iter
-    (fun key ->Hashtbl.add h  key ()) 
+  List.iter (fun key ->Hashtbl.add h  key ()) l;
+  function s -> try Hashtbl.find h s; true with Not_found -> false
+
+let is_caml_keyword = 
+  build_table
     [ "and"; "as";  "assert"; "begin"; "class";
       "constraint"; "do"; "done";  "downto"; "else"; "end"; "exception";
       "external";  "false"; "for";  "fun"; "function";  "functor"; "if";
@@ -102,19 +105,24 @@ let is_keyword =
       "method";  "module";  "mutable";  "new"; "object";  "of";  "open";
       "or"; "parser";  "private"; "rec"; "sig";  "struct"; "then"; "to";
       "true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
-
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
-
       (* ajoutés *)
-      "ref"; "not";
-      (* types *)
-      "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option";
-      "float"
-    ];
-  function s -> try Hashtbl.find h s; true with Not_found -> false
+      "ref"; "not"
+    ]
+
+let is_base_type = 
+  build_table
+    [ "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option";
+      "float" ]
+
+let is_keyword s = is_base_type s || is_caml_keyword s 
 
 let output_keyword s =
-  output_string "\\ocwkw{"; output_string s; output_string "}"
+  if is_base_type s then 
+    output_string "\\ocwbt{" 
+  else 
+    output_string "\\ocwkw{";
+  output_string s; output_string "}"
 
 let output_latex_id s =
   for i = 0 to String.length s - 1 do
@@ -155,6 +163,8 @@ let output_latex_special = function
   | "<=" -> enter_math (); output_string "\\le{}"
   | ">=" -> enter_math (); output_string "\\ge{}"
   | "<>" -> enter_math (); output_string "\\not="
+  | "(" | ")" as s -> 
+            enter_math (); output_string s
   | "[]" -> output_string "[\\,]"
   | s    -> output_string s
 
