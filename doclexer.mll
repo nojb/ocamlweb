@@ -111,7 +111,7 @@ and implementation = parse
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
            { comment_start := lexeme_start lexbuf;
-	     ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
+	     ignore lexbuf; implementation lexbuf }
   | space* "(*c"
            { comment_depth := 1; Buffer.add_string codeb "(*";
 	     comment lexbuf; code lexbuf; implementation lexbuf }
@@ -153,7 +153,7 @@ and code = parse
 	   comment lexbuf; code lexbuf }
   | space* "(*i"
          { comment_start := lexeme_start lexbuf;
-	   ignore lexbuf; skip_until_nl lexbuf; code lexbuf }
+	   ignore lexbuf; code lexbuf }
   | '"'  { Buffer.add_char codeb '"'; code_string lexbuf; code lexbuf }
   | character
          { Buffer.add_string codeb (lexeme lexbuf); code lexbuf }
