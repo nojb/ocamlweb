@@ -113,10 +113,12 @@ let read_one_file f =
 let main () =
   banner();
   let files = parse() in
-  latex_header ();
-  let modl = List.map read_one_file files in
-  produce_document modl;
-  latex_trailer ();
-  close_output ()
+  if List.length files > 0 then begin
+    latex_header ();
+    let modl = List.map read_one_file files in
+    produce_document modl;
+    latex_trailer ();
+    close_output ()
+  end
 
 let _ = Printexc.catch main ()
