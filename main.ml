@@ -57,15 +57,15 @@ let usage () =
 let copying () =
   prerr_endline "
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License version 2, as
+it under the terms of the GNU Library General Public License version 2, as
 published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-See the GNU General Public License version 2 for more details
-(enclosed in the file GPL).";
+See the GNU Library General Public License version 2 for more details
+(enclosed in the file LGPL).";
   flush stderr
 
 
@@ -77,8 +77,10 @@ See the GNU General Public License version 2 for more details
 let banner () =
   eprintf "This is ocamlweb version %s, compiled on %s\n"
     Version.version Version.date;
-  eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
-  eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
+  eprintf 
+    "Copyright (c) 1999-2000 Jean-Christophe Filliâtre and Claude Marché\n";
+  eprintf
+  "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
   flush stderr
     
 

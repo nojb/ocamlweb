@@ -1,6 +1,6 @@
 
-COMPILATION / INSTALLATION (source distribution only)
-=====================================================
+COMPILATION / INSTALLATION (source distribution)
+================================================
 
   You need Objective Caml (>= 2.01) to compile the sources.
  
@@ -15,9 +15,6 @@ COMPILATION / INSTALLATION (source distribution only)
      (see ./configure --help)
 
   2. Compile with "make". It creates a binary file "ocamlweb".
-
-     If your platform does not support native compilation, do instead
-     "make byte" to build the bytecode executable (still named ocamlweb).
 
   3. Install with "make install"
 
@@ -38,3 +35,14 @@ COMPILATION / INSTALLATION (source distribution only)
      test/ocamlweb.dvi.
 
   5. Clean the sources with "make clean"
+
+
+INSTALLATION (binary distribution)
+==================================
+
+copy the binary file "ocamlweb" in some directory that exists in your
+PATH environment variable, and copy the file "ocamlweb.sty" somewhere
+in your LaTeX input path (one of the directories listed in
+$TEXINPUTS). This file is needed to compile the documents produced by
+ocamlweb with LaTeX.
+

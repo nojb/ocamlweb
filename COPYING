@@ -1,17 +1,21 @@
 ocamlweb - a literate programming tool for Objective Caml
-Copyright (C) 1999 Jean-Christophe FILLIÂTRE
-  contributions by Claude MARCHÉ and Patrick LOISELEUR
+Copyright (C) 1999-2000 Jean-Christophe FILLIÂTRE and Claude MARCHÉ 
+
+contributions by 
+  Patrick LOISELEUR, Pierre COURTIEU, François POTTIER, Christian RINDERKNECHT,
+  Anne DORLAND and Guillaume MULLER (help for lex/yacc support)
+  Ralf Treinen (debian package) 
 
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License version 2, as
+it under the terms of the GNU Library General Public License version 2, as
 published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-See the GNU General Public License version 2 for more details
-(enclosed in the file GPL).
+See the GNU Library General Public License version 2 for more details
+(enclosed in the file LGPL).
 
 ======================================================================
 
