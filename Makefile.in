@@ -17,7 +17,7 @@ UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/n
 
 # Version
 MAJORVN=1
-MINORVN=3
+MINORVN=31
 VERSION=$(MAJORVN).$(MINORVN)
 OCAMLBEST=@OCAMLBEST@
 
@@ -103,7 +103,7 @@ install-demons: ocamlweb.static
 	cp ocamlweb.sty /users/demons/demons/tex/inputs
 
 manual:
-	cd doc; make all
+	make -C doc VERSION=$(VERSION) all
 
 LATEX=TEXINPUTS=..: ; export TEXINPUTS ; latex
 
@@ -137,7 +137,8 @@ check: bootstrap
 
 NAME=ocamlweb-$(VERSION)
 
-FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
+FTP = $(HOME)/ftp/ocamlweb
+WWW = $(HOME)/WWW/ocamlweb
 
 FILES = *.ml* ocamlweb.sty bootstrap.tex				\
 	Makefile.in configure.in configure .depend \
@@ -158,11 +159,11 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 
 OCAMLLEXFILES = lex_syntax.mli lex_parser.mly lex_lexer.mll
 
-DOCFILES = doc/ocamlweb-man.ps doc/ocamlweb-man.html doc/ocamlweb.1
+DOCFILES = doc/$(NAME)-man.ps doc/$(NAME)-man.html doc/ocamlweb.1
 
 export: source linux
 	cp README COPYING LGPL CHANGES $(FTP)
-	cd doc; make all export
+	make -C doc VERSION=$(VERSION) all export
 	make export-bootstrap
 	mail -s "nouvelle release d'ocamlweb" treinen@debian.org < /dev/null
 
@@ -270,7 +271,7 @@ clean:
 	rm -f $(GENERATED)
 	rm -f ocaml-parser/parser.output
 	rm -f ocamllex-parser/lex_parser.output
-	make -C doc clean
+	make -C doc VERSION=$(VERSION) clean
 	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
 
 dist-clean:: clean

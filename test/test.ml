@@ -102,4 +102,5 @@ let t = {
 
 #use "foo.ml";;
 
+(*s footnotes\footnote{bla bla bla} and so on... *)
 

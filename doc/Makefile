@@ -1,22 +1,27 @@
 
-all: ocamlweb-man.ps ocamlweb-man.html
+NAME=ocamlweb-$(VERSION)
+PSDOC=$(NAME)-man.ps
+HTMLDOC=$(NAME)-man.html
+
+all: $(PSDOC) $(HTMLDOC)
 
 WWW=$(HOME)/WWW/ocamlweb/
 FTP=$(HOME)/ftp/ocamlweb/
 
 export: all
-	gzip -c ocamlweb-man.ps > $(FTP)/ocamlweb-man.ps.gz
-	cp ocamlweb-man.html $(WWW)
+	gzip -c $(PSDOC) > $(FTP)/$(PSDOC).gz
+	cp $(HTMLDOC) $(WWW)
 
-ocamlweb-man.ps: ocamlweb-man.dvi
-	dvips ocamlweb-man.dvi -o ocamlweb-man.ps
+$(PSDOC): ocamlweb-man.dvi
+	dvips $^ -o $@
 
 ocamlweb-man.dvi: ocamlweb-man.tex
-	latex ocamlweb-man
-	latex ocamlweb-man
+	latex $^
+	latex $^
 
-ocamlweb-man.html: ocamlweb-man.tex
-	hevea ocamlweb-man.tex
+$(HTMLDOC): ocamlweb-man.tex
+	hevea $^ -o $@
 
 clean:
-	rm -f *~ *.aux *.log *.dvi *.ps
+	rm -f *~ *.aux *.log *.dvi *.ps *.toc
+	rm -f $(HTMLDOC)
