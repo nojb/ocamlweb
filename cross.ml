@@ -478,14 +478,13 @@ let wrapper parsing_function traverse_function f m =
   reset_cross ();
   current_file := f;
   add_module m;
-  let f' = if check_suffix f ".mll" then (chop_extension f) ^ ".ml" else f in
-  let c = open_in f' in
+  let c = open_in f in
   let lexbuf = Lexing.from_channel c in
   try
     traverse_function (parsing_function lexbuf);
     close_in c
   with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
-    eprintf " ** warning: syntax error while parsing %s\n" f';
+    eprintf " ** warning: syntax error while parsing %s\n" f;
     close_in c
   end
 

@@ -5,6 +5,8 @@ Parsing fichiers
  4. possibilité d'échapper [ ou ] dans les quotations de code
     (actuellement ce n'est pas possible et cela provoque des incohérences)
 
+ 5. Une commande pour rajouter une entrée dans l'index
+
 
 Web (cross)
 ===========
@@ -16,12 +18,36 @@ Web (cross)
     apparaître dans l'index global, ou doivent-ils apparaître dans un index
     particulier ?
 
+  LEXERS:     Ca marche, mais c'est très très lent !
+  -------
+    cross.ml:
+    let f' = if check_suffix f ".mll" then (chop_extension f) ^ ".ml" else f in
+
+    web.ml:
+    let lexer_after fmll fml l1 l2 =
+      let (_,x1,y1) = Linenum.for_position fml l1 in
+      let (_,x2,y2) = Linenum.for_position fmll l2 in
+      (x1,y1) >= (x2,y2)
+    
+    et dans find_where on met 
+    let after = 
+      if check_suffix w.w_filename ".mll" then 
+        lexer_after w.w_filename ((chop_extension w.w_filename) ^ ".ml")
+      else 
+        (>=)
+
+    main.ml: dans what_file
+    if check_suffix f ".ml" or check_suffix f ".mll" then
+
+
 Document LaTeX
 ==============
 
  1. underscore plus fin dans les identificateurs
 
 *2. Afficher "This code is used in section(s) ..."
+
+ 3. Index des modules
 
 
 Documentation ocamlweb

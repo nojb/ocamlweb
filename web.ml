@@ -17,12 +17,11 @@
 (* $Id$ *)
 
 (*i*)
-
+open Filename
 open Printf
 open Cross
 open Output
 open Pretty
-open Doclexer
 
 type paragraph =
   | Documentation of string
@@ -103,8 +102,7 @@ let add_par_loc =
     | Code (l,_) -> 
 	incr par_counter;
 	add_file_loc code_locations f (l,!par_counter)
-    | Documentation _ -> 
-	()
+    | Documentation _ -> ()
 
 let add_sec_loc =
   let sec_counter = ref 0 in
@@ -114,13 +112,11 @@ let add_sec_loc =
     List.iter (add_par_loc f) s.sec_contents
 
 let add_intf_loc it =
-  let f = Filename.basename it.interf_file in
-  List.iter (add_sec_loc f) it.interf_contents
+  List.iter (add_sec_loc it.interf_file) it.interf_contents
 
 let add_impl_loc im =
-  let f = Filename.basename im.implem_file in
   begin match im.implem_interf with None -> () | Some i -> add_intf_loc i end;
-  List.iter (add_sec_loc f) im.implem_contents
+  List.iter (add_sec_loc im.implem_file) im.implem_contents
 
 let locations_for_a_file = function
   | Implem i -> add_impl_loc i
@@ -202,8 +198,7 @@ let intervals l =
   in
   group ([],l)
 
-let make_label_name (f,n) =
-  (Filename.basename f) ^ ":" ^ (string_of_int n)
+let make_label_name (f,n) = f ^ ":" ^ (string_of_int n)
 
 let label_list l =
   List.map (fun x -> make_label_name (fst x)) l

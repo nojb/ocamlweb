@@ -65,7 +65,7 @@ test: ocamlweb
 	cd tmp; ../ocamlweb --no-web --latex-option CiME essai.ml -o essai.tex ; \
 	latex essai ; latex essai
 
-BOOTSTRAP= bootstrap.tex output.ml cross.ml web.ml main.ml
+BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml 
 
 bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)

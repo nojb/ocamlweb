@@ -88,7 +88,7 @@ let check_if_file_exists f =
 
 let what_file f =
   check_if_file_exists f;
-  if check_suffix f ".ml" or check_suffix f ".mll" then
+  if check_suffix f ".ml" then
     let fi = (chop_extension f) ^ ".mli" in
     let intf = if Sys.file_exists fi then Some (make_caml_file fi) else None in
     File_impl (make_caml_file f, intf)
