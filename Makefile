@@ -99,7 +99,7 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	parser.mly				\
 	lexer.mli lexer.mll			\
 	parse.mli parse.ml			\
-	Makefile .depend README
+	README
 
 export: source linux
 	cp README COPYING GPL CHANGES $(FTP)
@@ -110,7 +110,6 @@ source:
 	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test
 	cp $(FILES) export/$(NAME)
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
-	cd export/$(NAME)/test; ln -s ../ocamlweb.sty
 	(cd export ; tar cf $(NAME).tar $(NAME) ; \
 	gzip -f --best $(NAME).tar)
 	cp export/$(NAME).tar.gz $(FTP)
