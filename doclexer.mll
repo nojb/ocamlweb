@@ -28,6 +28,7 @@
 
   let comment_depth = ref 0
 
+  let verb_delim = ref (Char.chr 0)
 
   let parlist = ref ([] : paragraph list)
   let seclist = ref ([] : raw_section list)
@@ -126,10 +127,29 @@ and documentation = parse
 	   end}
   | "\036" rcs_keyword [^ '$']* "\036"
          { documentation lexbuf }
+  | "\\verb" _  
+         { verb_delim := lexeme_char lexbuf 5;
+           Buffer.add_string docub (lexeme lexbuf);
+	   inverb lexbuf; documentation lexbuf }
+  | "\\begin{verbatim}"
+         { Buffer.add_string docub (lexeme lexbuf);
+	   inverbatim lexbuf; documentation lexbuf }
   | '\n' " * "
          { Buffer.add_string docub "\n "; documentation lexbuf }
   | eof  { push_doc () }
   | _    { Buffer.add_char docub (first_char lexbuf); documentation lexbuf }
+
+and inverb = parse
+  | eof  { () }
+  | _    { let c = lexeme_char lexbuf 0 in
+	   Buffer.add_char docub c;
+           if c == !verb_delim then () else inverb lexbuf }
+
+and inverbatim = parse
+  | "\\end{verbatim}"
+         { Buffer.add_string docub (lexeme lexbuf) }
+  | eof  { () }
+  | _    { Buffer.add_char docub (lexeme_char lexbuf 0); inverbatim lexbuf }
 
 (* inside the code part *)
 and code = parse
