@@ -130,7 +130,7 @@ solaris:
 
 BINARYFILES = README INSTALL COPYING GPL ocamlweb ocamlweb.sty
 
-binary: opt
+binary: ocamlweb
 	mkdir -p export/$(BINARY)
 	cp $(BINARYFILES) export/$(BINARY)
 	(cd export; tar czf $(BINARY).tar.gz $(BINARY))
