@@ -5,6 +5,7 @@
 
 version 1.2, 14/01/2002
 =======================
+  o single-character identifiers now indexed
   o port to ocaml 3.04 and adequacy to ocaml 3.04 parser
   o fixed bugs in ocamlweb.sty (thanks to Ralf Treinen)
 

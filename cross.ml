@@ -77,7 +77,7 @@ let current_location loc =
   { w_filename = !current_file; w_loc = !current_offset + loc.loc_start }
 
 let add_def loc t s =
-  if String.length s > 1 then
+  if String.length s > 0 then
     let e = { e_name = s; e_type = t } in
     add_global defined e (current_location loc)
 
@@ -104,7 +104,7 @@ let add_local s =
 let is_uppercase = function 'A'..'Z' -> true | _ -> false
     
 let add_uses loc t s =
-  if String.length s > 1 && 
+  if String.length s > 0 &&
      not (is_keyword s) && not (Stringset.mem s !locals) 
   then
     let e = { e_name = s; e_type = t } in
