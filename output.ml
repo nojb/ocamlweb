@@ -318,7 +318,6 @@ let last_is_code = ref false
 
 let begin_code_paragraph () =
   if not !last_is_code then output_string "\\medskip\n";
-  output_string "\\noindent{}";
   last_is_code := true
 
 let end_code_paragraph is_last_paragraph =
