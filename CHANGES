@@ -3,6 +3,12 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 0.6, 21/10/99
+=====================
+  o backtrack on the way to pretty-print comments (comments inside
+    code lines produced line breaks)
+  o many spaces inside code are printed as a single one (so that you
+    can justify in ASCII without an ugly result with LaTeX)
   o unterminated ocamlweb comments (*i ... *i) now generate an error
     message 
 

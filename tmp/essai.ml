@@ -33,13 +33,13 @@ let une_autre_grande_chaine = "tatdn jgj gjhg jfjh
     skjhk hmkjhmlkhj mkjl kj"
 
 let ma_fonction x = function (yyy,z) ->
-  x + yyy*z (* commentaire : $[y]\not=0$ *) + toto
+  x + yyy*z (* commentaire : $y\not=0$ *) + toto
 
 let s c = "\\" ^ c ^ "autre chaine"
 
 let test x y z = x or y && not x = y
 
-let test xor ory = xor + ory
+let test xor ory = xor + (*c commentaire *) ory
 
 let xxx = { champ1 = 1; champ2 = "toto" }
 

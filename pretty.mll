@@ -100,7 +100,8 @@ rule pr_code = parse
 
 and pr_code_inside = parse
   | '\n' { end_line () }
-  | ' '  { output_char '~'; pr_code_inside lexbuf }
+  | space+
+         { output_char '~'; pr_code_inside lexbuf }
   | character
          { output_verbatim (lexeme lexbuf); pr_code_inside lexbuf }
   | "'" identifier
@@ -171,7 +172,8 @@ and escaped_code = parse
            end else
 	     if not !user_math_mode then leave_math () }
   | '"'  { output_bs (); pr_code_string lexbuf; escaped_code lexbuf }
-  | ' '  { output_char '~'; escaped_code lexbuf }
+  | space+
+         { output_char '~'; escaped_code lexbuf }
   | character
          { output_verbatim (lexeme lexbuf); escaped_code lexbuf }
   | "'" identifier

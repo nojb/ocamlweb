@@ -277,9 +277,9 @@ let output_ascii_char n =
 
 (*s \textbf{Comments.} *)
 
-let output_bc () = leave_math (); output_string "\\comment "
+let output_bc () = leave_math (); output_string "\\ocwbc{}"
 
-let output_ec () = leave_math (); output_string "\\endcomment "
+let output_ec () = leave_math (); output_string "\\ocwec{}"
 
 let output_hfill () = leave_math (); output_string "\\hfill "
 
