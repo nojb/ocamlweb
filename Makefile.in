@@ -20,7 +20,7 @@ CAMLC    = @OCAMLC@
 CAMLCOPT = @OCAMLOPT@
 CAMLDEP  = @OCAMLDEP@
 
-ZLIBS    = -I ocaml-parser
+ZLIBS    = -I ocaml-parser -I ocamllex-parser
 DEBUG    = 
 PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
@@ -35,6 +35,10 @@ CAML_CMO = ocaml-parser/misc.cmo ocaml-parser/clflags.cmo	\
 
 CAML_CMX = $(CAML_CMO:.cmo=.cmx)
 
+CAMLLEX_CMO = ocamllex-parser/lex_parser.cmo ocamllex-parser/lex_lexer.cmo 
+
+CAMLLEX_CMX = $(CAMLLEX_CMO:.cmo=.cmx)
+
 CMO = output.cmo cross.cmo pretty.cmo \
       web.cmo doclexer.cmo \
       version.cmo main.cmo
@@ -47,15 +51,15 @@ opt: ocamlweb
 
 byte: ocamlweb.byte
 
-ocamlweb: $(CAML_CMX) $(CMX)
-	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
+ocamlweb: $(CAML_CMX) $(CAMLLEX_CMX) $(CMX)
+	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CAMLLEX_CMX) $(CMX)
 	strip ocamlweb
 
-ocamlweb.byte: $(CAML_CMO) $(CMO)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb.byte $(CAML_CMO) $(CMO)
+ocamlweb.byte: $(CAML_CMO) $(CAMLLEX_CMO) $(CMO)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb.byte $(CAML_CMO) $(CAMLLEX_CMO) $(CMO)
 
-debug: $(CAML_CMO) $(CMO)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
+debug: $(CAML_CMO) $(CAMLLEX_CMO) $(CMO)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CAMLLEX_CMO) $(CMO)
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -133,6 +137,8 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	parse.mli parse.ml			\
 	README
 
+OCAMLLEXFILES = lex_syntax.mli lex_parser.mly lex_lexer.mll
+
 DOCFILES = doc/ocamlweb-man.ps doc/ocamlweb-man.html
 
 export: source linux
@@ -146,11 +152,12 @@ export-bootstrap: bootstrap
 
 source: manual
 	mkdir -p export/$(NAME)/test
-	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test; \
+	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p ocamllex-parser; mkdir -p test; \
 	  mkdir -p doc; mkdir -p support
 	cp $(FILES) export/$(NAME)
 	cp $(DOCFILES) export/$(NAME)/doc
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
+	cd ocamllex-parser; cp $(OCAMLLEXFILES) ../export/$(NAME)/ocamllex-parser
 	cd support; cp config.guess config.sub install-sh \
 	  ../export/$(NAME)/support
 	cd export ; tar cf $(NAME).tar $(NAME) ; \
@@ -196,26 +203,33 @@ binary: ocamlweb manual
 ocaml-parser/parser.mli ocaml-parser/parser.ml: ocaml-parser/parser.mly
 	ocamlyacc -v ocaml-parser/parser.mly
 
+ocamllex-parser/lex_parser.mli ocamllex-parser/lex_parser.ml: ocamllex-parser/lex_parser.mly
+	ocamlyacc -v ocamllex-parser/lex_parser.mly
+
 
 # clean and depend
 ##################
 
 GENERATED = doclexer.ml pretty.ml version.ml \
             ocaml-parser/lexer.ml ocaml-parser/linenum.ml \
-	    ocaml-parser/parser.mli ocaml-parser/parser.ml 
+	    ocaml-parser/parser.mli ocaml-parser/parser.ml \
+	    ocamllex-parser/lex_lexer.ml ocamllex-parser/lex_parser.ml \
+	    ocamllex-parser/lex_parser.mli
 
 clean:
 	rm -f *~ *.cm[iox] *.o 
 	rm -f ocaml-parser/*~ ocaml-parser/*.cm[iox] ocaml-parser/*.o
+	rm -f ocamllex-parser/*~ ocamllex-parser/*.cm[iox] ocamllex-parser/*.o
 	rm -f ocamlweb 
 	rm -f $(GENERATED)
 	rm -f ocaml-parser/parser.output
+	rm -f ocamllex-parser/lex_parser.output
 	make -C doc clean
 	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
 
 depend: $(GENERATED)
 	rm -f .depend
-	ocamldep $(ZLIBS) *.mli *.ml ocaml-parser/*.ml ocaml-parser/*.mli > .depend
+	ocamldep $(ZLIBS) *.mli *.ml ocaml-parser/*.ml ocaml-parser/*.mli ocamllex-parser/*.ml ocamllex-parser/*.mli > .depend
 
 include .depend
 

@@ -57,3 +57,5 @@ val defined : Whereset.t Idmap.t ref
 val cross_implem : string -> string -> unit
 val cross_interf : string -> string -> unit
  
+val cross_lex : string -> string -> unit
+ 

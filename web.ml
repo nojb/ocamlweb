@@ -222,8 +222,8 @@ let add_latex_option s =
 let index_file = function 
   | Implem i -> cross_implem i.content_file i.content_name
   | Interf i -> cross_interf i.content_file i.content_name
-  | Lex i -> () (*i Crosslex.cross_lex i.content_file i.content_name i.content_contents i*)
-  | Yacc i -> () (*i Crossyacc.cross_yacc i.content_file i.content_name i.content_contents i*)
+  | Lex i -> cross_lex i.content_file i.content_name 
+  | Yacc i -> () 
   | Other _ -> ()
 
 let build_index l = List.iter index_file l

@@ -540,3 +540,20 @@ let cross_implem = wrapper Parse.implementation tr_structure
 
 let cross_interf = wrapper Parse.interface tr_signature
 
+
+
+let cross_lex f m =
+  reset_cross ();
+  current_file := f;
+  add_module m;
+  let c = open_in f in
+  let lexbuf = Lexing.from_channel c in
+  try
+    let lexdefs = Lex_parser.lexer_definition Lex_lexer.main lexbuf in
+    close_in c
+  with Parsing.Parse_error | Lex_lexer.Lexical_error _ -> begin
+    if not !quiet then
+      eprintf " ** warning: syntax error while parsing %s\n" f;
+    close_in c
+  end
+  
