@@ -62,7 +62,7 @@ manual:
 	cd doc; make all
 
 test: ocamlweb
-	cd tmp; ../ocamlweb --no-web --latex-option LaTeXsects essai.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb --no-web --latex-option latex-sects essai.ml -o essai.tex ; \
 	latex essai ; latex essai
 
 BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml 
@@ -70,6 +70,7 @@ BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml
 bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; latex ocamlweb; latex ocamlweb
+	hevea ocamlweb.sty test/ocamlweb.tex
 
 check: bootstrap
 
