@@ -18,7 +18,7 @@
 
 (*i*)
 {
-
+  open Printf
   open Lexing
   open Output
   open Web
@@ -27,7 +27,9 @@
 (*s Global variables and functions used by the lexer. *)
 
   let skip_header = ref true
+  let current_file = ref ""
 
+  let comment_start = ref 0
   let comment_depth = ref 0
 
   let parlist = ref ([] : paragraph list)
@@ -64,8 +66,10 @@
       Buffer.clear codeb
     end
 
-  let reset_lexer () =
+  let reset_lexer f =
+    current_file := f;
     comment_depth := 0;
+    comment_start := 0;
     section_beg := 0;
     code_beg := 0;
     parlist := [];
@@ -106,7 +110,8 @@ and implementation = parse
            { new_section (); section_beg := (lexeme_start lexbuf);
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
-           { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
+           { comment_start := lexeme_start lexbuf;
+	     ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
   | space* "(*c"
            { comment_depth := 1; Buffer.add_string codeb "(*";
 	     comment lexbuf; code lexbuf; implementation lexbuf }
@@ -147,7 +152,8 @@ and code = parse
          { comment_depth := 1; Buffer.add_string codeb "(*";
 	   comment lexbuf; code lexbuf }
   | space* "(*i"
-         { ignore lexbuf; skip_until_nl lexbuf; code lexbuf }
+         { comment_start := lexeme_start lexbuf;
+	   ignore lexbuf; skip_until_nl lexbuf; code lexbuf }
   | '"'  { Buffer.add_char codeb '"'; code_string lexbuf; code lexbuf }
   | character
          { Buffer.add_string codeb (lexeme lexbuf); code lexbuf }
@@ -180,7 +186,9 @@ and skip_comment = parse
     are not nested. *)
 and ignore = parse
   | "i*)" { () }
-  | eof   { prerr_endline "Unterminated ocamlweb comment"; exit 1 }
+  | eof   { eprintf "File \"%s\", character %d\n" !current_file !comment_start;
+	    eprintf "Unterminated ocamlweb comment\n"; 
+	    exit 1 }
   | _     { ignore lexbuf }
 
 (*s Strings in code. *)
@@ -214,7 +222,7 @@ type file_type =
 (*s \textbf{Reading Caml files.} *)
 
 let raw_read_file f =
-  reset_lexer ();
+  reset_lexer f;
   let c = open_in f in
   let buf = Lexing.from_channel c in
   if !skip_header then header buf;

@@ -1,5 +1,8 @@
 (* header 1 *)
 (* header 2 *)
+(*i*)
+open Toto
+(*i*)
 
 (* $Id$ *)
 

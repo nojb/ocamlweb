@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o location (file + character) in error message for unterminated comments
   o index entries are now discriminated by their types (value,
     constructor, type, module, etc.)
   o nicer quotes in identifiers
