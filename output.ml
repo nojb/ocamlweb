@@ -108,7 +108,8 @@ let is_keyword =
       (* ajoutés *)
       "ref"; "not";
       (* types *)
-      "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option"
+      "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option";
+      "float"
     ];
   function s -> try Hashtbl.find h s; true with Not_found -> false
 
@@ -203,7 +204,9 @@ let end_paragraph () =
   output_string "\n\n\\medskip{}\n"
 
 let begin_index () =
-  output_string "\n\n\\ocwindex{}\n"
+  output_string "\n\n\\ocwbeginindex{}\n"
+let end_index () =
+  output_string "\n\n\\ocwendindex{}\n"
   
 let print_list print sep l = 
   let rec print_rec = function

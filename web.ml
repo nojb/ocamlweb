@@ -113,7 +113,8 @@ let print_one_entry s =
 
 let print_index () =
   begin_index ();
-  List.iter print_one_entry (all_entries())
+  List.iter print_one_entry (all_entries());
+  end_index ()
 
 (*s Production of the \LaTeX\ document. *)
 

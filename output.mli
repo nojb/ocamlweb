@@ -100,6 +100,7 @@ val end_paragraph : unit -> unit
 
 val begin_index : unit -> unit
 val output_index_entry : string -> int list -> int list -> unit
+val end_index : unit -> unit
 
 (*s The parameters of the output engine are reset to their initial values
     with [reset_output]. *)

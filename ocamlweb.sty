@@ -32,6 +32,7 @@
 \newcommand{\ocwsection}[1]{\bigskip\noindent{\bf#1.}{\kern1em}}
 
 % index
-\newcommand{\ocwindex}{\newpage\section*{Index}}
+\newcommand{\ocwbeginindex}{\newpage\begin{twocolumn}\section*{Index}}
+\newcommand{\ocwendindex}{\end{twocolumn}\newpage}
 % index entry
 \newcommand{\ocwindexentry}[3]{\noindent#1,\quad#2#3\par}
