@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.1, 20/09/2001
+=======================
   o make LaTeX output the name of the latex file being typeset
   o better redirections of messages/errors from LaTeX/dvips/hevea 
   o LaTeX messages now displayed (with -dvi,-ps), unless -q
