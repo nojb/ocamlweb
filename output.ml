@@ -470,11 +470,10 @@ let begin_code_paragraph () =
   last_is_code := true
 
 let end_code_paragraph is_last_paragraph =
-(*i  output_string (if is_last_paragraph then "\n" else "\\medskip\n\n") VERSI
-ON D'AVANT i*)
-  if is_last_paragraph 
-  then end_line()            (* Guillome Muller *)
-  else output_string "\\medskip\n\n"
+  if is_last_paragraph then 
+    end_line()            (*i Guillome Muller i*)
+  else 
+    output_string "\\medskip\n\n"
 
 let begin_doc_paragraph is_first_paragraph =
   if not is_first_paragraph then

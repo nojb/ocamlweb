@@ -32,7 +32,7 @@ let usage () =
   prerr_endline "Usage: ocamlweb <options and files>";
   prerr_endline "  -o <file>      write output in file <file>";
   prerr_endline "  -s             (short) no titles for files";
-  prerr_endline "  --latex-sects  use LaTeX sectioning, not WEB";
+  prerr_endline "  --noweb        use manual LaTeX sectioning, not WEB";
   prerr_endline "  --header       do not skip the headers of Caml file";
   prerr_endline "  --no-preamble  suppress LaTeX header and trailer";
   prerr_endline "  --no-index     do not output the index";
@@ -154,7 +154,8 @@ let parse () =
 
     | ("-header" | "--header") :: rem ->
 	skip_header := false; parse_rec rem
-    | ("-latexsects" | "-latex-sects" | "--latex-sects") :: rem ->
+    | ("-noweb" | "--noweb" | "-no-web" | "--no-web" |
+       "-latexsects" | "-latex-sects" | "--latex-sects") :: rem ->
 	add_latex_option "latex-sects";
 	web := false; parse_rec rem
     | ("-web" | "--web") :: rem ->

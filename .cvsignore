@@ -7,3 +7,7 @@ vrac
 config.cache
 config.status
 Makefile
+yacc_lexer.ml
+yacc_parser.output
+yacc_parser.ml
+yacc_parser.mli

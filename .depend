@@ -1,26 +1,18 @@
 doclexer.cmi: web.cmi 
 yacc_parser.cmi: yacc_syntax.cmi 
 yacc_syntax.cmi: ocamllex-parser/lex_syntax.cmi 
-crosslex.cmo: ocaml-parser/lexer.cmi ocaml-parser/parse.cmi \
-    ocaml-parser/syntaxerr.cmi crosslex.cmi 
-crosslex.cmx: ocaml-parser/lexer.cmx ocaml-parser/parse.cmx \
-    ocaml-parser/syntaxerr.cmx crosslex.cmi 
 cross.cmo: ocaml-parser/asttypes.cmi ocamllex-parser/lex_lexer.cmo \
     ocamllex-parser/lex_parser.cmi ocamllex-parser/lex_syntax.cmi \
     ocaml-parser/lexer.cmi ocaml-parser/location.cmi \
     ocaml-parser/longident.cmi output.cmi ocaml-parser/parse.cmi \
     ocaml-parser/parsetree.cmi ocaml-parser/syntaxerr.cmi yacc_lexer.cmo \
-    yacc_parser.cmi cross.cmi 
+    yacc_parser.cmi yacc_syntax.cmi cross.cmi 
 cross.cmx: ocaml-parser/asttypes.cmi ocamllex-parser/lex_lexer.cmx \
     ocamllex-parser/lex_parser.cmx ocamllex-parser/lex_syntax.cmi \
     ocaml-parser/lexer.cmx ocaml-parser/location.cmx \
     ocaml-parser/longident.cmx output.cmx ocaml-parser/parse.cmx \
     ocaml-parser/parsetree.cmi ocaml-parser/syntaxerr.cmx yacc_lexer.cmx \
-    yacc_parser.cmx cross.cmi 
-crossyacc.cmo: ocaml-parser/lexer.cmi ocaml-parser/parse.cmi \
-    ocaml-parser/syntaxerr.cmi crossyacc.cmi 
-crossyacc.cmx: ocaml-parser/lexer.cmx ocaml-parser/parse.cmx \
-    ocaml-parser/syntaxerr.cmx crossyacc.cmi 
+    yacc_parser.cmx yacc_syntax.cmi cross.cmi 
 doclexer.cmo: output.cmi web.cmi doclexer.cmi 
 doclexer.cmx: output.cmx web.cmx doclexer.cmi 
 main.cmo: doclexer.cmi output.cmi version.cmo web.cmi 

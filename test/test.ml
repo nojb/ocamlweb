@@ -1,10 +1,11 @@
 (* header 1 *)
 (* header 2 *)
+
+(*i $Id$ i*)
+
 (*i*)
 open Toto
 (*i*)
-
-(* $Id$ *)
 
 (* documentation $\beta$ 1 *)
 

@@ -586,7 +586,7 @@ let traverse_lex_defs f m lexdefs =
   (* traverse lexer rules *)
   List.iter
     (fun (id,rules) -> 
-       (* add_defs id LexParseRule; *)
+       (*i add_defs id LexParseRule; i*)
        List.iter 
 	 (fun (regexp,action) ->
 	    add_used_regexps f m regexp;

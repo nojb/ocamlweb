@@ -98,7 +98,7 @@ test: test/test.tex
 	xdvi test.dvi
 
 BOOTSTRAP= bootstrap.tex output.mli output.ml \
-	   yacc_parser.mly yacc_parser.mll cross.mli cross.ml \
+	   yacc_parser.mly yacc_lexer.mll cross.mli cross.ml \
            pretty.mli pretty.mll \
 	   web.mli web.ml doclexer.mli doclexer.mll main.ml 
 
