@@ -1,6 +1,6 @@
 
-COMPILATION
-============
+COMPILATION (source distribution only)
+======================================
 
   You need Objective Caml (>= 2.01) to compile the sources.
  
@@ -23,8 +23,8 @@ INSTALLATION
      with LaTeX.
 
 
-TEST
-====
+TEST (source distribution only)
+===============================
 
   You can run "make check" to `bootstrap' ocamlweb i.e. to apply it to
   its own code. If everything works fine, it will create a DVI document
