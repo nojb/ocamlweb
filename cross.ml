@@ -561,7 +561,7 @@ let lexer_function_inside_file ic loc =
     left := !left - m;
     m
 
-let cross_action_inside_file f m loc = 
+let cross_action_inside_file msg f m loc = 
   reset_cross f loc.Lex_syntax.start_pos;
   let c = open_in f in
   let lexbuf = Lexing.from_function (lexer_function_inside_file c loc) in
@@ -569,8 +569,10 @@ let cross_action_inside_file f m loc =
     tr_structure (Parse.implementation lexbuf);
     close_in c
   with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
-    if not !quiet then
-      eprintf " ** warning: syntax error while parsing action in %s\n" f;
+    if not !quiet then begin
+      eprintf "File \"%s\", character %d\n" f loc.Lex_syntax.start_pos;
+      eprintf " ** warning: syntax error while parsing %s\n" msg
+    end;
     close_in c
   end
 
@@ -616,18 +618,18 @@ let traverse_lex_defs f m lexdefs =
     lexdefs.Lex_syntax.entrypoints;
   (* now we can traverse actions *)
   (* traverse header *)
-  cross_action_inside_file f m lexdefs.Lex_syntax.header;
+  cross_action_inside_file "header" f m lexdefs.Lex_syntax.header;
   (* traverse actions *)
   List.iter
     (fun (id,loc,rules) -> 
        List.iter 
 	 (fun (regexp,action) ->
 	    add_used_regexps f m regexp;
-	    cross_action_inside_file f m action)
+	    cross_action_inside_file "action" f m action)
 	 rules)
     lexdefs.Lex_syntax.entrypoints;
   (* traverse trailer *)
-  cross_action_inside_file f m lexdefs.Lex_syntax.trailer
+  cross_action_inside_file "trailer" f m lexdefs.Lex_syntax.trailer
 
   
 
@@ -707,14 +709,14 @@ let traverse_yacc f m yacc_defs =
     yacc_defs.Yacc_syntax.rules;
   (* now let's traverse types, actions, header, trailer *)
   (* traverse header *)
-  cross_action_inside_file f m yacc_defs.Yacc_syntax.header;
+  cross_action_inside_file "header" f m yacc_defs.Yacc_syntax.header;
   (* traverse types in decls *)
   List.iter
     (function 
        | Yacc_syntax.Typed_tokens(typ,idl) ->
-	   cross_action_inside_file f m typ
+	   cross_action_inside_file "type" f m typ
        | Yacc_syntax.Non_terminals_type(typ,idl) -> 
-	   cross_action_inside_file f m typ
+	   cross_action_inside_file "type" f m typ
        | _ -> ())
     yacc_defs.Yacc_syntax.decls;
   (* traverse actions *)
@@ -722,11 +724,11 @@ let traverse_yacc f m yacc_defs =
     (fun (_,rhss) ->
        List.iter
 	 (fun (_,action) ->
-	    cross_action_inside_file f m action)
+	    cross_action_inside_file "action" f m action)
 	 rhss)
     yacc_defs.Yacc_syntax.rules;
   (* traverse trailer *)
-  cross_action_inside_file f m yacc_defs.Yacc_syntax.trailer
+  cross_action_inside_file "trailer" f m yacc_defs.Yacc_syntax.trailer
 
 let cross_yacc f m =
   reset_cross f 0;
