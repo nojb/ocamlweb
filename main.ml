@@ -41,6 +41,7 @@ let usage () =
   prerr_endline "  --tex <file>   consider <file> as a .tex file";
   prerr_endline "  --latex-option <opt>";
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
+  prerr_endline "  --files <file> read file names to process in <file>";
   exit 1
 
 
@@ -101,6 +102,35 @@ let what_file f =
     exit 1
   end
 
+(*s \textbf{Reading file names from a file.} File names may be given
+in a file instead of being given on the command
+line. [(files_from_file f)] returns the list of file names contained
+in the file named [f]. These file names must be separated by spaces,
+tabulations or newlines *)
+
+let files_from_file f =
+
+  let rec files_from_channel accu_s accu_l ch =
+    try
+      let c = input_char ch in
+	match c with 
+	    ' ' | '\t' | '\n' ->
+	      files_from_channel 
+		"" (if accu_s="" then accu_l else accu_s::accu_l) ch
+	  | _ -> 
+	      files_from_channel (accu_s^(String.make 1 c)) accu_l ch
+    with
+	End_of_file ->
+	  List.rev (if accu_s="" then accu_l else accu_s::accu_l)
+  in
+    try
+      check_if_file_exists f;
+      let ch = open_in f in
+      let l = files_from_channel "" [] ch in
+	close_in ch;l
+    with Sys_error _ ->
+      eprintf "\nocamlweb: cannot read from file %s\n" f;
+      exit 1
 
 (*s \textbf{Parsing of the command line.} *)
 
@@ -155,6 +185,11 @@ let parse () =
     | ("-tex" | "--tex") :: f :: rem -> 
 	add_file (File_other f); parse_rec rem
     | ("-tex" | "--tex") :: [] ->
+	usage ()
+    | ("-files" | "--files") :: f :: rem ->
+	List.iter (fun f -> add_file (what_file f)) (files_from_file f); 
+	parse_rec rem
+    | ("-files" | "--files") :: [] ->
 	usage ()
     | f :: rem -> 
 	add_file (what_file f); parse_rec rem
