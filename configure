@@ -737,7 +737,7 @@ else
     fi
   done
   IFS="$ac_save_ifs"
-  test -z "$ac_cv_path_MKTEXLSR" && ac_cv_path_MKTEXLSR="no"
+  test -z "$ac_cv_path_MKTEXLSR" && ac_cv_path_MKTEXLSR="true"
   ;;
 esac
 fi
@@ -748,8 +748,8 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-if test "$MKTEXLSR" = no ; then
-	{ echo "configure: error: Cannot find mktexlsr." 1>&2; exit 1; }
+if test "$MKTEXLSR" = true ; then
+	echo "configure: warning: Cannot find mktexlsr." 1>&2
 fi
 
 
