@@ -77,10 +77,14 @@ manual:
 
 LATEX=TEXINPUTS=..: ; export TEXINPUTS ; latex
 
-test: ocamlweb tmp/essai.ml
-	cd tmp; ../ocamlweb essai.ml -o essai.tex; \
-	$(LATEX) essai ; grep -q "Rerun" essai.log && $(LATEX) essai || true; \
-	hevea -o essai.html ../ocamlweb.sty essai.tex
+test/test.tex: ocamlweb test/test.ml test/test.mli
+	cd test; ../ocamlweb test.mli test.ml -o test.tex
+
+test: test/test.tex
+	cd test; \
+	$(LATEX) test ; grep -q "Rerun" test.log && $(LATEX) test || true; \
+	-hevea -o test.html ../ocamlweb.sty test.tex; \
+	xdvi test.dvi
 
 BOOTSTRAP= bootstrap.tex output.mli output.ml cross.mli cross.ml \
            pretty.mli --impl pretty.mll web.mli web.ml \
