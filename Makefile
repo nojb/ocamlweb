@@ -83,8 +83,7 @@ NAME=ocamlweb-$(VERSION)
 
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
-FILES = buffer.mli buffer.ml					\
-        doclexer.mli doclexer.mll cross.ml cross.mli		\
+FILES = doclexer.mli doclexer.mll cross.ml cross.mli		\
 	pretty.mli pretty.mll					\
 	output.mli output.ml web.mli web.ml main.ml		\
 	ocamlweb.sty bootstrap.tex				\
