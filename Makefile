@@ -43,7 +43,7 @@ ocamlweb: $(CAML_CMO) $(CMO)
 
 opt: $(CAML_CMX) $(CMX)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
-	-strip ocamlweb
+	strip ocamlweb
 
 debug: $(CAML_CMO) $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
