@@ -7,6 +7,8 @@
 
 type truc = AA | BB | CC
 
+exception AAA of aatoto * aatruc * aamachin
+
 type machin = { champ1 : int;
 		champ2 : string }
 
@@ -17,9 +19,13 @@ type machin = { champ1 : int;
     ou encore << échapper >> cette ["chaine de caractères"]. *)
 
 let ma_fonction x = function (yyy,z) ->
-  x + yyy*z (* commentaire : $[y]\not=0$ *)
+  x + yyy*z (* commentaire : $[y]\not=0$ *) + toto
 
 let s c = "\\" ^ c ^ "autre chaine"
+
+let xxx = { champ1 = 1; champ2 = "toto" }
+
+let yyy = [| 1; xxx; 3 |]
 
 (*s un vrai commentaire *)
 
@@ -41,5 +47,13 @@ let toto = match truc with tagada -> ma_fonction tagada
 
 let test_pat = function
     A1 -> 1
-  | BB -> 2
+  | BB -> toto
   | CC -> CC.f
+
+(*s *)
+
+let y = tagada
+
+(*s *)
+
+let x = toto

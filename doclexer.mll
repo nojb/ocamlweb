@@ -26,17 +26,21 @@
 
   let comment_depth = ref 0
 
+  let beginning = ref 0
+
   let parlist = ref ([] : paragraph list)
   let seclist = ref ([] : raw_section list)
 
   let reset_lexer () =
     comment_depth := 0;
+    beginning := 0;
     parlist := [];
     seclist := []
 
   let new_section () =
     if !parlist <> [] then begin
-      seclist := (List.rev !parlist) :: !seclist
+      let s = { sec_contents = List.rev !parlist; sec_beg = !beginning } in
+      seclist := s :: !seclist
     end;
     parlist := []
 
@@ -87,7 +91,7 @@ and implementation = parse
   | space* "(*" space_or_nl*
            { new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*s" space_or_nl*
-           { new_section (); 
+           { new_section (); beginning := (Lexing.lexeme_start lexbuf);
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
            { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }

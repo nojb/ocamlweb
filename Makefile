@@ -21,8 +21,7 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-CAML_OBJS = config.cmo \
-       misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
+CAML_OBJS = misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
        linenum.cmo location.cmo longident.cmo pstream.cmo syntaxerr.cmo \
        parser.cmo lexer.cmo parse.cmo
 

@@ -28,7 +28,9 @@ type paragraph =
   | Documentation of string
   | Code of string
 
-type raw_section = paragraph list
+type raw_section = {
+  sec_contents : paragraph list;
+  sec_beg : int }
 
 type interf = { 
   interf_file : string;

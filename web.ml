@@ -27,7 +27,9 @@ type paragraph =
   | Documentation of string
   | Code of string
 
-type raw_section = paragraph list
+type raw_section =  {
+  sec_contents : paragraph list;
+  sec_beg : int }
 
 type interf = { 
   interf_file : string;
@@ -71,7 +73,25 @@ let build_index l =
        | Interf i -> build_interf i
        | Other f -> ())
     l
-    
+
+
+(*s The sections' table. *)
+
+module Intmap = Map.Make(struct type t = int let compare = compare end)
+
+let section_table = ref Idmap.empty
+
+let add_section file loc n =
+  let l = try Idmap.find file !section_table with Not_found -> [] in
+  section_table := Idmap.add file ((loc,n)::l) !section_table
+
+let find_section w =
+  let rec lookup = function
+      [] -> raise Not_found
+    | (n,s)::r -> if w.w_loc >= n then s else lookup r
+  in
+  lookup (Idmap.find w.w_filename !section_table)
+
 
 (*s Printing of the index. *)
 
@@ -100,12 +120,16 @@ let all_entries () =
   let s = Idmap.fold (fun x _ s -> Stringset.add x s) !defined s in
   Sort.list alpha_string (Stringset.elements s)
 
+let rec uniquize = function
+  | [] | [_] as l -> l
+  | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
+
 let print_one_entry s =
   let list_in_table t =
     try 
       let l = Whereset.elements (Idmap.find s !t) in
-      let l = List.map (fun x -> x.w_loc) l in
-      Sort.list (<) l
+      let l = List.map find_section l in
+      uniquize (Sort.list (<) l)
     with Not_found -> 
       []
   in
@@ -119,6 +143,7 @@ let print_index () =
   List.iter print_one_entry (all_entries());
   end_index ()
 
+
 (*s Production of the \LaTeX\ document. *)
 
 let sec_number = ref 0
@@ -127,15 +152,16 @@ let pretty_print_paragraph = function
   | Documentation s -> pretty_print_doc s
   | Code s -> pretty_print_code s
 
-let pretty_print_section s = 
+let pretty_print_section f s = 
   incr sec_number;
+  add_section f s.sec_beg !sec_number;
   output_section !sec_number;
   List.iter 
     (function p -> 
        begin_paragraph ();
        pretty_print_paragraph p;
        end_paragraph())
-    s
+    s.sec_contents
     
 let pretty_print_implem imp =
   output_module imp.implem_name;
@@ -143,14 +169,14 @@ let pretty_print_implem imp =
     | None -> ()
     | Some i -> 
 	interface_part ();
-	List.iter pretty_print_section i.interf_contents;
+	List.iter (pretty_print_section i.interf_file) i.interf_contents;
 	code_part ()
   end;
-  List.iter pretty_print_section imp.implem_contents
+  List.iter (pretty_print_section imp.implem_file) imp.implem_contents
 
 let pretty_print_interf inte =
   output_interface inte.interf_name;
-  List.iter pretty_print_section inte.interf_contents
+  List.iter (pretty_print_section inte.interf_file) inte.interf_contents
 
 
 (*s Production of the document. 

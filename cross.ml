@@ -123,6 +123,27 @@ let bind_variables ids f x =
   f x;
   locals := save
 
+
+let rec tr_core_type t =
+  tr_core_type_desc t.ptyp_loc t.ptyp_desc
+
+and tr_core_type_desc loc = function
+  | Ptyp_any | Ptyp_var _ -> 
+      ()
+  | Ptyp_arrow (t1,t2) ->
+      tr_core_type t1; tr_core_type t2
+  | Ptyp_tuple tl ->
+      List.iter tr_core_type tl
+  | Ptyp_constr (q,tl) ->
+      add_uses_q loc q; List.iter tr_core_type tl
+(**
+  | Ptyp_object of core_field_type list
+  | Ptyp_class of Longident.t * core_type list
+  | Ptyp_alias of core_type * string
+**)
+  | _ -> ()
+
+
 let rec pattern_expression (p,e) =
   bind_variables (ids_of_a_pattern p) tr_expression e
 
@@ -134,7 +155,8 @@ and tr_expression e =
   tr_expression_desc e.pexp_loc e.pexp_desc
 
 and tr_expression_desc loc = function
-  | Pexp_ident q -> add_uses_q loc q
+  | Pexp_ident q -> 
+      add_uses_q loc q
   | Pexp_apply (e,el) ->
       tr_expression e; List.iter tr_expression el
   | Pexp_ifthenelse (e1,e2,e3) -> 
@@ -147,9 +169,12 @@ and tr_expression_desc loc = function
       List.iter tr_expression el
   | Pexp_construct (_,e,_) -> 
       option_iter tr_expression e
-  | Pexp_function pel -> List.iter pattern_expression pel
-  | Pexp_match (e,pel) -> tr_expression e; List.iter pattern_expression pel
-  | Pexp_try (e,pel) -> tr_expression e; List.iter pattern_expression pel
+  | Pexp_function pel -> 
+      List.iter pattern_expression pel
+  | Pexp_match (e,pel) -> 
+      tr_expression e; List.iter pattern_expression pel
+  | Pexp_try (e,pel) -> 
+      tr_expression e; List.iter pattern_expression pel
   | Pexp_let (recf,pel,e) -> 
       let pl = List.map fst pel in
       if recf = Recursive then 
@@ -157,31 +182,48 @@ and tr_expression_desc loc = function
       else
 	iter_snd tr_expression pel; 
       patterns_expression pl e
-  | _ -> ()
-(**
+  | Pexp_record (l,e) ->
+      iter_fst (add_uses_q loc) l; iter_snd tr_expression l; 
+      option_iter tr_expression e
+  | Pexp_field (e,q) ->
+      tr_expression e; add_uses_q loc q
+  | Pexp_setfield (e1,q,e2) ->
+      tr_expression e1; add_uses_q loc q; tr_expression e2
+  | Pexp_array el ->
+      List.iter tr_expression el
+  | Pexp_for (i,e1,e2,_,e) ->
+      tr_expression e1; tr_expression e2; bind_variables [i] tr_expression e
+  | Pexp_constraint (e,t1,t2) ->
+      tr_expression e; option_iter tr_core_type t1; option_iter tr_core_type t2
+  | Pexp_when (e1,e2) ->
+      tr_expression e1; tr_expression e2
+  | Pexp_letmodule (x,m,e) ->
+      tr_module_expr m; bind_variables [x] tr_expression e
   | Pexp_constant _ -> ()
-  | Pexp_record of (Longident.t * expression) list * expression option
-  | Pexp_field of expression * Longident.t
-  | Pexp_setfield of expression * Longident.t * expression
-  | Pexp_array of expression list
-  | Pexp_for of string * expression * expression * direction_flag * expression
-  | Pexp_constraint of expression * core_type option * core_type option
-  | Pexp_when of expression * expression
+(**
   | Pexp_send of expression * string
   | Pexp_new of Longident.t
   | Pexp_setinstvar of string * expression
   | Pexp_override of (string * expression) list
-  | Pexp_letmodule of string * module_expr * expression
 **)
+  | _ -> ()
 
 and tr_value_description vd =
-  () (* TODO *)
+  tr_core_type vd.pval_type
 
 and tr_type_declaration td =
-  () (* TODO *)
+  tr_type_kind td.ptype_loc td.ptype_kind
+
+and tr_type_kind loc = function
+  | Ptype_abstract -> ()
+  | Ptype_variant cl ->
+      iter_fst (add_def loc) cl;
+      iter_snd (List.iter tr_core_type) cl
+  | Ptype_record fl ->
+      List.iter (fun (f,_,t) -> add_def loc f; tr_core_type t) fl
 
 and tr_exception_declaration ed =
-  () (* TODO *)
+  List.iter tr_core_type ed
 
 (* Classes *)
 
@@ -197,7 +239,35 @@ and tr_module_type mt =
   () (* TODO *)
 
 and tr_signature s =
-  () (* TODO *)
+  List.iter tr_signature_item s
+
+and tr_signature_item i =
+  tr_signature_item_desc i.psig_loc i.psig_desc
+
+and tr_signature_item_desc loc = function
+  | Psig_value (x,vd) ->
+      add_def loc x; tr_value_description vd
+  | Psig_type l ->
+      iter_fst (add_def loc) l; iter_snd tr_type_declaration l
+  | Psig_exception (id,ed) ->
+      add_def loc id; tr_exception_declaration ed
+  | Psig_module (id,mt) ->
+      add_def loc id; tr_module_type mt
+  | Psig_modtype (id,mtd) ->
+      add_def loc id; tr_modtype_declaration mtd
+  | Psig_open m ->
+      add_open m
+  | Psig_include mt ->
+      tr_module_type mt
+(**
+  | Psig_class of class_description list
+  | Psig_class_type of class_type_declaration list
+**)
+  | _ -> ()
+
+and tr_modtype_declaration = function
+  | Pmodtype_abstract -> ()
+  | Pmodtype_manifest mt -> tr_module_type mt
 
 and tr_module_expr me =
   () (* TODO *)

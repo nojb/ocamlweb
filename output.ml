@@ -107,13 +107,13 @@ let is_caml_keyword =
       "true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
       (* ajoutés *)
-      "ref"; "not"
+      "not"
     ]
 
 let is_base_type = 
   build_table
     [ "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option";
-      "float" ]
+      "float"; "ref" ]
 
 let is_keyword s = is_base_type s || is_caml_keyword s 
 
@@ -122,7 +122,8 @@ let output_keyword s =
     output_string "\\ocwbt{" 
   else 
     output_string "\\ocwkw{";
-  output_string s; output_string "}"
+  output_string s;
+  output_string "}"
 
 let output_latex_id s =
   for i = 0 to String.length s - 1 do
@@ -219,8 +220,12 @@ let begin_paragraph () =
 let end_paragraph () =
   output_string "\n\n\\medskip{}\n"
 
+
+(* Index. *)
+
 let begin_index () =
   output_string "\n\n\\ocwbeginindex{}\n"
+
 let end_index () =
   output_string "\n\n\\ocwendindex{}\n"
   
@@ -232,19 +237,41 @@ let print_list print sep l =
   in
   print_rec l
   
-let output_int n = output_string (string_of_int n)
+type elem =
+  | Single of int
+  | Interval of int * int
 
-let output_bf_int n = 
-  output_string "\\textbf{"; output_int n; output_string "}"
+let intervals l =
+  let rec group = function
+    | (acc, []) -> List.rev acc
+    | (Interval (n1,n2)::acc, n::rem) when n = succ n2 -> 
+	group (Interval (n1,n)::acc, rem)
+    | ((Single n2)::(Single n1)::acc, n::rem) when n = n1+2 ->
+	group (Interval (n1,n)::acc, rem)
+    | (acc, n::rem) ->
+	group ((Single n)::acc, rem)
+  in
+  group ([],l)
+
+let output_elem = function
+  | Single n -> 
+      output_string (string_of_int n)
+  | Interval (n1,n2) -> 
+      output_string (string_of_int n1);
+      output_string "--";
+      output_string (string_of_int n2)
+
+let output_bf_elem n = 
+  output_string "\\textbf{"; output_elem n; output_string "}"
 
 let output_index_entry s def use =
   let sep () = output_string ", " in
   output_string "\\ocwindexentry{";
   output_raw_ident s;
   output_string "}{";
-  print_list output_bf_int sep def;
+  print_list output_bf_elem sep (intervals def);
   output_string "}{";
   if def <> [] && use <> [] then output_string ", ";
-  print_list output_int sep use;
+  print_list output_elem sep (intervals use);
   output_string "}\n"
 
