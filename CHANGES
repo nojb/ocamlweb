@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o right-justified comments with (*r ... *)
+  o misinterpretation of -- in strings fixes
   o better adequacy to caml tokens (and better pretty-printing)
   o single letter identifiers are also printed using macros \ocwlowerid, etc.
   o line breaks in strings are now correctly handled

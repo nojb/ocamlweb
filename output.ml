@@ -177,7 +177,9 @@ let output_escaped_char c =
   match c with
     | '\\' -> 
 	output_string "\\symbol{92}"
-    | '$' | '#' | '%' | '&' | '{' | '}' | '^' | '_' | '~' -> 
+    | '$' | '#' | '%' | '&' | '{' | '}' | '_' -> 
+	output_char '\\'; output_char c
+    | '^' | '~' -> 
 	output_char '\\'; output_char c; output_string "{}"
     | _ -> 
 	output_char c
@@ -266,12 +268,17 @@ let output_type_variable id =
       | "t" -> output_greek "tau"
       | _   -> output_tv id
 
+let output_ascii_char n =
+  output_string (sprintf "\\symbol{%d}" n)
+
 
 (*s \textbf{Comments.} *)
 
 let output_bc () = leave_math (); output_string "\\ocwbc{}"
 
 let output_ec () = leave_math (); output_string "\\ocwec{}"
+
+let output_hfill () = leave_math (); output_string "\\hfill "
 
 
 (*s \textbf{Strings.} *)

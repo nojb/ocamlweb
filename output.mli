@@ -69,7 +69,9 @@ val leave_math : unit -> unit
     [output_symbol] pretty-prints the Caml symbols,
     like $\rightarrow$ for \texttt{->}. 
     [output_type_variable s] pretty-prints type variables, in particular 
-    one-letter type variables are output as greek letters.  *)
+    one-letter type variables are output as greek letters. 
+    [output_ascii_char n] outputs the character of ASCII code [n].
+    *)
 
 type char_type = Upper | Lower | Symbol
 val what_is_first_char : string -> char_type
@@ -79,12 +81,15 @@ val output_ident : string -> unit
 val output_escaped_char : char -> unit
 val output_symbol : string -> unit
 val output_type_variable : string -> unit
+val output_ascii_char : int -> unit
 
-(* Comments inside code are opened and closed respectively by 
-   [output_bc] and [output_ec]. *)
+(* Comments inside code are opened and closed respectively by
+   [output_bc] and [output_ec]. The function [output_hfill] is called
+   before [output_bc] to justify a comment. *)
 
 val output_bc : unit -> unit
 val output_ec : unit -> unit
+val output_hfill : unit -> unit
 
 (* Strings inside code are opened and close respectively by
    [ output_bs] and [output_es]. A space character in a string is 

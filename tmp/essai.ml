@@ -22,9 +22,7 @@ let l =
   [|[|1;3;2|];
     [|4;5;6|]|]
 
-let t = T
-
-let M.t = M.T
+let t = 1 ** 2
 
 let une_grande_chaine = "tatdn jgj gjhg jfjh \
     kjhsljkh hglg lglj gljb lgjh \
@@ -50,7 +48,11 @@ let yyy = [| 1; xxx; 3 |]
 (*s un vrai commentaire *)
 
 let autre_bout x =
-  if x <= 0 then x+1 else x+2; (*c un vrai commentaire *)
+  if x <= 0 then x+1 else x+2;          (*r un vrai commentaire *)
+  f 3;                                  (*r et hop *)
+  cool ()                               (*r et voilà une troisième ligne *)
+
+let chaine =
   "(* une grande chaine
    qui se poursuit sur deux lignes"; while true do () done;
   '"' + "une autre chaine"

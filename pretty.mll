@@ -109,6 +109,9 @@ and pr_code_inside = parse
 	   pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
+  | "(*r" 
+         { output_hfill (); output_bc (); comment_depth := 1;
+	   pr_comment lexbuf; pr_code_inside lexbuf }
   | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
   | symbol_token
          { output_symbol (lexeme lexbuf); pr_code_inside lexbuf }
@@ -149,6 +152,7 @@ and pr_code_string = parse
          { output_escaped_char '\\'; output_escaped_char '\\'; 
 	   pr_code_string lexbuf }
   | eof  { () }
+  | '-'  { output_ascii_char 45; pr_code_string lexbuf }
   | _    { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
 
 
