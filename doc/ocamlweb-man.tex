@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage{fullpage}
 
+\newcommand{\WEB}{\textsf{WEB}}
 \newcommand{\Caml}{\textsf{Caml}}
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
 
@@ -73,23 +74,53 @@ shape. These commands are the following:
   cannot be nested but any \Caml\ code and comments may appear between
   them, included nested \Caml\ comments.  You can use those delimiters
   to enclose a comment that shouldn't appear in the document, but also
-  to comment some \Caml\ code between \texttt{(*i*)} and
-  \texttt{(*i*)} in such a way that your code still compile but is
-  ignored by \ocamlweb.
+  to hide some \Caml\ code, putting it between \texttt{(*i*)} and
+  \texttt{(*i*)} in such a way that your code still compiles but is
+  ignored by \ocamlweb. (Notice that of you use the delimiters
+  \texttt{(*i} and \texttt{i*)} directly, the text inside is commented
+  for both \Caml\ and \ocamlweb.)
 
 \item[\texttt{(*c}] ~\par
   
   Tells \ocamlweb\ that this is a real \Caml\ comment an not a
   documentation text. Mainly useful is you want to insert comments
   after empty lines. However, this is not the spirit of \ocamlweb, and
-  you are encouraged to put the documentation in separate paragraphs
-  and not in traditional \Caml\ comments.
+  you are encouraged to put the documentation in separate \LaTeX\ 
+  paragraphs and not in traditional \Caml\ comments.
 
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Hints to get a pretty document}
+
+\ocamlweb\ is rather robust, in the sense that it will always succeed
+in producing a document, as soon as the \Caml\ files are lexically
+correct. However, you may find the result rather ugly if so was your
+source files. Here are some style hints to get a pretty document.
+
+First, \ocamlweb\ is not a real code pretty-printer: it uses different
+faces for identifiers and keywords, and use some mathematical symbols
+for \verb!->!, \verb!*!, etc. but it does not indent your code. It
+does not even cut your code lines when they are too long. The code
+will always appear formatted as it is in the source files. The
+indentation at the beggining of each line is output as a proportional
+space (tabulations are correctly translated). In particular, if you
+want your pattern-matchings to be aligned, you have to put a `\verb!|!'
+also in front of the first pattern. Here is the difference:
+\begin{displaymath}
+  \begin{array}{l}
+    \mathsf{let}~\mathit{f}~=~\mathsf{function} \\
+    \kern2em\mathit{O}~\rightarrow~\dots \\
+    \kern1em|~(\mathit{S}~p)~\rightarrow~\dots
+  \end{array}
+  \qquad\qquad
+  \begin{array}{l}
+    \mathsf{let}~\mathit{f}~=~\mathsf{function} \\
+    \kern1em|~\mathit{O}~\rightarrow~\dots \\
+    \kern1em|~(\mathit{S}~p)~\rightarrow~\dots
+  \end{array}
+\end{displaymath}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,10 +131,12 @@ shape. These commands are the following:
 \begin{displaymath}
   \texttt{ocamlweb }<\textit{options and files}>
 \end{displaymath}
-Any command line argument which is not an option is considered as a
-file. A file that is not a \Caml\ file is considered as a \LaTeX\ file,
-and will be copied `as is' in the final document. The order of files
-on the command line is kept in the final document. 
+Any command line argument which is not an option is considered to be a
+file (even if it starts with a \verb!-!). \Caml\ files are identified
+by the suffixes \verb!.ml! and \verb!.mli!, and \LaTeX\ files by the
+suffix \verb!.tex!. The latter will be copied `as is' in the final
+document. The order of files on the command line is kept in the final
+document.
 
 \subsection*{Command line options}
 
@@ -111,7 +144,28 @@ on the command line is kept in the final document.
 
 \item[\texttt{-o }\textit{file}, \texttt{--output }\textit{file}] ~\par
   
-  Redirects the output to file \textit{file}.
+  Redirects the output into the file `\textit{file}'.
+
+\item[\texttt{--no-web}] ~\par
+
+  No \WEB\ style. In that case, there are no sections, and the user
+  structurates his document directly through \LaTeX\ commands, like
+  for instance \texttt{\symbol{92}section},
+  \texttt{\symbol{92}subsection}, etc.
+  There is still an index, in the usual \LaTeX\ sense. (Therefore, if
+  you have introduced \LaTeX\ sections and subsections, their numbers
+  will appear in the index.)
+
+\item[\texttt{--no-index}] ~\par
+  
+  Do not print the index.
+
+\item[\texttt{--extern-defs}] ~\par
+
+  Keeps the external definitions in the index i.e. the identifiers
+  which are not defined in any part of the code. (The default behavior
+  is to suppress them from the index, even if they are used somewhere
+  in the code.)
 
 \item[\texttt{--header}] ~\par
 
@@ -122,13 +176,6 @@ on the command line is kept in the final document.
   \Caml\ file, and are stopped by any character other then a space
   outside a comment or by an empty line. 
 
-\item[\texttt{--extern-defs}] ~\par
-
-  Keeps the external definitions in the index i.e. the identifiers
-  which are not defined in any part of the code. (The default behavior
-  is to suppress them from the index, even if they are used somewhere
-  in the code.)
-
 \item[\texttt{--no-doc}] ~\par
 
   Suppresses the header and trailer of the final document. Thus, you can
@@ -137,6 +184,12 @@ on the command line is kept in the final document.
 \item[\texttt{--latex-option }\textit{option}] ~\par
 
   Passes the given option the \LaTeX\ package \texttt{ocamlweb.sty}. 
+
+\item[\texttt{--impl }\textit{file}, \texttt{--intf }\textit{file}, 
+      \texttt{--tex }\textit{file}] ~\par
+
+  Considers the file `\textit{file}' respectively as a \verb!.ml! file, a
+  \verb!.mli! file or a \verb!.tex! file.
 
 \item[\texttt{-h}, \texttt{--help}] ~\par
 
@@ -154,10 +207,17 @@ on the command line is kept in the final document.
 
 \begin{enumerate}
 \item \textbf{How can I insert `usepackage' commands, or whatever else,
-  in the \LaTeX\ preamble ?} ~\par
+  in the \LaTeX\ preamble?} ~\par
 
   Use the option \texttt{--no-doc} and catenate the result with your
   own header and trailer.
+
+\item \textbf{How can I customize the appearance of the final
+    document?} ~\par 
+
+  Make your own version of the \LaTeX\ package
+  \texttt{ocamlweb.sty}. There are macros for keywords, identifiers,
+  index entries, etc. with short comments explaining their role.
 
 \end{enumerate}
 
