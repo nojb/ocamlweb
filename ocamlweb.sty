@@ -6,6 +6,7 @@
 % You can modify the following macros to customize the appearance
 % of the document.
 
+\newif\iflatexsectioning\latexsectioningfalse
 % the following comment tells HeVeA to ignore all this until END LATEX
 %BEGIN LATEX
 
@@ -19,7 +20,6 @@
 % numbered in sequences. If true, structured sectioning is allowed
 % using LaTeX sectioning commands.
 
-\newif\iflatexsectioning\latexsectioningfalse
 \DeclareOption{noweb}{\latexsectioningtrue}
 \DeclareOption{web-sects}{\latexsectioningfalse}
 
@@ -102,10 +102,17 @@
 \newcommand{\ocweyc}{\ensuremath{\ast/}}
  
 % yacc special notations
+\iflatexsectioning
 \newcommand{\ocwyaccrules}{\subsection*{Grammar rules}}
 \newcommand{\ocwyacctrailer}{\subsection*{Trailer}}
 \newcommand{\ocwyaccopercentbrace}{\subsection*{Header}}
 \newcommand{\ocwyacccpercentbrace}{\subsection*{Token declarations}}
+\else
+\newcommand{\ocwyaccrules}{}
+\newcommand{\ocwyacctrailer}{}
+\newcommand{\ocwyaccopercentbrace}{}
+\newcommand{\ocwyacccpercentbrace}{}
+\fi
 \newcommand{\ocwyacccolon}{\ensuremath{::=}}
 \newcommand{\ocwyaccendrule}{}
 \newcommand{\ocwyaccpipe}{\ensuremath{\mid}}
