@@ -75,9 +75,11 @@ rule header = parse
 
 (* inside a module, at the beginning of a line) *)
 and implementation = parse
-  | "(*"   { comment_depth := 1; Buffer.clear docub; documentation lexbuf;
+  | "(*" space*
+           { comment_depth := 1; Buffer.clear docub; documentation lexbuf;
 	     implementation lexbuf }
-  | "(*s"  { new_section (); 
+  | "(*s" space*
+           { new_section (); 
 	     comment_depth := 1; Buffer.clear docub; documentation lexbuf;
 	     implementation lexbuf }
   | space+ { implementation lexbuf }
@@ -89,11 +91,14 @@ and implementation = parse
       
 (* inside the documentation part *)
 and documentation = parse
-  | "(*" { comment_depth := succ !comment_depth; documentation lexbuf }
-  | "*)" { comment_depth := pred !comment_depth;
-           if !comment_depth > 0 then 
+  | "(*" { Buffer.add_string docub (Lexing.lexeme lexbuf);
+	   incr comment_depth; documentation lexbuf }
+  | space* "*)" 
+         { decr comment_depth;
+           if !comment_depth > 0 then begin
+	     Buffer.add_string docub (Lexing.lexeme lexbuf);
 	     documentation lexbuf 
-	   else begin
+	   end else begin
 	     skip_until_nl lexbuf;
 	     push_doc ()
 	   end}
@@ -107,6 +112,7 @@ and documentation = parse
 (* inside the code part, at the beginning of a line *)
 and code = parse
   | '\n' { push_code () }
+  | ";;" { push_code () }
   | eof  { push_code () }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf;
 	   code lexbuf }
@@ -114,6 +120,7 @@ and code = parse
 (* to read the code until the newline *)
 and code_until_nl = parse
   | '\n' { Buffer.add_char codeb '\n' }
+  | ";;" { code_until_nl lexbuf }
   | "(*" { comment_depth := 1; Buffer.add_string codeb "(*";
 	   comment lexbuf; code_until_nl lexbuf }
   | eof  { () }
@@ -131,18 +138,16 @@ and skip_until_nl = parse
 
 (* to read a comment inside a piece of code *)
 and comment = parse
-  | "(*" { Buffer.add_string codeb "(*";
-	   comment_depth := succ !comment_depth; comment lexbuf }
-  | "*)" { Buffer.add_string codeb "*)";
-	   comment_depth := pred !comment_depth;
+  | "(*" { Buffer.add_string codeb "(*"; incr comment_depth; comment lexbuf }
+  | "*)" { Buffer.add_string codeb "*)"; decr comment_depth;
            if !comment_depth > 0 then comment lexbuf }
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); comment lexbuf }
 
 (* to skip a comment (used by header) *)
 and skip_comment = parse
-  | "(*" { comment_depth := succ !comment_depth; skip_comment lexbuf }
-  | "*)" { comment_depth := pred !comment_depth;
+  | "(*" { incr comment_depth; skip_comment lexbuf }
+  | "*)" { decr comment_depth;
            if !comment_depth > 0 then skip_comment lexbuf }
   | eof  { () }
   | _    { skip_comment lexbuf }

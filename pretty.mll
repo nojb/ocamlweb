@@ -21,24 +21,11 @@
   open Printf
   open Output
 
+  let comment_depth = ref 0
+
+  let bracket_depth = ref 0
+
   let first_char lexbuf = Lexing.lexeme_char lexbuf 0
-
-  let is_keyword = 
-    let h = Hashtbl.create 101 in
-    List.iter
-      (fun key ->Hashtbl.add h  key ()) 
-      [ "and"; "as";  "assert"; "begin"; "class";
-	"constraint"; "do"; "done";  "downto"; "else"; "end"; "exception";
-	"external";  "false"; "for";  "fun"; "function";  "functor"; "if";
-	"in"; "include"; "inherit"; "initializer"; "lazy"; "let"; "match";
-	"method";  "module";  "mutable";  "new"; "object";  "of";  "open";
-	"or"; "parser";  "private"; "rec"; "sig";  "struct"; "then"; "to";
-	"true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
-	"mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr"];
-    function s -> try Hashtbl.find h s; true with Not_found -> false
-
-  let current_indent = ref 0
-  let line_indent = ref 0
 
   let count_spaces s =
     let c = ref 0 in
@@ -50,42 +37,19 @@
     done;
     !c
 
-  let beginning_of_line s =
-    let n = count_spaces s in
-    line_indent := n;
-    if n <= !current_indent then current_indent := n
+  let user_math_mode = ref false
 
-  let first_line = ref true
-
-  let math_mode = ref false
-		     
-  let reset_pretty () =
-    first_line := true;
-    math_mode := false
-
-  let enter_math () =
-    if not !math_mode then begin
-      output_string " $";
-      math_mode := true
+  let user_math () =
+    if not !user_math_mode then begin
+      user_math_mode := true;
+      enter_math ()
+    end else begin
+      user_math_mode := false;
+      leave_math ()
     end
 
-  let leave_math () =
-    if !math_mode then begin
-      output_string "$ ";
-      math_mode := false
-    end
-
-  let indentation n =
-    leave_math ();
-    if not !first_line then
-      let space = 1.5 *. (float n) in
-      output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
-    else
-      first_line := false
-	
-  let keyword s = leave_math (); output_keyword s 
-
-  let ident s = enter_math (); output_ident s
+  let check_user_math s =
+    if !user_math_mode then output_string s else output_string ("\\"^s)
 
 }
 
@@ -94,33 +58,71 @@ let lowercase = ['a'-'z' '\223'-'\246' '\248'-'\255' '_']
 let uppercase = ['A'-'Z' '\192'-'\214' '\216'-'\222']
 let identchar = 
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
+let identifier = (lowercase | uppercase) identchar*
+let latex_special = 
+    ' ' | '^' | '%' | '&' | '$' | '{' | '}'  (* TeX reserved chars *)
+  | '*' | "->" | "<-" | "<=" | ">=" | "<>"   (* math symbols *)
+
+(************************************************************************)
+(* CODE                                                                 *)
+(************************************************************************)
 
 (* pretty-print of code, at beginning of line... *)
 rule pr_code = parse
-  | space* { let n = count_spaces (Lexing.lexeme lexbuf) in
-	     indentation n;
-	     pr_code_inside lexbuf;
-	     pr_code lexbuf }
+  | space* { let n = count_spaces (Lexing.lexeme lexbuf) in indentation n;
+	     pr_code_inside lexbuf; pr_code lexbuf }
   | eof    { leave_math () }
    
 (* ...and inside the line *)
 and pr_code_inside = parse
   | '\n' { () }
-  | lowercase identchar*
-         { let s = Lexing.lexeme lexbuf in
-	   if is_keyword s then keyword s else ident s;
-	   pr_code_inside lexbuf }
-  | '^'  { output_string "\\^"; pr_code_inside lexbuf }
-  | '*'  { enter_math (); output_string "\\times "; pr_code_inside lexbuf }
-  | ' '  { if !math_mode then output_string " ~ " else output_char ' ';
-	   pr_code_inside lexbuf }
-  | _    { output_char (first_char lexbuf); pr_code_inside lexbuf }
+  | identifier
+         { output_ident (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
+  | "(*" { output_bc (); comment_depth := 1;
+	   pr_comment lexbuf; pr_code_inside lexbuf }
+  | latex_special  
+         { output_latex_special (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
   | eof  { () }
- 
+  | _    { output_char (first_char lexbuf); pr_code_inside lexbuf }
+
+(* comments *)
+and pr_comment = parse
+  | "(*" { output_bc (); incr comment_depth; pr_comment lexbuf }
+  | "*)" { output_ec (); decr comment_depth;
+           if !comment_depth > 0 then pr_comment lexbuf }
+  | '['  { bracket_depth := 1; escaped_code lexbuf; pr_comment lexbuf }
+  | eof  { () }
+  | '$'  { user_math(); pr_comment lexbuf }
+  | '_' | '^' { check_user_math (Lexing.lexeme lexbuf); pr_comment lexbuf }
+  | _    { output_char (first_char lexbuf); pr_comment lexbuf }
+
+(* escaped code *)
+and escaped_code = parse
+  | '[' { output_char '['; incr bracket_depth; escaped_code lexbuf }
+  | ']' { decr bracket_depth; 
+	  if !bracket_depth > 0 then begin
+	    output_char ']'; escaped_code lexbuf
+          end else
+	    if not !user_math_mode then leave_math () }
+  | identifier
+         { output_ident (Lexing.lexeme lexbuf); escaped_code lexbuf }
+  | latex_special  
+         { output_latex_special (Lexing.lexeme lexbuf); escaped_code lexbuf }
+  | eof  { if not !user_math_mode then leave_math () }
+  | _    { output_char (first_char lexbuf); escaped_code lexbuf }
+
+
+(************************************************************************)
+(* DOCUMENTATION                                                        *)
+(************************************************************************)
+
 (* pretty-print of documentation (output `as it', except for quotations *)
 and pr_doc = parse
-  | _   { output_char (first_char lexbuf); pr_doc lexbuf }
+  | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
+  | '$' { user_math(); pr_doc lexbuf }
+  | '_' | '^' { check_user_math (Lexing.lexeme lexbuf); pr_doc lexbuf }
   | eof { () }
+  | _   { output_char (first_char lexbuf); pr_doc lexbuf }
 
 {
 

@@ -26,5 +26,13 @@ val set_no_doc : bool -> unit
 val latex_header : unit -> unit
 val latex_trailer : unit -> unit
 
-val output_keyword : string -> unit
+val indentation : int -> unit
+val enter_math : unit -> unit
+val leave_math : unit -> unit
+
 val output_ident : string -> unit
+val output_bc : unit -> unit
+val output_ec : unit -> unit
+val output_latex_special : string -> unit
+
+val reset_pretty : unit -> unit

@@ -1,0 +1,28 @@
+
+Parsing ocaml
+=============
+
+ 1. chaînes dans les commentaires
+
+ 2. caractères \xxx et caractères échappés
+
+ 3. identificateurs "uppercase"
+
+
+Web
+===
+
+  . tout à faire :-)
+
+
+Document LaTeX
+==============
+
+ 1. underscore plus fin dans les identificateurs
+
+
+Documentation ocamlweb
+======================
+
+  . tout à faire :-)
+

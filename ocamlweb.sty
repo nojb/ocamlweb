@@ -1,7 +1,21 @@
-% This is ocamlweb.sty, by Jean-Christophe Filliâtre
-% LaTeX package used by ocamlweb
 
+% This is ocamlweb.sty, by Jean-Christophe Filliâtre
+% This LaTeX package is used by ocamlweb (http://www.lri.fr/~filliatr/ocamlweb)
+%
+% You can modify the following macros to modify the appearance
+% of the document
+
+% underscore ?
+% \def\_{\kern.04em\vbox{\hrule width.3em height .6pt}\kern.08em}
+
+% comments
+\newcommand{\ocwbc}{\quad\ensuremath{(\ast}}
+\newcommand{\ocwec}{\ensuremath{\ast)}}
+% keywords
 \newcommand{\ocwkw}[1]{\textsf{#1}}
+% identifiers
 \newcommand{\ocwid}[1]{\textit{#1}}
+% newline with indentation of the next line as argument
 \newcommand{\ocwnl}[1]{\par\noindent\kern#1}
+% new section
 \newcommand{\ocwsection}[1]{\bigskip\noindent{\bf#1.}{\kern1em}}

@@ -21,7 +21,7 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-BUFFER = 
+BUFFER = buffer.cmx
 OBJS = $(BUFFER) output.cmx pretty.cmx web.cmx lexer.cmx version.cmx main.cmx
 
 all: ocamlweb
