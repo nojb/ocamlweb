@@ -104,7 +104,7 @@ FILES = doclexer.mli doclexer.mll cross.ml cross.mli		\
 	pretty.mli pretty.mll					\
 	output.mli output.ml web.mli web.ml main.ml		\
 	ocamlweb.sty bootstrap.tex				\
-	Makefile .depend README INSTALL COPYING GPL CHANGES
+	Makefile.in configure .depend README INSTALL COPYING GPL CHANGES
 
 OCAMLFILES = misc.mli misc.ml clflags.ml	\
         terminfo.mli terminfo.ml		\
@@ -133,12 +133,15 @@ export-bootstrap: bootstrap
 
 source: manual
 	mkdir -p export/$(NAME)/test
-	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test; mkdir -p doc
+	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test; \
+	  mkdir -p doc; mkdir -p support
 	cp $(FILES) export/$(NAME)
 	cp $(DOCFILES) export/$(NAME)/doc
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
-	(cd export ; tar cf $(NAME).tar $(NAME) ; \
-	gzip -f --best $(NAME).tar)
+	cd support; cp config.guess config.sub install-sh \
+	  ../export/$(NAME)/support
+	cd export ; tar cf $(NAME).tar $(NAME) ; \
+	  gzip -f --best $(NAME).tar
 	cp export/$(NAME).tar.gz $(FTP)
 
 BINARY = $(NAME)-$(OSTYPE)
