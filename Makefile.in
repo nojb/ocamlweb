@@ -139,7 +139,6 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	linenum.mli linenum.mll			\
 	location.mli location.ml		\
 	longident.mli longident.ml		\
-	pstream.mli pstream.ml			\
 	syntaxerr.mli syntaxerr.ml		\
 	asttypes.mli parsetree.mli		\
 	parser.mly				\
