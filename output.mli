@@ -39,10 +39,13 @@ val output_verbatim : string -> unit
 (*s The following functions are mainly useful for a \LaTeX\ output, but
     will work correctly in other cases. A call to [set_no_doc] suppresses
     the output of the header and trailer. [(indentation n)] introduces an
-    indentation of size [n] at the beggining of a line. *)
+    indentation of size [n] at the beggining of a line. 
+    [latex_header] takes as argument the options of the \LaTeX\ package
+    ocamlweb.sty.
+*)
 
 val set_no_doc : bool -> unit
-val latex_header : unit -> unit
+val latex_header : string -> unit
 val latex_trailer : unit -> unit
 
 val indentation : int -> unit
@@ -101,7 +104,10 @@ val end_paragraph : unit -> unit
 
 val begin_index : unit -> unit
 val output_index_entry : string -> int list -> int list -> unit
+val output_raw_index_entry : string -> int list -> int list -> unit
 val end_index : unit -> unit
+
+val output_label : string -> unit
 
 (*s The parameters of the output engine are reset to their initial values
     with [reset_output]. *)

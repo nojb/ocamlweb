@@ -53,10 +53,12 @@ let nodoc = ref false
 
 let set_no_doc b = nodoc := b
 
-let latex_header () =
+let latex_header opt =
   if not !nodoc then begin
     output_string "\\documentclass[12pt]{article}\n";
-    output_string "\\usepackage{ocamlweb}\n";
+    output_string "\\usepackage";
+    if opt <> "" then output_string (sprintf "[%s]" opt);
+    output_string "{ocamlweb}\n";
     output_string "\\usepackage[latin1]{inputenc}\n";
     output_string "\\usepackage[T1]{fontenc}\n";
     output_string "\\usepackage{fullpage}\n";
@@ -266,7 +268,7 @@ let output_bf_elem n =
 
 let output_index_entry s def use =
   let sep () = output_string ", " in
-  output_string "\\ocwindexentry{";
+  output_string "\\ocwwebindexentry{";
   output_raw_ident s;
   output_string "}{";
   print_list output_bf_elem sep (intervals def);
@@ -275,3 +277,18 @@ let output_index_entry s def use =
   print_list output_elem sep (intervals use);
   output_string "}\n"
 
+let output_raw_index_entry s def use =
+  let sep () = output_string ", " in
+  let output_label n = 
+    output_string ("\\ref{code" ^ (string_of_int n) ^ "}") 
+  in
+  output_string "\\ocwrefindexentry{";
+  output_raw_ident s;
+  output_string "}{";
+  print_list output_label sep def;
+  output_string "}{";
+  print_list output_label sep use;
+  output_string "}\n"
+
+let output_label l =
+  output_string "\\label{"; output_string l; output_string "}\n"

@@ -43,7 +43,7 @@ let mon_autre_fonction x1 x2 =
   x1 := x2;
   ma_fonction !x1 (x2,x2/3)
 
-let toto = match truc with tagada -> ma_fonction tagada
+let toto = match truc with tagada -> ma_fonction champ1
 
 let test_pat = function
     A1 -> 1

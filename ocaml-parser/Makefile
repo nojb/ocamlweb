@@ -27,8 +27,9 @@ OBJS = misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
        linenum.cmo location.cmo longident.cmo pstream.cmo syntaxerr.cmo \
        parser.cmo lexer.cmo parse.cmo
 
-all: $(OBJS)
-	ocamlc -o ocaml-parser $(OBJS)
+byte: $(OBJS)
+
+opt: $(OBJS:.cmo=.cmx)
 
 import:
 #	config

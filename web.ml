@@ -25,7 +25,7 @@ open Pretty
 
 type paragraph =
   | Documentation of string
-  | Code of string
+  | Code of int * string
 
 type raw_section =  {
   sec_contents : paragraph list;
@@ -49,30 +49,40 @@ type file =
 
 (* i*)
 
+
 (*s Options of the engine. *)
 
+let web = ref true
+
 let extern_defs = ref false
+
+let latex_options = ref ""
+
+let add_latex_option s =
+  if !latex_options = "" then 
+    latex_options := s
+  else
+    latex_options := !latex_options ^ "," ^ s
 
 
 (*s Construction of the global index. *)
 
-let build_interf inte =
+let index_interf inte =
   cross_interf inte.interf_file
 
-let build_implem imp =
+let index_implem imp =
   cross_implem imp.implem_file;
   begin match imp.implem_interf with
     | None -> ()
-    | Some i -> build_interf i
+    | Some i -> index_interf i
   end
 
-let build_index l =
-  List.iter 
-    (function 
-       | Implem i -> build_implem i 
-       | Interf i -> build_interf i
-       | Other f -> ())
-    l
+let index_file = function 
+  | Implem i -> index_implem i 
+  | Interf i -> index_interf i
+  | Other f -> ()
+
+let build_index l = List.iter index_file l
 
 
 (*s The sections' table. *)
@@ -81,16 +91,23 @@ module Intmap = Map.Make(struct type t = int let compare = compare end)
 
 let section_table = ref Idmap.empty
 
-let add_section file loc n =
-  let l = try Idmap.find file !section_table with Not_found -> [] in
-  section_table := Idmap.add file ((loc,n)::l) !section_table
+let code_table = ref Idmap.empty
 
-let find_section w =
+let add_in_table table file loc n =
+  let l = try Idmap.find file !table with Not_found -> [] in
+  table := Idmap.add file ((loc,n)::l) !table
+
+let add_section = add_in_table section_table
+
+let add_code = add_in_table code_table
+
+let find_where w =
   let rec lookup = function
       [] -> raise Not_found
     | (n,s)::r -> if w.w_loc >= n then s else lookup r
   in
-  lookup (Idmap.find w.w_filename !section_table)
+  let table = if !web then !section_table else !code_table in
+  lookup (Idmap.find w.w_filename table)
 
 
 (*s Printing of the index. *)
@@ -128,7 +145,7 @@ let print_one_entry s =
   let list_in_table t =
     try 
       let l = Whereset.elements (Idmap.find s !t) in
-      let l = List.map find_section l in
+      let l = List.map find_where l in
       uniquize (Sort.list (<) l)
     with Not_found -> 
       []
@@ -136,7 +153,10 @@ let print_one_entry s =
   let def = list_in_table defined
   and use = list_in_table used in
   if !extern_defs || def <> [] then
-    output_index_entry s def use
+    if !web then 
+      output_index_entry s def use 
+    else 
+      output_raw_index_entry s def use
 
 let print_index () =
   begin_index ();
@@ -148,20 +168,26 @@ let print_index () =
 
 let sec_number = ref 0
 
-let pretty_print_paragraph = function
-  | Documentation s -> pretty_print_doc s
-  | Code s -> pretty_print_code s
+let code_number = ref 0
+
+let pretty_print_paragraph f = function
+  | Documentation s -> 
+      pretty_print_doc s
+  | Code (l,s) ->
+      if not !web then begin 
+	incr code_number;
+	add_code f l !code_number;
+	output_label ("code" ^ (string_of_int !code_number))
+      end;
+      pretty_print_code s
 
 let pretty_print_section f s = 
-  incr sec_number;
-  add_section f s.sec_beg !sec_number;
-  output_section !sec_number;
-  List.iter 
-    (function p -> 
-       begin_paragraph ();
-       pretty_print_paragraph p;
-       end_paragraph())
-    s.sec_contents
+  if !web then begin
+    incr sec_number;
+    add_section f s.sec_beg !sec_number;
+    output_section !sec_number
+  end;
+  List.iter (pretty_print_paragraph f) s.sec_contents
     
 let pretty_print_implem imp =
   output_module imp.implem_name;
@@ -178,19 +204,27 @@ let pretty_print_interf inte =
   output_interface inte.interf_name;
   List.iter (pretty_print_section inte.interf_file) inte.interf_contents
 
+let pretty_print_file = function
+  | Implem i -> pretty_print_implem i 
+  | Interf i -> pretty_print_interf i
+  | Other f -> output_file f
 
-(*s Production of the document. 
-    1. Build the index. 2. Pretty-print. 3. Print the index. *)
+
+(*s Production of the document. We proceed in three steps:
+    \begin{enumerate}
+    \item Build the index;
+    \item Pretty-print;
+    \item Print the index.
+    \end{enumerate}
+ *)
 
 let produce_document l =
   build_index l;
   sec_number := 0;
-  List.iter 
-    (function 
-       | Implem i -> pretty_print_implem i 
-       | Interf i -> pretty_print_interf i
-       | Other f -> output_file f)
-    l;
-  print_index ()
+  latex_header !latex_options;
+  List.iter pretty_print_file l;
+  print_index ();
+  latex_trailer ();
+  close_output ()
 
 

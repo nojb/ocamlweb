@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=16
+MINORVN=2
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc
@@ -21,24 +21,34 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-CAML_OBJS = misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
+CAML_CMO = misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
        linenum.cmo location.cmo longident.cmo pstream.cmo syntaxerr.cmo \
        parser.cmo lexer.cmo parse.cmo
 
-BUFFER = buffer.cmx
-OBJS = $(BUFFER) output.cmx cross.cmx pretty.cmx web.cmx doclexer.cmx \
-       version.cmx main.cmx
+CAML_CMX = $(CAML_CMO:.cmo=.cmx)
+
+BUFFER = buffer.cmo
+CMO = $(BUFFER) output.cmo cross.cmo pretty.cmo web.cmo doclexer.cmo \
+       version.cmo main.cmo
+
+CMX = $(CMO:.cmo=.cmx)
 
 all: ocamlweb
 
-ocamlweb: $(OBJS:.cmx=.cmo)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_OBJS) $(OBJS:.cmx=.cmo)
+ocamlweb: ocaml-parser-byte $(CMO)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_CMO) $(CMO)
 
-opt: $(OBJS)
-	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(OBJS)
+opt: ocaml-parser-opt $(CMX)
+	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
 
-debug: $(OBJS:.cmx=.cmo)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(OBJS:.cmx=.cmo)
+debug: ocaml-parser-byte $(CMO)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
+
+ocaml-parser-byte:
+	cd ocaml-parser; make byte
+
+ocaml-parser-opt:
+	cd ocaml-parser; make opt
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -47,14 +57,12 @@ version.ml: Makefile
 install:
 	cp ocamlweb $(BINDIR)
 
-byte: $(OBJS:.cmx=.cmo)
-
 manual:
 	cd doc; make all
 
 test: ocamlweb
-	cd tmp; ../ocamlweb essai.ml ../output.ml -o essai.tex ; \
-	latex essai
+	cd tmp; ../ocamlweb --no-web --latex-option CiME essai.ml ../output.ml ../web.ml -o essai.tex ; \
+	latex essai ; latex essai
 
 # export
 ########

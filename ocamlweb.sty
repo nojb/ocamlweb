@@ -1,40 +1,94 @@
 
 % This is ocamlweb.sty, by Jean-Christophe Filliâtre
+% modified by Claude Marché
 % This LaTeX package is used by ocamlweb (http://www.lri.fr/~filliatr/ocamlweb)
 %
 % You can modify the following macros to customize the appearance
 % of the document.
 
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ocamlweb}[1999/05/21]
+
+%      package options
+
+% we use internally two cases:
+% 0 : option plain, the standard Knuth web style (the default) 
+% 1 : option CiME, the CiME ad-hoc documentation style
+% other cases could be added
+
+\def\webstylecase{0}
+\DeclareOption{plain}{\def\webstylecase{0}}
+\DeclareOption{CiME}{\def\webstylecase{1}}
+
+% option for visible spaces
+
+\newif\ifvisiblespaces\visiblespacestrue
+\DeclareOption{novisiblespaces}{\visiblespacesfalse}
+
+\ProcessOptions
+
+
 % underscore ?
 % \def\_{\kern.04em\vbox{\hrule width.3em height .6pt}\kern.08em}
 
-% comments
+% macro for typesetting comment start and end
 \newcommand{\ocwbc}{\quad\ensuremath{(\ast}}
 \newcommand{\ocwec}{\ensuremath{\ast)}}
-% keywords
+
+% macro for typesetting keywords
 \newcommand{\ocwkw}[1]{\textsf{#1}}
-% base types
+
+% macro for typesetting base types (int, bool, string, etc.)
+\expandafter\ifcase\webstylecase
 \newcommand{\ocwbt}[1]{\textit{#1}}
-% identifiers
+\or
+\newcommand{\ocwbt}[1]{\textsl{#1}}
+\fi
+
+% macro for typesetting identifiers
+\expandafter\ifcase\webstylecase
 \newcommand{\ocwid}[1]{\textit{#1\/}}
+\or
+\newcommand{\ocwid}[1]{\textsl{#1\/}}
+\fi
+
 % newline with indentation of the next line as argument
 \newcommand{\ocwnl}[1]{\par\noindent\kern#1}
-% visible space in a string
-\newcommand{\ocwvspace}{{\tt\char`\ }}
 
-% new module
+% visible space in a string
+\ifvisiblespaces
+\newcommand{\ocwvspace}{{\tt\char`\ }}
+\else
+\newcommand{\ocwvspace}{{\tt ~}}
+\fi
+
+% macro for typesetting the title of a module implementation
+\expandafter\ifcase\webstylecase
 \newcommand{\ocwmodule}[1]{\section*{Module #1}}
-% new interface
-\newcommand{\ocwinterface}[1]{\section*{Interface for Module #1}}
+\or
+\newcommand{\ocwmodule}[1]{\section{Implementation of module \ocwid{#1}}}
+\fi
+
+% macro for typesetting the title of a module interface
+\expandafter\ifcase\webstylecase
+\newcommand{\ocwinterface}[1]{\section*{Interface for module #1}}
+\or
+\newcommand{\ocwinterface}[1]{\section{Module \ocwid{#1}}}
+\fi
+
 % interface part of a module
 \newcommand{\ocwinterfacepart}{\subsection*{Interface}}
+
 % code part of a module
 \newcommand{\ocwcodepart}{\subsection*{Code}}
+
 % new section
 \newcommand{\ocwsection}[1]{\bigskip\noindent{\bf#1.}{\kern1em}}
 
 % index
 \newcommand{\ocwbeginindex}{\begin{theindex}}
 \newcommand{\ocwendindex}{\end{theindex}}
+
 % index entry
-\newcommand{\ocwindexentry}[3]{\item #1,\quad#2#3}
+\newcommand{\ocwwebindexentry}[3]{\item #1,\quad#2#3}
+\newcommand{\ocwrefindexentry}[3]{\item #1,\quad\textbf{#2}, #3}

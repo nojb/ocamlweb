@@ -26,7 +26,7 @@
 
 type paragraph =
   | Documentation of string
-  | Code of string
+  | Code of int * string
 
 type raw_section = {
   sec_contents : paragraph list;
@@ -48,8 +48,8 @@ type file =
   | Interf of interf
   | Other  of string
 
-(*i*)
 val extern_defs : bool ref
-(*i*)
+val add_latex_option : string -> unit
+val web : bool ref
 
 val produce_document : file list -> unit

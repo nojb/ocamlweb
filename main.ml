@@ -24,13 +24,16 @@ open Doclexer
 let usage () =
   prerr_endline "";
   prerr_endline "Usage: ocamlweb <options and files>";
-  prerr_endline "  -o file        write output in file `file'";
+  prerr_endline "  -o <file>      write output in file <file>";
+  prerr_endline "  --no-web       no WEB style";
   prerr_endline "  --header       do not skip the headers";
   prerr_endline "  --no-doc       suppress LaTeX header and trailer";
   prerr_endline "  --extern-defs  keep external definitions in the index";
-  prerr_endline "  --impl file    consider `file' as a .ml file";
-  prerr_endline "  --intf file    consider `file' as a .mli file";
-  prerr_endline "  --tex file     consider `file' as a .tex file";
+  prerr_endline "  --impl <file>  consider <file> as a .ml file";
+  prerr_endline "  --intf <file>  consider <file> as a .mli file";
+  prerr_endline "  --tex <file>   consider <file> as a .tex file";
+  prerr_endline "  --latex-option <opt>";
+  prerr_endline "                 pass an option to the LaTeX package ocamlweb";
   exit 1
 
 let copying () =
@@ -100,6 +103,10 @@ let parse () =
 
     | ("-header" | "--header") :: rem ->
 	skip_header := false; parse_rec rem
+    | ("-noweb" | "--no-web") :: rem ->
+	web := false; parse_rec rem
+    | ("-web" | "--web") :: rem ->
+	web := true; parse_rec rem
     | ("-nodoc" | "--nodoc" | "--no-doc") :: rem ->
 	set_no_doc true; parse_rec rem
     | ("-o" | "--output") :: f :: rem ->
@@ -115,6 +122,11 @@ let parse () =
 	exit 0
     | ("-warranty" | "--warranty") :: _ ->
 	copying (); exit 0
+
+    | "--latex-option" :: s :: rem ->
+	add_latex_option s; parse_rec rem
+    | "--latex-option" :: [] ->
+	usage ()
 
     | ("-impl" | "--impl") :: f :: rem -> 
 	check_if_file_exists f;
@@ -173,10 +185,7 @@ let main () =
   let files = parse() in
   if List.length files > 0 then begin
     let modl = List.map read_one_file files in
-    latex_header ();
     produce_document modl;
-    latex_trailer ();
-    close_output ()
   end
 
 let _ = Printexc.catch main ()

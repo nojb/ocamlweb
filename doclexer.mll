@@ -26,20 +26,15 @@
 
   let comment_depth = ref 0
 
-  let beginning = ref 0
 
   let parlist = ref ([] : paragraph list)
   let seclist = ref ([] : raw_section list)
 
-  let reset_lexer () =
-    comment_depth := 0;
-    beginning := 0;
-    parlist := [];
-    seclist := []
+  let section_beg = ref 0
 
   let new_section () =
     if !parlist <> [] then begin
-      let s = { sec_contents = List.rev !parlist; sec_beg = !beginning } in
+      let s = { sec_contents = List.rev !parlist; sec_beg = !section_beg } in
       seclist := s :: !seclist
     end;
     parlist := []
@@ -57,12 +52,21 @@
     end
 
   let codeb = Buffer.create 8192
+
+  let code_beg = ref 0
 		
   let push_code () =
     if Buffer.length codeb > 0 then begin
-      parlist := (Code (Buffer.contents codeb)) :: !parlist;
+      parlist := (Code (!code_beg, Buffer.contents codeb)) :: !parlist;
       Buffer.clear codeb
     end
+
+  let reset_lexer () =
+    comment_depth := 0;
+    section_beg := 0;
+    code_beg := 0;
+    parlist := [];
+    seclist := []
 
 }
 
@@ -91,7 +95,7 @@ and implementation = parse
   | space* "(*" space_or_nl*
            { new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*s" space_or_nl*
-           { new_section (); beginning := (Lexing.lexeme_start lexbuf);
+           { new_section (); section_beg := (Lexing.lexeme_start lexbuf);
 	     new_doc (); documentation lexbuf; implementation lexbuf }
   | space* "(*i"
            { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
@@ -100,7 +104,8 @@ and implementation = parse
 	     comment lexbuf; code lexbuf; implementation lexbuf }
   | space* '\n'   
            { implementation lexbuf }
-  | _      { Buffer.clear codeb; Buffer.add_char codeb (first_char lexbuf); 
+  | _      { Buffer.clear codeb; code_beg := (Lexing.lexeme_start lexbuf);
+	     Buffer.add_char codeb (first_char lexbuf); 
 	     code lexbuf; implementation lexbuf }
   | eof    { new_section (); List.rev !seclist }
       

@@ -164,11 +164,14 @@ and pr_doc = parse
 
 {
 
-  let pretty_print_code s =
+  let pretty_print f x =
     reset_pretty ();
-    pr_code (Lexing.from_string s)
+    begin_paragraph ();
+    f x;
+    end_paragraph ()
 
-  let pretty_print_doc s =
-    pr_doc (Lexing.from_string s)
+  let pretty_print_code s = pretty_print pr_code (Lexing.from_string s)
+
+  let pretty_print_doc s = pretty_print pr_doc (Lexing.from_string s)
 
 }
