@@ -1,6 +1,12 @@
 
-  o style WEB and style LaTeX
+version 0.25, 02/06/99
+======================
+  o ocamlweb.sty: greatly improved by Claude Marché
+  o various command line options: --no-index, --no-web, --latex-option, 
+    --impl, --intf, --tex
+  o two styles: WEB and LaTeX
   o ocamlweb now uses the ocaml parser to extract definitions and uses
+    (the modules and classes language is not yet processed)
   o better adequacy to the ocaml lexer when separating code and documentation
 
 version 0.15, 18/5/99
