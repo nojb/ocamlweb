@@ -396,6 +396,14 @@ and pr_doc = parse
       { output_char (first_char lexbuf); pr_doc lexbuf }
 
 and pr_doc_title = parse
+  | '[' 
+      { if !user_math_mode then 
+	  output_char '['
+	else begin
+	  bracket_depth := 1; 
+	  begin_code (); escaped_code lexbuf; end_code ()
+	end; 
+	pr_doc_title lexbuf }
   | '.'
       { output_string ".}\\quad{}" }
   | eof

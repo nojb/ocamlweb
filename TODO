@@ -131,6 +131,11 @@ Document LaTeX
     *, 'a, =>, etc.) . Du coup l'option --nogreek serait subsumé. Voir
     aussi 7 ci-dessus.
 
+11. espace s'allongeant en fin de page
+
+    \vskip 0pt plus 3cm
+    \penalty -5000
+    \vskip 0pt plus -3cm
 
 Documentation ocamlweb
 ======================

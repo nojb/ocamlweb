@@ -8,6 +8,8 @@
 
 (*i*)}(*i*)
 
+let c = 1
+
 (*s Lexical rules. *)
 
 rule token = parse
