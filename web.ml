@@ -58,7 +58,7 @@ let sec_number = ref 0
 
 let build_code s =
   let buf = Lexing.from_string s in
-  let _ = cross_code buf in ()
+  let _ = cross_implem buf in ()
 
 let build_interf s =
   let buf = Lexing.from_string s in

@@ -1,5 +1,5 @@
 
-CAML=/users/demons/filliatr/local/src/ocaml-2.02
+CAML=$(HOME)/src/ocaml-2.02
 
 CAMLC    = ocamlc
 CAMLCOPT = ocamlopt 
@@ -11,7 +11,7 @@ BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
 SOURCES = utils/config.mli utils/misc.mli utils/misc.ml \
-	utils/clflags.mli utils/clflags.ml \
+	utils/clflags.ml \
 	utils/terminfo.mli utils/terminfo.ml \
 	utils/warnings.mli utils/warnings.ml \
 	parsing/linenum.mli parsing/linenum.mll \
@@ -34,10 +34,10 @@ all: $(OBJS)
 
 import:
 #	config
-	cd $(caml); ./configure; make utils/config.ml
-	cp $(caml)/utils/config.ml .; chmod u+w config.ml
+	cd $(CAML); if test ! -f utils/config.ml ; then ./configure; make utils/config.ml; fi
+	cp $(CAML)/utils/config.ml .; chmod u+w config.ml
 #	source files
-	for f in $(SOURCES); do cp $(caml)/$$f .; done
+	for f in $(SOURCES); do cp $(CAML)/$$f .; done
 
 linenum.ml: linenum.mll
 	ocamllex linenum.mll
@@ -70,9 +70,11 @@ parser.mli parser.ml: parser.mly
 ##################
 
 clean:
-	rm -f *~ *.cm[iox] *.o 
+	rm -f *~ *.cm[iox] *.o
+	rm -f ocaml-parser
+	rm -f parser.output
 
-depend:
+depend: parser.ml lexer.ml
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml > .depend
 

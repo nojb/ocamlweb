@@ -9,6 +9,8 @@ clflags.cmo: config.cmi
 clflags.cmx: config.cmx 
 config.cmo: config.cmi 
 config.cmx: config.cmi 
+lexer.cmo: misc.cmi parser.cmi lexer.cmi 
+lexer.cmx: misc.cmx parser.cmx lexer.cmi 
 linenum.cmo: misc.cmi linenum.cmi 
 linenum.cmx: misc.cmx linenum.cmi 
 location.cmo: linenum.cmi terminfo.cmi warnings.cmi location.cmi 
@@ -18,7 +20,7 @@ longident.cmx: misc.cmx longident.cmi
 misc.cmo: misc.cmi 
 misc.cmx: misc.cmi 
 parse.cmo: lexer.cmi location.cmi parser.cmi syntaxerr.cmi parse.cmi 
-parse.cmx: lexer.cmi location.cmx parser.cmx syntaxerr.cmx parse.cmi 
+parse.cmx: lexer.cmx location.cmx parser.cmx syntaxerr.cmx parse.cmi 
 parser.cmo: asttypes.cmi clflags.cmo location.cmi longident.cmi parsetree.cmi \
     pstream.cmi syntaxerr.cmi parser.cmi 
 parser.cmx: asttypes.cmi clflags.cmx location.cmx longident.cmx parsetree.cmi \

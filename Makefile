@@ -15,20 +15,25 @@ VERSION=$(MAJORVN).$(MINORVN)
 CAMLC    = ocamlc
 CAMLCOPT = ocamlopt 
 CAMLDEP  = ocamldep
-ZLIBS    =
+ZLIBS    = -I ocaml-parser
 DEBUG    = -g
 PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
+CAML_OBJS = config.cmo \
+       misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
+       linenum.cmo location.cmo longident.cmo pstream.cmo syntaxerr.cmo \
+       parser.cmo lexer.cmo parse.cmo
+
 BUFFER = buffer.cmx
-OBJS = $(BUFFER) output.cmx cross.cmx pretty.cmx web.cmx lexer.cmx \
+OBJS = $(BUFFER) output.cmx cross.cmx pretty.cmx web.cmx doclexer.cmx \
        version.cmx main.cmx
 
 all: ocamlweb
 
 ocamlweb: $(OBJS:.cmx=.cmo)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(OBJS:.cmx=.cmo)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_OBJS) $(OBJS:.cmx=.cmo)
 
 opt: $(OBJS)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(OBJS)
@@ -60,7 +65,7 @@ NAME=ocamlweb-$(VERSION)
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = buffer.mli buffer.ml \
-        lexer.mll cross.mll pretty.mli pretty.mll \
+        doclexer.mll cross.ml pretty.mli pretty.mll \
 	output.mli output.ml web.mli web.ml main.ml \
 	ocamlweb.sty \
 	Makefile .depend README INSTALL COPYING GPL CHANGES
@@ -114,9 +119,9 @@ binary: ocamlweb
 ##################
 
 clean:
-	rm -f *~ *.cm[iox] *.o ocamlweb lexer.ml pretty.ml cross.ml version.ml
+	rm -f *~ *.cm[iox] *.o ocamlweb doclexer.ml pretty.ml version.ml
 
-depend: lexer.ml pretty.ml cross.ml
+depend: doclexer.ml pretty.ml
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml > .depend
 

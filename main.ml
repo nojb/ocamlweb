@@ -19,7 +19,7 @@
 open Printf
 open Output
 open Web
-open Lexer
+open Doclexer
 
 let usage () =
   prerr_endline "";
