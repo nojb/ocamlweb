@@ -53,7 +53,7 @@ val leave_math : unit -> unit
     [is_keyword] identifies the keywords of Objective Caml. 
     [output_ident] outputs an identifier, in different faces for keywords 
     and other identifiers, escaping the characters that need it, 
-    like _ for instance in \LaTeX. 
+    like \_ for instance in \LaTeX. 
     [output_escaped_char] pretty-prints the reserved char of \LaTeX, 
     like \verb!&! or \verb!$!.
     [output_latex_special] pretty-prints some mathematical symbols,

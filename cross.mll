@@ -17,7 +17,7 @@
 (* $Id$ *)
 
 (* This module parses code to extract the identifiers defined and used,
-   and the modules opened *)
+   and the modules opened. *)
 
 {
 
@@ -82,6 +82,17 @@
        && String.length s > 1 && not (Stringset.mem s !locals) then
       add_global used s (current_location())
 
+  let add_uses_q s =
+    let n = String.length s in
+    let rec decomp i =
+      try
+	let k = String.index_from s i '.' in
+	(String.sub s i (k-i)) :: (decomp (succ k))
+      with Not_found -> 
+	[String.sub s i (n-i)]
+    in
+    List.iter add_uses (decomp 0)
+
   let return_sets () =
     !opened, !defs
 
@@ -90,13 +101,21 @@
 }
 
 let space = [' ' '\t']
+let space_or_nl = [' ' '\t' '\n']
+
 let lowercase = ['a'-'z' '\223'-'\246' '\248'-'\255' '_']
 let uppercase = ['A'-'Z' '\192'-'\214' '\216'-'\222']
 let identchar = 
   ['A'-'Z' 'a'-'z' '_' '\192'-'\214' '\216'-'\246' '\248'-'\255' '\'' '0'-'9']
+
 let lo_ident = lowercase identchar*
 let up_ident = uppercase identchar*
 let ident = (lowercase | uppercase ) identchar*
+
+let lo_qident = (up_ident '.')* lo_ident
+let up_qident = (up_ident '.')* up_ident
+let qident = (up_ident '.')* ident
+
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
@@ -111,7 +130,7 @@ rule cross_code = parse
   | "and"  { if !last = "let" then pattern_defs lexbuf else type_decl lexbuf;
 	     inside_code lexbuf }
   | "exception"
-           { exn_decl lexbuf; inside_code lexbuf }
+           { def_ident lexbuf; inside_code lexbuf }
   | "open" { opens lexbuf; cross_code lexbuf }
   | "(*"   { comment_depth := 1; skip_comment lexbuf; cross_code lexbuf }
   | character
@@ -126,17 +145,18 @@ and inside_code = parse
   | character
            { inside_code lexbuf }
   | "exception"
-           { exn_decl lexbuf; inside_code lexbuf }
+           { def_ident lexbuf; inside_code lexbuf }
   | "open" { opens lexbuf; inside_code lexbuf }
-  | "let" | "and"
+  | "let" | "and" | "function" | "fun"
            { bindings lexbuf; inside_code lexbuf }
-  | (up_ident '.')* lo_ident
-           { add_uses (Lexing.lexeme lexbuf); inside_code lexbuf }
+  | qident
+           { add_uses_q (Lexing.lexeme lexbuf); inside_code lexbuf }
   | up_ident
            { inside_code lexbuf }
   | eof    { return_sets () }
   | _      { inside_code lexbuf }
 
+(* stops on a character '=' *)
 and pattern_defs = parse
   | space* "rec" 
              { pattern_defs lexbuf }
@@ -149,18 +169,20 @@ and pattern_defs = parse
   | space    { bindings lexbuf }
   | _        { pattern_defs lexbuf }
 
+(* stops on '=' or '->' *)
 and bindings = parse
   | space*   { bindings lexbuf }
   | lo_ident { add_local (Lexing.lexeme lexbuf); bindings lexbuf }
   | up_ident { bindings lexbuf }
   | eof      { () }
-  | "="      { () }
+  | "=" | "->" { () }
   | '"'      { skip_string lexbuf; bindings lexbuf }
   | character{ bindings lexbuf }
   | _        { bindings lexbuf }
 
 and opens = parse
-  | up_ident { add_open (Lexing.lexeme lexbuf) }
+  | (up_ident '.')* up_ident
+             { add_open (Lexing.lexeme lexbuf) }
   | space*   { opens lexbuf }
   | eof      { () }
   | _        { () }
@@ -169,42 +191,62 @@ and opens = parse
 
 and cross_interf = parse
   | space* { cross_interf lexbuf }
-  | "val"  { val_decl lexbuf; cross_interf lexbuf }
+  | "val" | "external" | "exception" 
+           { def_ident lexbuf; cross_interf lexbuf }
   | "with" space+ "type"
            { cross_interf lexbuf }
   | "type" | "and"
            { type_decl lexbuf; cross_interf lexbuf }
-  | "exception" 
-           { exn_decl lexbuf; cross_interf lexbuf }
+  | "module" | "module" space* "type"
+           { def_ident lexbuf; cross_interf lexbuf }
   | "open" { opens lexbuf; cross_interf lexbuf }
   | "(*"   { comment_depth := 1; skip_comment lexbuf; cross_interf lexbuf }
   | '"'    { skip_string lexbuf; cross_interf lexbuf }
-  | ident  { add_uses (Lexing.lexeme lexbuf); cross_interf lexbuf }
+  | "'" lo_ident
+           { cross_interf lexbuf }
+  | qident { add_uses_q (Lexing.lexeme lexbuf); cross_interf lexbuf }
   | eof    { return_sets () }
   | _      { cross_interf lexbuf }
 
-(* val *)
-and val_decl = parse
-  | lo_ident      { add_def (Lexing.lexeme lexbuf) }
-  | space*        { val_decl lexbuf }
+(* ident defined *)
+and def_ident = parse
+  | ident         { add_def (Lexing.lexeme lexbuf) }
+  | space_or_nl*  { def_ident lexbuf }
   | eof           { () }
   | _             { () }
 
-(* type *)
+(* type definition *)
 and type_decl = parse
   | '\'' lo_ident { type_decl lexbuf }
-  | lo_ident      { add_def (Lexing.lexeme lexbuf) }
-  | space*        { type_decl lexbuf }
+  | lo_ident      { add_def (Lexing.lexeme lexbuf); type_def_body lexbuf }
+  | '(' | ',' | ')' | space*        
+                  { type_decl lexbuf }
   | eof           { () }
   | _             { () }
 
-(* exception *)
-and exn_decl = parse
-  | up_ident      { add_def (Lexing.lexeme lexbuf) }
-  | space*        { exn_decl lexbuf }
+and type_def_body = parse
+  | up_ident      { add_def (Lexing.lexeme lexbuf); type_def_body lexbuf }
+  | qident        { add_uses_q (Lexing.lexeme lexbuf); type_def_body lexbuf }
+  | "\n\n"        { () }
+  | space_or_nl*  { type_def_body lexbuf }
+  | '{'           { record_label lexbuf; type_def_body lexbuf }
+  | eof           { () }
+  | _             { type_def_body lexbuf }
+
+(* records *)
+and record_label = parse
+  | lo_ident      { add_def (Lexing.lexeme lexbuf); record_body lexbuf }
+  | space_or_nl*  { record_label lexbuf }
   | eof           { () }
   | _             { () }
-  
+
+and record_body = parse
+  | qident { add_uses_q (Lexing.lexeme lexbuf); record_body lexbuf }
+  | ';'    { record_label lexbuf; record_body lexbuf }
+  | '}'    { () }
+  | eof    { () }
+  | _      { record_body lexbuf }
+
 (* Comments and strings are ignored here ***********************************)  
 and skip_comment = parse
   | "(*" { incr comment_depth; skip_comment lexbuf }

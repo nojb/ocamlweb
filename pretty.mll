@@ -71,17 +71,17 @@ let character =
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
 
-(************************************************************************)
-(* CODE                                                                 *)
-(************************************************************************)
 
-(* pretty-print of code, at beginning of line... *)
+(*s The following function pretty-prints some code and assumes that we are
+    at the beginning of a line. *)
+
 rule pr_code = parse
   | space* { let n = count_spaces (Lexing.lexeme lexbuf) in indentation n;
 	     pr_code_inside lexbuf; pr_code lexbuf }
   | eof    { leave_math () }
    
-(* ...and inside the line *)
+(*s  That function pretty-prints code anywhere else. *)
+
 and pr_code_inside = parse
   | '\n' { () }
   | (identifier '.')* identifier
@@ -111,8 +111,6 @@ and pr_comment = parse
   | '['  { bracket_depth := 1; escaped_code lexbuf; pr_comment lexbuf }
   | eof  { () }
   | '$'  { user_math(); pr_comment lexbuf }
-  | '_' | '^' 
-         { check_user_math (first_char lexbuf); pr_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_comment lexbuf }
 
 (* strings in code *)
@@ -156,8 +154,6 @@ and escaped_code = parse
 and pr_doc = parse
   | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
-  | '_' | '^' 
-        { check_user_math (first_char lexbuf); pr_doc lexbuf }
   | eof { () }
   | _   { output_char (first_char lexbuf); pr_doc lexbuf }
 

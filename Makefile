@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=15
+MINORVN=20
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc
@@ -49,7 +49,7 @@ manual:
 	cd doc; make all
 
 test: ocamlweb
-	cd tmp; ../ocamlweb --impl ../pretty.mll essai.ml ../main.ml ../output.mli ../web.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb --extern-defs essai.ml -o essai.tex ; \
 	latex essai
 
 # export

@@ -10,14 +10,19 @@ val toto : string -> string
       * c'est mon droit
       *)
 
+type truc = AA | BB | CC
+
+type machin = { champ1 : TRUC.truc;
+		champ2 : truc }
+
 (*s documentation 2 où je parle de [ma_fonction x] ci-dessous définie
     et de bien d'autres choses que j'aimerais voir s'afficher sur un
     paragraphe un tant soit peu grand, comme celui-ci. 
     Je peux aussi parler de \verb!@x! si je veux... 
     ou encore << échapper >> cette ["chaine de caractères"]. *)
 
-let ma_fonction x = function (y,z) ->
-  x + y*z (* commentaire : $[y]\not=0$ *)
+let ma_fonction x = function (yyy,z) ->
+  x + yyy*zzz (* commentaire : $[y]\not=0$ *)
 
 (*c un vrai commentaire *)
 
@@ -33,5 +38,9 @@ let autre_bout x =
 
 let mon_autre_fonction x1 x2 =
   x1 := x2;
-  ma_fonction !x1 (x2,x2/3)
+  List.ma_fonction !x1 (x2,x2/3)
 
+let test_pat = function
+    A1 -> 1
+  | BB -> 2
+  | CC -> CC.f

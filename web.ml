@@ -96,12 +96,30 @@ let build_index l =
 
 (*s Printing of the index. *)
 
-let alpha_order = (<)
+let norm_char c = match Char.uppercase c with
+  | '\192'..'\198' -> 'A'
+  | '\199' -> 'C'
+  | '\200'..'\203' -> 'E'
+  | '\204'..'\207' -> 'I'
+  | '\209' -> 'N'
+  | '\210'..'\214' -> 'O'
+  | '\217'..'\220' -> 'U'
+  | '\221' -> 'Y'
+  | c -> c
+
+let norm_string s =
+  let u = String.copy s in
+  for i = 0 to String.length s - 1 do
+    u.[i] <- norm_char s.[i]
+  done;
+  u
+
+let alpha_string s1 s2 = norm_string s1 < norm_string s2
 
 let all_entries () =
   let s = Idmap.fold (fun x _ s -> Stringset.add x s) !used Stringset.empty in
   let s = Idmap.fold (fun x _ s -> Stringset.add x s) !defined s in
-  Sort.list alpha_order (Stringset.elements s)
+  Sort.list alpha_string (Stringset.elements s)
 
 let print_one_entry s =
   let list_in_table t =
