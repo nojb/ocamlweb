@@ -1,0 +1,79 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage}
+
+\newcommand{\Caml}{\textsf{Caml}}
+\newcommand{\ocamlweb}{\textsf{ocamlweb}}
+
+\begin{document}
+
+%%% titre %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{ocamlweb: a literate programming tool \\ 
+       for Objective Caml}
+\author{Jean-Christophe Filli\^{a}tre \\
+        \normalsize\texttt{www.lri.fr/\~{}filliatr}}
+\date{}
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Principles}
+
+Documentation is inserted into \Caml\ files as \emph{comments}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Usage}
+
+\ocamlweb\ is invoked with a shell command line as
+\begin{displaymath}
+  \texttt{ocamlweb }<\textit{options and files}>
+\end{displaymath}
+Any command line argument which is not an option is considered as a
+file. A file that is not a \Caml\ file is considered as a \LaTeX\ file,
+and will be copied `as is' in the final document. The order of files
+on the command line is kept in the final document. 
+
+\subsection*{Command line options}
+
+\begin{description}
+
+\item[\texttt{-header}:]
+
+  Do not skip the header of \Caml\ files. The default behavior is to
+  skip them, since there are usually made of copyright and license
+  informations, which you do not want to see in the final document.
+  Headers are identified as comments right at the beginning of the
+  \Caml\ file, and are stopped by any character other then a space
+  outside a comment or by an empty line. 
+
+\item[\texttt{-o }\textit{file}:] 
+  
+  Redirect the output to file \textit{file}.
+
+\item[\texttt{-nodoc}:]
+
+  Suppress the header and trailer of the document. Thus, you can
+  insert the resulting document into a larger document.
+
+\item[\texttt{-h}:]
+
+  Give a short summary of the options.
+
+\item[\texttt{-v}:]
+
+  Print the version and exit.
+
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
