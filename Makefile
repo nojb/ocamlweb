@@ -21,9 +21,9 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-CAML_CMO = misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
-       linenum.cmo location.cmo longident.cmo pstream.cmo syntaxerr.cmo \
-       parser.cmo lexer.cmo parse.cmo
+CAML_CMO = misc.cmo clflags.cmo terminfo.cmo warnings.cmo	\
+           linenum.cmo location.cmo longident.cmo pstream.cmo	\
+           syntaxerr.cmo parser.cmo lexer.cmo parse.cmo
 
 CAML_CMX = $(CAML_CMO:.cmo=.cmx)
 
@@ -71,7 +71,7 @@ bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; latex ocamlweb
 	cd test; grep -q "Rerun" ocamlweb.log && latex ocamlweb || true
-	cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
+	-cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
 
 check: bootstrap
 
@@ -82,24 +82,24 @@ NAME=ocamlweb-$(VERSION)
 
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
-FILES = buffer.mli buffer.ml \
-        doclexer.mll cross.ml cross.mli pretty.mli pretty.mll \
-	output.mli output.ml web.mli web.ml main.ml \
-	ocamlweb.sty ocamlweb.hva bootstrap.tex \
+FILES = buffer.mli buffer.ml					\
+        doclexer.mll cross.ml cross.mli pretty.mli pretty.mll	\
+	output.mli output.ml web.mli web.ml main.ml		\
+	ocamlweb.sty bootstrap.tex			\
 	Makefile .depend README INSTALL COPYING GPL CHANGES
 
-OCAMLFILES = misc.mli misc.ml clflags.ml \
-	terminfo.mli terminfo.ml \
-	warnings.mli warnings.ml \
-	linenum.mli linenum.mll \
-	location.mli location.ml \
-	longident.mli longident.ml \
-	pstream.mli pstream.ml \
-	syntaxerr.mli syntaxerr.ml \
-	asttypes.mli parsetree.mli \
-	parser.mly \
-	lexer.mli lexer.mll \
-	parse.mli parse.ml \
+OCAMLFILES = misc.mli misc.ml clflags.ml	\
+        terminfo.mli terminfo.ml		\
+	warnings.mli warnings.ml		\
+	linenum.mli linenum.mll			\
+	location.mli location.ml		\
+	longident.mli longident.ml		\
+	pstream.mli pstream.ml			\
+	syntaxerr.mli syntaxerr.ml		\
+	asttypes.mli parsetree.mli		\
+	parser.mly				\
+	lexer.mli lexer.mll			\
+	parse.mli parse.ml			\
 	Makefile .depend README
 
 export: source
@@ -108,7 +108,7 @@ export: source
 
 source:
 	mkdir -p export/$(NAME)
-	cd export; mkdir ocaml-parser; mkdir test
+	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test
 	cp $(FILES) export/$(NAME)
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
 	cd export/$(NAME)/test; ln -s ../ocamlweb.sty

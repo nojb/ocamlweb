@@ -1,11 +1,10 @@
 (Dis donc emacs, ceci est du -*-text-*- !)
 
-                    LIST OF CHANGES
-		    ===============
+		      LIST OF CHANGES
+		      ===============
 
-$Id$
-
-
+version 0.3, 17/06/99 (first official release)
+=====================
   o \ocwnl has been splitted into \ocweol and \ocwindent for better
     code printing. a new corresponding function end_line has been
     added into output.ml.
@@ -32,5 +31,8 @@ version 0.26, 02/06/99
 
 version 0.15, 18/5/99
 =====================
-  o first public release
+  o first release (only for a few number of users who asked for)
+
+$Id$
+
 
