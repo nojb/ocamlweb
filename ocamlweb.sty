@@ -42,16 +42,11 @@
 %HEVEA puts to much space with \medskip
 %HEVEA\renewcommand{\medskip}{}
 
-
 % own name
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
 
 % underscore ?
 % \def\_{\kern.04em\vbox{\hrule width.3em height .6pt}\kern.08em}
-
-% macro for typesetting comment start and end
-\newcommand{\ocwbc}{\quad\ensuremath{(\ast}}
-\newcommand{\ocwec}{\ensuremath{\ast)}}
 
 % macro for typesetting keywords
 \newcommand{\ocwkw}[1]{\textsf{#1}}
@@ -75,7 +70,26 @@
 %END LATEX
 %HEVEA\newcommand{\ocwindent}[1]{\hspace{#1}\hspace{#1}}
 
+% macro for typesetting comments
+\newcommand{\ocwbc}{\quad\ensuremath{(\ast}}
+\newcommand{\ocwec}{\ensuremath{\ast)}}
 
+\newbox\boxA
+\newbox\boxB
+\newdimen\boxwidth
+
+\def\comment{\unskip\hskip 2em\null\par\nointerlineskip
+  \setbox\boxA=\lastbox
+  \setbox\boxB=\hbox{\strut\unhbox\boxA}\boxwidth=\wd\boxB
+  \noindent\box\boxB\par
+  \ifdim\boxwidth<.5\hsize\vskip -\baselineskip
+  \else\boxwidth=.5\hsize\fi
+  \noindent\hangafter=0 \hangindent=\boxwidth
+  \llap{$(*$ }\ignorespaces}
+\def\endcomment{\unskip~$*)$\strut\par}
+
+\def\codeline{\vbox\bgroup\noindent\strut\ignorespaces}
+\def\endcodeline{\egroup}
 
 % visible space in a string
 %BEGIN LATEX

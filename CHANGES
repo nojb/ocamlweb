@@ -2,7 +2,8 @@
 
 		      LIST OF CHANGES
 		      ===============
-
+ 
+  o escape sequences ([...]) are no more active inside mathematics ($...$)
   o bootstrap is now completed
   o interfaces are no more inserted automatically before implementations 
     (patch from François Pottier)

@@ -105,21 +105,24 @@ let leave_math () =
   end
 
 
-(*s \textbf{End of lines.}
-    [(end_line ())] ends a line. (used for code only). *)
-
-let end_line () =
-  leave_math ();
-  output_string "\\ocweol\n"
-
-
 (*s \textbf{Indentation.}
     An indentation at the beginning of a line of $n$ spaces 
     is produced by [(indentation n)] (used for code only). *)
 
 let indentation n =
   let space = 0.5 *. (float n) in
-  output_string (sprintf "\\ocwindent{%2.2fem}\n" space)
+  output_string (sprintf "\\codeline\\ocwindent{%2.2fem}\n" space)
+
+
+(*s \textbf{End of lines.}
+    [(end_line ())] ends a line. (used for code only). *)
+
+let end_line () =
+  leave_math ();
+  output_string "\\endcodeline\\ocweol\n"
+
+let end_line_string () =
+  output_string "\\endgraf\n"
 
 
 (*s \textbf{Keywords.}
@@ -274,9 +277,9 @@ let output_ascii_char n =
 
 (*s \textbf{Comments.} *)
 
-let output_bc () = leave_math (); output_string "\\ocwbc{}"
+let output_bc () = leave_math (); output_string "\\comment "
 
-let output_ec () = leave_math (); output_string "\\ocwec{}"
+let output_ec () = leave_math (); output_string "\\endcomment "
 
 let output_hfill () = leave_math (); output_string "\\hfill "
 

@@ -129,7 +129,12 @@ and pr_comment = parse
            if !comment_depth > 0 then pr_comment lexbuf }
   | '\n' space* '*' ' '
          { output_string "\n "; pr_comment lexbuf }
-  | '['  { bracket_depth := 1; escaped_code lexbuf; pr_comment lexbuf }
+  | '['  { if !user_math_mode then 
+	     output_char '['
+	   else begin
+	     bracket_depth := 1; escaped_code lexbuf
+	   end; 
+	   pr_comment lexbuf }
   | eof  { () }
   | '$'  { user_math(); pr_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_comment lexbuf }
@@ -139,14 +144,14 @@ and pr_comment = parse
 
 and pr_code_string = parse
   | '"'  { output_es () }
-  | '\n' { end_line (); indentation 0; pr_code_string lexbuf }
+  | '\n' { end_line_string (); pr_code_string lexbuf }
   | ' '  { output_vspace (); pr_code_string lexbuf }
   | '\\' ['"' 't' 'b' 'r']
          { output_escaped_char '\\'; 
 	   output_char (lexeme_char lexbuf 1); 
 	   pr_code_string lexbuf }
   | '\\' '\n'
-         { output_escaped_char '\\'; end_line (); indentation 0; 
+         { output_escaped_char '\\'; end_line_string ();
 	   pr_code_string lexbuf }
   | '\\' '\\'
          { output_escaped_char '\\'; output_escaped_char '\\'; 
@@ -185,7 +190,12 @@ and escaped_code = parse
     It is output `as is', except for quotations. *)
 
 and pr_doc = parse
-  | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
+  | '[' { if !user_math_mode then 
+	     output_char '['
+	   else begin
+	     bracket_depth := 1; escaped_code lexbuf
+	   end; 
+	   pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
   | "\\verb" _  
          { verb_delim := lexeme_char lexbuf 5;

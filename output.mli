@@ -54,8 +54,10 @@ val set_no_preamble : bool -> unit
 val latex_header : string -> unit
 val latex_trailer : unit -> unit
 
-val end_line : unit -> unit
 val indentation : int -> unit
+val end_line : unit -> unit
+val end_line_string : unit -> unit
+
 val enter_math : unit -> unit
 val leave_math : unit -> unit
 
