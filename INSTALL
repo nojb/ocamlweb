@@ -46,3 +46,12 @@ in your LaTeX input path (one of the directories listed in
 $TEXINPUTS). This file is needed to compile the documents produced by
 ocamlweb with LaTeX.
 
+
+NOTE TO THE TexLive USERS
+=========================
+
+The LaTeX document produced by ocamlweb uses the 'fullpage' package
+(to get margins adapted to A4 paper). This package has been rewritten
+in the TeXLive and may cause bad DVI or PostScript (superposed
+texts). If so, please get the standard FULLPAGE.STY by H.Partl from
+http://www.ctan.org/.
