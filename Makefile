@@ -61,6 +61,9 @@ install:
 	cp ocamlweb $(BINDIR)
 	cp ocamlweb.sty $(TEXDIR)
 
+local:
+	cp ocamlweb $$HOME/bin/$$OSTYPE
+
 manual:
 	cd doc; make all
 
@@ -177,6 +180,7 @@ clean:
 	rm -f ocaml-parser/lexer.ml ocaml-parser/linenum.ml
 	rm -f ocaml-parser/parser.mli ocaml-parser/parser.ml
 	make -C doc clean
+	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
 
 depend: doclexer.ml pretty.ml ocaml-parser/parser.ml ocaml-parser/lexer.ml \
         ocaml-parser/linenum.ml
