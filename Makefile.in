@@ -135,7 +135,7 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	parser.mly				\
 	lexer.mli lexer.mll			\
 	parse.mli parse.ml			\
-	README
+	README LICENSE
 
 OCAMLLEXFILES = lex_syntax.mli lex_parser.mly lex_lexer.mll
 
