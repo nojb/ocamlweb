@@ -136,11 +136,11 @@ and tr_core_type_desc loc = function
       List.iter tr_core_type tl
   | Ptyp_constr (q,tl) ->
       add_uses_q loc q; List.iter tr_core_type tl
-(**
+(*i
   | Ptyp_object of core_field_type list
   | Ptyp_class of Longident.t * core_type list
   | Ptyp_alias of core_type * string
-**)
+i*)
   | _ -> ()
 
 
@@ -200,12 +200,12 @@ and tr_expression_desc loc = function
   | Pexp_letmodule (x,m,e) ->
       tr_module_expr m; bind_variables [x] tr_expression e
   | Pexp_constant _ -> ()
-(**
+(*i
   | Pexp_send of expression * string
   | Pexp_new of Longident.t
   | Pexp_setinstvar of string * expression
   | Pexp_override of (string * expression) list
-**)
+i*)
   | _ -> ()
 
 and tr_value_description vd =
@@ -259,10 +259,10 @@ and tr_signature_item_desc loc = function
       add_open m
   | Psig_include mt ->
       tr_module_type mt
-(**
+(*i
   | Psig_class of class_description list
   | Psig_class_type of class_type_declaration list
-**)
+i*)
   | _ -> ()
 
 and tr_modtype_declaration = function

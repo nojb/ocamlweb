@@ -16,9 +16,17 @@
 
 (* $Id$ *)
 
+(*i*)
 open Printf
+(*i*)
 
-(* low level output *******************************************************)
+(* Low level output. 
+   [out_channel] is a reference on the current output channel.
+   It is initialized to the standard output and can be 
+   redirect to a file by the function [set_output_to_file]. 
+   The function [close_output] closes the output channel if it is a file.
+   [output_char], [output_string] and [output_file] are self-explainable.
+ *)
 
 let out_channel = ref stdout
 let output_is_file = ref false
@@ -42,12 +50,15 @@ let output_file f =
     done
   with End_of_file -> close_in ch
 
-let output_verbatim s =
-  (* TODO : vérifier que "!" n'apparaît pas dans [s] *)
-  output_string "\\verb!"; output_string s; output_string "!"
-  
 
-(* high level output (LaTeX) ************************************************)
+(*s High level output.
+    In this section and the following, we introduce functions which are 
+    \LaTeX\ dependent. 
+  *)
+
+let output_verbatim s =
+  (*i TODO : vérifier que "!" n'apparaît pas dans [s] i*)
+  output_string "\\verb!"; output_string s; output_string "!"
 
 let nodoc = ref false
 
@@ -70,7 +81,11 @@ let latex_trailer () =
     output_string "\\end{document}\n"
   end
 
-(* indentation *)
+
+(*s Math mode. We keep a boolean, [math_mode], to know if we are currently
+    already in \TeX\ math mode. The functions [enter_math] and [leave_math]
+    inserts \verb!$! if necessary, and switch that boolean.
+ *)
 
 let math_mode = ref false
 		  
@@ -86,12 +101,23 @@ let leave_math () =
     math_mode := false
   end
 
+
+(*s Indentation at the beginning of a line (for code only) is produced by
+    the following function. *)
+
 let indentation n =
   leave_math ();
   let space = 0.5 *. (float n) in
   output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
 
-(* keywords and identifiers *)
+
+(*s Keywords.
+    Caml keywords and base type are stored in two hash tables, and the two
+    functions [is_caml_keyword] and [is_base_type] make the corresponding
+    tests.
+    The function [output_keyword] prints a keyword, with different macros
+    for base types and keywords.
+  *)
 
 let build_table l = 
   let h = Hashtbl.create 101 in
@@ -127,13 +153,27 @@ let output_keyword s =
   output_string s;
   output_string "}"
 
+
+(*s Identifiers.
+    The function [output_raw_ident] prints an identifier,
+    escaping the \TeX\ reserved characters with [output_escaped_char].
+    The function [output_ident] prints an identifier, calling 
+    [output_keyword] if necessary.
+ *)
+
+let output_escaped_char c = 
+  if c = '^' || c = '~' then leave_math();
+  match c with
+    | '\\' -> 
+	output_string "\\symbol{92}"
+    | '$' | '#' | '%' | '&' | '{' | '}' | '^' | '_' | '~' -> 
+	output_char '\\'; output_char c; output_string "{}"
+    | _ -> 
+	output_char c
+
 let output_latex_id s =
   for i = 0 to String.length s - 1 do
-    let c = s.[i] in
-    if c = '_' then
-      output_string "\\_"
-    else
-      output_char c
+    output_escaped_char s.[i]
   done
 
 let output_raw_ident s =
@@ -145,16 +185,17 @@ let output_ident s =
   end else begin
     enter_math ();
     if String.length s = 1 then
-      output_latex_id s
+      output_escaped_char s.[0]
     else
       output_raw_ident s
   end
 
-let output_escaped_char c = 
-  if c = '^' || c = '~' then leave_math();
-  match c with
-    | '\\' -> output_string "\\symbol{92}"
-    | _ -> output_char '\\'; output_char c; output_string "{}"
+
+(*s Symbols. Some mathematical symbols are printed in a nice way, in order
+    to get a more readable code.
+    The type variables from \verb!'a! to \verb!'d! are printed as Greek
+    letters for the same reason.
+ *)
 
 let output_latex_special = function
   | " " -> output_string "~" 
@@ -174,15 +215,18 @@ let output_greek_letter = function
   | 'a' -> enter_math (); output_string "\\alpha{}"
   | 'b' -> enter_math (); output_string "\\beta{}"
   | 'c' -> enter_math (); output_string "\\gamma{}"
+  | 'd' -> enter_math (); output_string "\\delta{}"
   | c   -> output_char '\''; output_char c
 
-(* comments *)
+
+(*s Comments. *)
 
 let output_bc () = leave_math (); output_string "\\ocwbc{}"
 
 let output_ec () = leave_math (); output_string "\\ocwec{}"
 
-(* strings *)
+
+(*s Strings. *)
 
 let output_bs () = leave_math (); output_string "\\texttt{\""
 
@@ -190,12 +234,14 @@ let output_es () = output_string "\"}"
 
 let output_vspace () = output_string "\\ocwvspace{}"
 
-(* coming back to initial values *)
+
+(*s Reset of the output machine. *)
 
 let reset_output () =
   math_mode := false
 
-(* sectioning commands *)
+
+(*s Sectioning commands. *)
 
 let output_section n =
   output_string (sprintf "\\ocwsection{%d}\n" n)
@@ -223,7 +269,9 @@ let end_paragraph () =
   output_string "\n\n\\medskip{}\n"
 
 
-(* Index. *)
+(*s Index. 
+    Index is started in 
+  *)
 
 let begin_index () =
   output_string "\n\n\\ocwbeginindex{}\n"
@@ -233,12 +281,18 @@ let end_index () =
   
 let print_list print sep l = 
   let rec print_rec = function
-      [] -> ()
+    | [] -> ()
     | [x] -> print x
     | x::r -> print x; sep(); print_rec r
   in
   print_rec l
   
+
+(*s Index in WEB style. 
+    When we are in WEB style, the index is directly printed by the following
+    code, and consists in two lists of sections.
+ *)
+
 type elem =
   | Single of int
   | Interval of int * int
@@ -276,6 +330,14 @@ let output_index_entry s def use =
   if def <> [] && use <> [] then output_string ", ";
   print_list output_elem sep (intervals use);
   output_string "}\n"
+
+
+(*s Index in \LaTeX\ style. 
+    When we are not in WEB style, the index in left to \LaTeX, and all
+    the work is done by the macro \verb!ocwrefindexentry!, which takes
+    three arguments: the identifier and the two lists of labels where
+    it is defined and used respectively.
+ *)
 
 let output_raw_index_entry s def use =
   let sep () = output_string "," in
