@@ -44,6 +44,9 @@ let usage () =
   prerr_endline "  --files <file> read file names to process in <file>";
   prerr_endline "  --quiet        quiet mode";
   prerr_endline "  --no-greek     disable use of greek letters for type variables";
+  prerr_endline "";
+  prerr_endline 
+    "On-line documentation at http://www.lri.fr/~filliatr/ocamlweb/\n";
   exit 1
 
 
@@ -79,7 +82,7 @@ let banner () =
     
 
 (*s \textbf{Separation of files.} Files given on the command line are
-    separating according to their type, which is determined by their suffix.
+    separated according to their type, which is determined by their suffix.
     Implementations and interfaces have respective suffixes \verb!.ml!
     and \verb!.mli! and \LaTeX\ files have suffix \verb!.tex!. *)
 
@@ -168,7 +171,7 @@ let parse () =
 	use_greek_letters := false; parse_rec rem
 
     | ("-h" | "-help" | "-?" | "--help") :: rem ->
-	usage ()
+	banner (); usage ()
     | ("-v" | "-version" | "--version") :: _ ->
 	banner (); exit 0
     | ("-warranty" | "--warranty") :: _ ->
