@@ -1,12 +1,25 @@
 
+% ocamlweb - A WEB-like tool for ocaml
+% Copyright (C) 1999 Jean-Christophe FILLIATRE
+% 
+% This software is free software; you can redistribute it and/or
+% modify it under the terms of the GNU General Public
+% License version 2, as published by the Free Software Foundation.
+% 
+% This software is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+% 
+% See the GNU General Public License version 2 for more details
+% (enclosed in the file GPL).
+
 % This is ocamlweb.hva, by Jean-Christophe Filliâtre
 % modified by Claude Marché and Patrick Loiseleur
-% This HeVeA package is used by ocamlweb (http://www.lri.fr/~filliatr/ocamlweb)
 %
 % You can modify the following macros to customize the appearance
 % of the HTML document.
 
-%\renewcommand{\medskip}{}
+\renewcommand{\medskip}{}
 
 % macro for typesetting comment start and end
 \newcommand{\ocwbc}{\quad\ensuremath{(\ast}}
@@ -19,14 +32,13 @@
 \newcommand{\ocwbt}[1]{\textit{#1}}
 
 % macro for typesetting identifiers
-\newcommand{\ocwid}[1]{\textit{#1\/}}
+\newcommand{\ocwid}[1]{\index[idents]{#1}\textit{#1\/}}
 
 % newline with indentation of the next line as argument
 \newcommand{\ocwnl}[1]{\\\hspace{#1}\hspace{#1}}
 
 % visible space in a string
-\newcommand{\ocwvspace}{{\tt\char`\ }}
-%\newcommand{\ocwvspace}{{\tt ~}}
+\newcommand{\ocwvspace}{\hspace{1em}}
 
 % macro for typesetting the title of a module implementation
 \newcommand{\ocwmodule}[1]{\section*{Module #1}}
@@ -41,14 +53,20 @@
 \newcommand{\ocwcodepart}{\subsection*{Code}}
 
 % new section
-\newcommand{\ocwsection}[1]{\bigskip\noindent{\bf#1.}{\hspace{1em}}}
+\newcommand{\ocwsection}[1]{%
+  \label{code-section#1}\bigskip\noindent{\bf#1.}{\hspace{1em}}}
 
 % index
-\newcommand{\ocwbeginindex}{\begin{itemize}}
-\newcommand{\ocwendindex}{\end{itemize}}
+%\newcommand{\ocwbeginindex}{\begin{itemize}}
+%\newcommand{\ocwendindex}{\end{itemize}}
+
+\newindex{idents}{}{}{Index of indentifiers}
+\newcommand{\ocwbeginindex}{\printindex[idents]}
+\newcommand{\ocwendindex}{}
 
 % index entry in WEB style
-\newcommand{\ocwwebindexentry}[3]{\item #1,\quad#2#3}
+\newcommand{\ocwwebindexentry}[3]{}
+%\newcommand{\ocwwebindexentry}[3]{\item #1\anchor{index_#1},\quad#2#3\\}
 
 % index entry in LaTeX style
-\newcommand{\ocwrefindexentry}[3]{\item #1,\quad\textbf{#2}, #3}
+% \newcommand{\ocwrefindexentry}[3]{\item #1,\quad\textbf{#2}, #3}
