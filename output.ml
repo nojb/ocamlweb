@@ -107,9 +107,11 @@ let is_keyword =
       "or"; "parser";  "private"; "rec"; "sig";  "struct"; "then"; "to";
       "true"; "try"; "type"; "val"; "virtual"; "when"; "while"; "with";
 
+      "ref";
+
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr";
 
-      "string"; "int"; "array"; "unit"; "bool"; "char"
+      "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option"
     ];
   function s -> try Hashtbl.find h s; true with Not_found -> false
 
@@ -125,6 +127,9 @@ let output_latex_id s =
       output_char c
   done
 
+let output_raw_ident s =
+  output_string "\\ocwid{"; output_latex_id s; output_string "}"
+
 let output_ident s =
   if is_keyword s then begin
     leave_math (); output_keyword s
@@ -132,9 +137,8 @@ let output_ident s =
     enter_math ();
     if String.length s = 1 then
       output_latex_id s
-    else begin
-      output_string "\\ocwid{"; output_latex_id s; output_string "}"
-    end
+    else
+      output_raw_ident s
   end
 
 let output_latex_special = function
@@ -154,7 +158,7 @@ let output_latex_special = function
   | "<=" -> enter_math (); output_string "\\le{}"
   | ">=" -> enter_math (); output_string "\\ge{}"
   | "<>" -> enter_math (); output_string "\\not="
-  | _   -> assert false
+  | s    -> output_string s
 
 (* comments *)
 
@@ -164,7 +168,7 @@ let output_ec () = leave_math (); output_string "\\ocwec{}"
 
 (* coming back to initial values *)
 
-let reset_pretty () =
+let reset_output () =
   first_line := true;
   math_mode := false
 
@@ -194,3 +198,31 @@ let begin_paragraph () =
 
 let end_paragraph () =
   output_string "\n\n\\medskip{}\n"
+
+let begin_index () =
+  output_string "\n\n\\ocwindex{}\n"
+  
+let print_list print sep l = 
+  let rec print_rec = function
+      [] -> ()
+    | [x] -> print x
+    | x::r -> print x; sep(); print_rec r
+  in
+  print_rec l
+  
+let output_int n = output_string (string_of_int n)
+
+let output_bf_int n = 
+  output_string "\\textbf{"; output_int n; output_string "}"
+
+let output_index_entry s def use =
+  let sep () = output_string ", " in
+  output_string "\\ocwindexentry{";
+  output_raw_ident s;
+  output_string "}{";
+  print_list output_bf_int sep def;
+  output_string "}{";
+  if def <> [] && use <> [] then output_string ", ";
+  print_list output_int sep use;
+  output_string "}\n"
+

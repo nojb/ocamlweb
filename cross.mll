@@ -27,19 +27,49 @@
 
   module Stringset = Set.Make(struct type t = string let compare = compare end)
 
-  let defs = ref Stringset.empty
-  let uses = ref Stringset.empty
+  type where = { w_module : string; w_section : int }
+
+  module Whereset = Set.Make(struct type t = where let compare = compare end)
+
+  module Idmap = Map.Make(struct type t = string let compare = compare end)
+
+  (* Those two global tables keep the places where things are defined and
+     used, to produce the final indexes *)
+
+  let defined = ref Idmap.empty
+  let used = ref Idmap.empty
+
+  let add_global table k i =
+    try
+      let s = Idmap.find k !table in
+      table := Idmap.add k (Whereset.add i s) !table
+    with Not_found ->
+      table := Idmap.add k (Whereset.add i Whereset.empty) !table
+
+  (* The following tables are used locally, at each step *)
+
   let opened = ref Stringset.empty
+  let defs = ref Stringset.empty
   let locals = ref Stringset.empty
 
+  let current_module = ref ""
+  let cross_new_module m = current_module := m
+
+  let current_section = ref 0
+  let cross_new_section s = current_section := s
+
+  let current_location () = 
+    { w_module = !current_module; w_section = !current_section }
+
   let reset_cross () =
-    defs := Stringset.empty;
-    uses := Stringset.empty;
     opened := Stringset.empty;
     locals := Stringset.empty
 
-  let add_def s : unit =
-    defs := Stringset.add s !defs
+  let add_def s =
+    if String.length s > 1 then begin
+      add_global defined s (current_location());
+      defs := Stringset.add s !defs
+    end
 
   let add_open s =
     opened := Stringset.add s !opened
@@ -48,11 +78,12 @@
     locals := Stringset.add s !locals
 
   let add_uses s =
-    if not (is_keyword s) then
-      uses := Stringset.add s !uses
+    if not (is_keyword s) 
+       && String.length s > 1 && not (Stringset.mem s !locals) then
+      add_global used s (current_location())
 
-  let code_return () =
-    !opened, !defs, !uses
+  let return_sets () =
+    !opened, !defs
 
   let last = ref ""
 
@@ -72,24 +103,49 @@ let ident = (lowercase | uppercase ) identchar*
 
 rule cross_code = parse
   | space* { cross_code lexbuf }
-  | "let"  { last := "let"; pattern_defs lexbuf; cross_code lexbuf }
-  | "type" { last := "type"; type_decl lexbuf; cross_code lexbuf }
+  | "let" space*
+           { last := "let"; pattern_defs lexbuf; inside_code lexbuf }
+  | "type" { last := "type"; type_decl lexbuf; inside_code lexbuf }
   | "and"  { if !last = "let" then pattern_defs lexbuf else type_decl lexbuf;
-	     cross_code lexbuf }
+	     inside_code lexbuf }
   | "exception"
-           { exn_decl lexbuf; cross_code lexbuf }
+           { exn_decl lexbuf; inside_code lexbuf }
   | "open" { opens lexbuf; cross_code lexbuf }
   | "(*"   { comment_depth := 1; skip_comment lexbuf; cross_code lexbuf }
-  | eof    { code_return () }
+  | eof    { return_sets () }
   | _      { cross_code lexbuf }
 
+and inside_code = parse
+  | "(*"   { comment_depth := 1; skip_comment lexbuf; inside_code lexbuf }
+  | "exception"
+           { exn_decl lexbuf; inside_code lexbuf }
+  | "open" { opens lexbuf; inside_code lexbuf }
+  | "let" | "and"
+           { bindings lexbuf; inside_code lexbuf }
+  | (up_ident '.')* lo_ident
+           { add_uses (Lexing.lexeme lexbuf); inside_code lexbuf }
+  | up_ident
+           { inside_code lexbuf }
+  | eof    { return_sets () }
+  | _      { inside_code lexbuf }
+
 and pattern_defs = parse
-  | space*   { pattern_defs lexbuf }
-  | "rec"    { pattern_defs lexbuf }
+  | space* "rec" 
+             { pattern_defs lexbuf }
   | lo_ident { add_def (Lexing.lexeme lexbuf); pattern_defs lexbuf }
+  | up_ident { pattern_defs lexbuf }
+  | eof      { () }
+  | '='      { () }
+  | space    { bindings lexbuf }
+  | _        { pattern_defs lexbuf }
+
+and bindings = parse
+  | space*   { bindings lexbuf }
+  | lo_ident { add_local (Lexing.lexeme lexbuf); bindings lexbuf }
+  | up_ident { bindings lexbuf }
   | eof      { () }
   | "="      { () }
-  | _        { pattern_defs lexbuf }
+  | _        { bindings lexbuf }
 
 and opens = parse
   | up_ident { add_open (Lexing.lexeme lexbuf) }
@@ -109,7 +165,7 @@ and cross_interf = parse
   | "open" { opens lexbuf; cross_interf lexbuf }
   | "(*"   { comment_depth := 1; skip_comment lexbuf; cross_interf lexbuf }
   | ident  { add_uses (Lexing.lexeme lexbuf); cross_interf lexbuf }
-  | eof    { code_return () }
+  | eof    { return_sets () }
   | _      { cross_interf lexbuf }
 
 (* val *)

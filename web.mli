@@ -16,8 +16,16 @@
 
 (* $Id$ *)
 
+(* This module is the heart of the program. The only function is
+   [produce_document], which takes a list of files and produces the
+   final \LaTeX\ document. 
+   A file is either an implementation, or an interface or 
+   any other file, which is then considered as a \LaTeX\ file.
+   A file is internally represented by the type [file] defined below,
+   which is self-explainable. *)
+
 type paragraph =
-    Documentation of string
+  | Documentation of string
   | Code of string
 
 type raw_section = paragraph list
@@ -34,7 +42,7 @@ type implem = {
   implem_interf : (raw_section list) option } 
 
 type file = 
-    Implem of implem
+  | Implem of implem
   | Interf of interf
   | Other  of string
 

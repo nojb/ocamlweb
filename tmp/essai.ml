@@ -15,11 +15,12 @@ let ma_fonction x = function (y,z) ->
 
 let autre_bout x =
   if x <= 0 then x+1 else x+2;
-  bal bla x if y' if z123'_45;
-    while true do () done
+  while true do () done
 
 (*s    documentation 3 : cette fonction a pour effet de mettre dans la 
   référence [x1] la valeur [x2]. *)
 
 let mon_autre_fonction x1 x2 =
-  x1 := x2
+  x1 := x2;
+  ma_fonction !x1 (x2,x2/3)
+

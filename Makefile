@@ -43,7 +43,7 @@ install:
 byte: $(OBJS:.cmx=.cmo)
 
 test: ocamlweb
-	cd tmp; ../ocamlweb essai.ml foo.mli end.tex -o essai.tex ; \
+	cd tmp; ../ocamlweb ../output.mli ../web.ml -o essai.tex ; \
 	latex essai
 
 # export
@@ -102,9 +102,9 @@ binary: ocamlweb
 ##################
 
 clean:
-	rm -f *~ *.cm[iox] *.o ocamlweb lexer.ml pretty.ml version.ml
+	rm -f *~ *.cm[iox] *.o ocamlweb lexer.ml pretty.ml cross.ml version.ml
 
-depend: lexer.ml pretty.ml
+depend: lexer.ml pretty.ml cross.ml
 	rm -f .depend
 	ocamldep $(ZLIBS) *.mli *.ml > .depend
 

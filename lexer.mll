@@ -82,6 +82,7 @@ and implementation = parse
   | "(*s" space*
            { new_section (); 
 	     new_doc (); documentation lexbuf; implementation lexbuf }
+  | "(*i"  { ignore lexbuf; skip_until_nl lexbuf; implementation lexbuf }
   | space+ { implementation lexbuf }
   | '\n'   { implementation lexbuf }
   | _      { Buffer.clear codeb; Buffer.add_char codeb (first_char lexbuf); 
@@ -126,10 +127,6 @@ and code_until_nl = parse
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf }
 
-(* inside an interface *)
-and interface = parse
-  | eof  { [] }
-
 (* to skip everything until a newline *)
 and skip_until_nl = parse
   | '\n' { () }
@@ -151,3 +148,9 @@ and skip_comment = parse
            if !comment_depth > 0 then skip_comment lexbuf }
   | eof  { () }
   | _    { skip_comment lexbuf }
+
+(* ignored parts, between "(*i" and "i*)" *)
+and ignore = parse
+  | "i*)" { () }
+  | eof   { () }
+  | _     { ignore lexbuf }

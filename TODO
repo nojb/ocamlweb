@@ -6,13 +6,14 @@ Parsing ocaml
 
  2. caractères \xxx et caractères échappés
 
- 3. identificateurs "uppercase"
 
+Web (cross)
+===========
 
-Web
-===
+ 1. nom de constructeurs dans le code : que faire ?
 
-  . tout à faire :-)
+ 2. nom de constructeurs et étiquettes dans les déclarations de types
+    == définitions
 
 
 Document LaTeX

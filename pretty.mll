@@ -51,6 +51,10 @@
   let check_user_math c =
     if !user_math_mode then output_char c else output_escaped_char c
 
+  let reset_pretty () =
+    reset_output ();
+    user_math_mode := false
+
 }
 
 let space = [' ' '\t']
@@ -76,7 +80,7 @@ rule pr_code = parse
 (* ...and inside the line *)
 and pr_code_inside = parse
   | '\n' { () }
-  | identifier
+  | (identifier '.')* identifier
          { output_ident (Lexing.lexeme lexbuf); pr_code_inside lexbuf }
   | "'a" { output_string "\\alpha{}"; pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
