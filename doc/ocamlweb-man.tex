@@ -362,7 +362,7 @@ redefining some macros:
 \item[\texttt{ocwkw}, \texttt{ocwbt}, \texttt{ocwupperid},
   \texttt{ocwlowerid}, \texttt{ocwtv}] ~ 
   
-  The one-argument macros for typesetting keywords, base types (such
+  The one-argument macros to typeset keywords, base types (such
   as \verb|int|, \verb|string|, etc.), uppercase identifiers (type
   constructors, exception names, module names), lowercase identifiers
   and type variables respectively. Defaults are sans-serif for
@@ -377,6 +377,12 @@ redefining some macros:
 \end{verbatim}
   anywhere between \verb|\usepackage{ocamlweb}| and
   \verb|\begin{document}|. 
+
+\item[\texttt{ocwlexkw}, \texttt{ocwlexident}, \texttt{ocwyacckw},
+  \texttt{ocwyaccident}] ~
+
+  Analogous macros as above, to typeset lex keywords, lex identifiers,
+  yacc keywords and yacc identifiers respectively.
 
 \item[\texttt{ocwinterface}, \texttt{ocwmodule},
   \texttt{ocwinterfacepart}, \texttt{ocwcodepart}] ~ 
@@ -453,11 +459,9 @@ redefining some macros:
 
 \item \textbf{What about lexers and parsers?} ~\par
   
-  This is currently only a pretty-printing support for
-  \textsf{ocamllex} lexers and \textsf{ocamlyacc} parsers.  There is
-  no indexing for the identifiers defined or used in these modules.
-  You have to pass the corresponding files to \ocamlweb\ through the
-  option \verb!--impl!.
+  There is support for \textsf{ocamllex} lexers and \textsf{ocamlyacc}
+  parsers since version 0.9. They are recognized by their suffix on
+  the command line (do not use option \verb!--impl! anymore).
 
 \item \textbf{I would like my pattern-matching right-hand sides to be
     aligned. Is it possible?} ~\par
