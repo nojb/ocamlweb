@@ -102,29 +102,34 @@ let what_file f =
     exit 1
   end
 
-(*s \textbf{Reading file names from a file.} File names may be given
-in a file instead of being given on the command
-line. [(files_from_file f)] returns the list of file names contained
-in the file named [f]. These file names must be separated by spaces,
-tabulations or newlines *)
+(*s \textbf{Reading file names from a file.} 
+    File names may be given
+    in a file instead of being given on the command
+    line. [(files_from_file f)] returns the list of file names contained
+    in the file named [f]. These file names must be separated by spaces,
+    tabulations or newlines.
+ *)
 
 let files_from_file f =
-  let rec files_from_channel accu_s accu_l ch =
+  let files_from_channel ch =
+    let buf = Buffer.create 80 in
+    let l = ref [] in
     try
-      let c = input_char ch in
-      match c with 
-	| ' ' | '\t' | '\n' ->
-	    files_from_channel 
-	      "" (if accu_s="" then accu_l else accu_s::accu_l) ch
-	| _ -> 
-	    files_from_channel (accu_s^(String.make 1 c)) accu_l ch
+      while true do
+	match input_char ch with
+	  | ' ' | '\t' | '\n' ->
+	      if Buffer.length buf > 0 then l := (Buffer.contents buf) :: !l;
+	      Buffer.clear buf
+	  | c -> 
+	      Buffer.add_char buf c
+      done; []
     with End_of_file ->
-      List.rev (if accu_s="" then accu_l else accu_s::accu_l)
+      List.rev !l
   in
   try
     check_if_file_exists f;
     let ch = open_in f in
-    let l = files_from_channel "" [] ch in
+    let l = files_from_channel ch in
     close_in ch;l
   with Sys_error s -> begin
     eprintf "\nocamlweb: cannot read from file %s (%s)\n" f s;
