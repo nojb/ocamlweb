@@ -5,7 +5,7 @@
 
 version 0.8, 02/06/2000
 ======================= 
-  o configuration with autoconf
+  o configuration with autoconf (thanks to Luc MAZARDO)
   o location (file + character) in error message for unterminated comments
   o index entries are now discriminated by their types (value,
     constructor, type, module, etc.)
