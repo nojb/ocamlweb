@@ -30,6 +30,8 @@
 
   let bracket_depth = ref 0
 
+  let verb_delim = ref (Char.chr 0)
+
   let first_char lexbuf = lexeme_char lexbuf 0
 
   let count_spaces s =
@@ -175,8 +177,27 @@ and escaped_code = parse
 and pr_doc = parse
   | '[' { bracket_depth := 1; escaped_code lexbuf; pr_doc lexbuf }
   | '$' { user_math(); pr_doc lexbuf }
+  | "\\verb" _  
+         { verb_delim := lexeme_char lexbuf 5;
+           output_string (lexeme lexbuf);
+	   pr_verb lexbuf; pr_doc lexbuf }
+  | "\\begin{verbatim}"
+         { output_string (lexeme lexbuf);
+	   pr_verbatim lexbuf; pr_doc lexbuf }
   | eof { () }
   | _   { output_char (first_char lexbuf); pr_doc lexbuf }
+
+and pr_verb = parse
+  | eof  { () }
+  | _    { let c = lexeme_char lexbuf 0 in
+	   output_char c;
+           if c == !verb_delim then () else pr_verb lexbuf }
+
+and pr_verbatim = parse
+  | "\\end{verbatim}"
+         { output_string (lexeme lexbuf) }
+  | eof  { () }
+  | _    { output_char (lexeme_char lexbuf 0); pr_verbatim lexbuf }
 
 (*i*)
 {
