@@ -19,10 +19,11 @@ open Misc
 open Parser
 
 type error =
-  | Illegal_character
+  | Illegal_character of char
   | Unterminated_comment
   | Unterminated_string
   | Unterminated_string_in_comment
+  | Keyword_as_label of string
 ;;
 
 exception Error of error * int * int
@@ -143,23 +144,24 @@ let char_for_decimal_code lexbuf i =
   Char.chr(c land 0xFF)
 
 (* To store the position of the beginning of a string and comment *)
-let string_start_pos = ref 0
-and comment_start_pos = ref []
-;;
+let string_start_pos = ref 0;;
+let comment_start_pos = ref [];;
 
 (* Error report *)
 
 open Format
 
-let report_error = function
-    Illegal_character ->
-      print_string "Illegal character"
+let report_error ppf = function
+  | Illegal_character c ->
+      fprintf ppf "Illegal character (%s)" (Char.escaped c)
   | Unterminated_comment ->
-      print_string "Comment not terminated"
+      fprintf ppf "Comment not terminated"
   | Unterminated_string ->
-      print_string "String literal not terminated"
+      fprintf ppf "String literal not terminated"
   | Unterminated_string_in_comment ->
-      print_string "This comment contains an unterminated string literal"
+      fprintf ppf "This comment contains an unterminated string literal"
+  | Keyword_as_label kwd ->
+      fprintf ppf "`%s' is a keyword, it cannot be used as label name" kwd
 ;;
 
 }
@@ -176,13 +178,29 @@ let hex_literal = '0' ['x' 'X'] ['0'-'9' 'A'-'F' 'a'-'f']+
 let oct_literal = '0' ['o' 'O'] ['0'-'7']+
 let bin_literal = '0' ['b' 'B'] ['0'-'1']+
 let float_literal =
-  ['0'-'9']+ ('.' ['0'-'9']*)? (['e' 'E'] ['+' '-']? ['0'-'9']+)?
+  ['0'-'9']+ ('.' ['0'-'9']* )? (['e' 'E'] ['+' '-']? ['0'-'9']+)?
 
 rule token = parse
     blank +
       { token lexbuf }
   | "_"
       { UNDERSCORE }
+  | "~"  { TILDE }
+  | "~" lowercase identchar * ':'
+      { let s = Lexing.lexeme lexbuf in
+        let name = String.sub s 1 (String.length s - 2) in
+        if Hashtbl.mem keyword_table name then
+          raise (Error(Keyword_as_label name, Lexing.lexeme_start lexbuf,
+                       Lexing.lexeme_end lexbuf));
+        LABEL name }
+  | "?"  { QUESTION }
+  | "?" lowercase identchar * ':'
+      { let s = Lexing.lexeme lexbuf in
+        let name = String.sub s 1 (String.length s - 2) in
+        if Hashtbl.mem keyword_table name then
+          raise (Error(Keyword_as_label name, Lexing.lexeme_start lexbuf,
+                       Lexing.lexeme_end lexbuf));
+        OPTLABEL name }
   | lowercase identchar *
       { let s = Lexing.lexeme lexbuf in
           try
@@ -219,7 +237,7 @@ rule token = parse
                     Location.loc_ghost = false }
         and warn = Warnings.Comment "the start of a comment"
         in
-        Location.print_warning loc warn;
+        Location.prerr_warning loc warn;
         comment_start_pos := [Lexing.lexeme_start lexbuf];
         comment lexbuf;
         token lexbuf
@@ -230,7 +248,7 @@ rule token = parse
                     Location.loc_ghost = false }
         and warn = Warnings.Comment "not the end of a comment"
         in
-        Location.print_warning loc warn;
+        Location.prerr_warning loc warn;
         lexbuf.Lexing.lex_curr_pos <- lexbuf.Lexing.lex_curr_pos - 1;
         STAR
       }
@@ -240,12 +258,13 @@ rule token = parse
   | "#"  { SHARP }
   | "&"  { AMPERSAND }
   | "&&" { AMPERAMPER }
+  | "`"  { BACKQUOTE }
   | "'"  { QUOTE }
   | "("  { LPAREN }
   | ")"  { RPAREN }
   | "*"  { STAR }
   | ","  { COMMA }
-  | "?"  { QUESTION }
+  | "??" { QUESTION2 }
   | "->" { MINUSGREATER }
   | "."  { DOT }
   | ".." { DOTDOT }
@@ -276,7 +295,9 @@ rule token = parse
   | "-"  { SUBTRACTIVE "-" }
   | "-." { SUBTRACTIVE "-." }
 
-  | ['!' '?' '~'] symbolchar *
+  | "!" symbolchar *
+            { PREFIXOP(Lexing.lexeme lexbuf) }
+  | ['~' '?'] symbolchar +
             { PREFIXOP(Lexing.lexeme lexbuf) }
   | ['=' '<' '>' '|' '&' '$'] symbolchar *
             { INFIXOP0(Lexing.lexeme lexbuf) }
@@ -290,7 +311,7 @@ rule token = parse
             { INFIXOP3(Lexing.lexeme lexbuf) }
   | eof { EOF }
   | _
-      { raise (Error(Illegal_character,
+      { raise (Error(Illegal_character ((Lexing.lexeme lexbuf).[0]),
                      Lexing.lexeme_start lexbuf, Lexing.lexeme_end lexbuf)) }
 
 and comment = parse

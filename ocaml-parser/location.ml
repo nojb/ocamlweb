@@ -47,7 +47,7 @@ let num_loc_lines = ref 0 (* number of lines already printed after input *)
 let rec highlight_locations loc1 loc2 =
   match !status with
     Terminfo.Uninitialised ->
-      status := Terminfo.setup stderr; highlight_locations loc1 loc2
+      status := Terminfo.setup stdout; highlight_locations loc1 loc2
   | Terminfo.Bad_term ->
       false
   | Terminfo.Good_term num_lines ->
@@ -67,21 +67,21 @@ let rec highlight_locations loc1 loc2 =
             (* If too many lines, give up *)
             if !lines >= num_lines - 2 then raise Exit;
             (* Move cursor up that number of lines *)
-            flush stderr; Terminfo.backup !lines;
+            flush stdout; Terminfo.backup !lines;
             (* Print the input, switching to standout for the location *)
             let bol = ref false in
-            prerr_string "# ";
+            print_string "# ";
             for pos = 0 to String.length lb.lex_buffer - pos0 - 1 do
-              if !bol then (prerr_string "  "; bol := false);
+              if !bol then (print_string "  "; bol := false);
               if pos = loc1.loc_start || pos = loc2.loc_start then
-                (flush stderr; Terminfo.standout true);
+                (flush stdout; Terminfo.standout true);
               if pos = loc1.loc_end || pos = loc2.loc_end then
-                (flush stderr; Terminfo.standout false);
+                (flush stdout; Terminfo.standout false);
               let c = lb.lex_buffer.[pos + pos0] in
-              prerr_char c;
+              print_char c;
               bol := (c = '\n')
             done;
-            flush stderr;
+            flush stdout;
             (* Make sure standout mode is over *)
             Terminfo.standout false;
             (* Position cursor back to original location *)
@@ -91,42 +91,38 @@ let rec highlight_locations loc1 loc2 =
 
 (* Print the location in some way or another *)
 
+open Format
+
 let reset () =
   num_loc_lines := 0
 
-let (msg_file, msg_line, msg_chars, msg_to, msg_colon, warn_head) =
+let (msg_file, msg_line, msg_chars, msg_to, msg_colon, msg_head) =
   match Sys.os_type with
   | "MacOS" -> ("File \"", "\"; line ", "; characters ", " to ", "", "### ")
   | _ -> ("File \"", "\", line ", ", characters ", "-", ":", "")
 
-let print loc =
+let print ppf loc =
   if String.length !input_name = 0 then
-    if highlight_locations loc none then () else begin
-      prerr_string "Characters ";
-      prerr_int loc.loc_start; prerr_string "-";
-      prerr_int loc.loc_end; prerr_string ":";
-      prerr_newline()
-    end
+    if highlight_locations loc none then () else
+      fprintf ppf "Characters %i-%i:@." loc.loc_start loc.loc_end
   else begin
     let (filename, linenum, linebeg) =
             Linenum.for_position !input_name loc.loc_start in
-    prerr_string msg_file; prerr_string filename;
-    prerr_string msg_line; prerr_int linenum;
-    prerr_string msg_chars; prerr_int (loc.loc_start - linebeg);
-    prerr_string msg_to; prerr_int (loc.loc_end - linebeg);
-    prerr_string msg_colon;
-    prerr_newline()
+    fprintf ppf "%s%s%s%i" msg_file filename msg_line linenum;
+    fprintf ppf "%s%i" msg_chars (loc.loc_start - linebeg);
+    fprintf ppf "%s%i%s@.%s"
+     msg_to (loc.loc_end - linebeg) msg_colon msg_head;
   end
 
-let print_warning loc w =
+let print_warning loc ppf w =
  if Warnings.is_active w then begin
-  print loc;
-  prerr_string warn_head;
-  prerr_string "Warning: "; prerr_string (Warnings.message w); prerr_newline();
-  incr num_loc_lines
+  fprintf ppf "%aWarning: %s@." print loc (Warnings.message w);
+  incr num_loc_lines;
  end
 ;;
 
+let prerr_warning loc w = print_warning loc err_formatter w;;
+
 let echo_eof () =
-  prerr_newline ();
+  print_newline ();
   incr num_loc_lines

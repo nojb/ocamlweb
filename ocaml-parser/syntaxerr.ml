@@ -23,28 +23,19 @@ type error =
 exception Error of error
 exception Escape_error
 
-let report_error = function
-    Unclosed(opening_loc, opening, closing_loc, closing) ->
+let report_error ppf = function
+  | Unclosed(opening_loc, opening, closing_loc, closing) ->
       if String.length !Location.input_name = 0
       && Location.highlight_locations opening_loc closing_loc
-      then begin
-        print_string "Syntax error: '";
-        print_string closing;
-        print_string "' expected, the highlighted '";
-        print_string opening;
-        print_string "' might be unmatched"
-      end else begin
-        Location.print closing_loc;
-        print_string "Syntax error: '";
-        print_string closing;
-        print_string "' expected"; force_newline();
-        Location.print opening_loc;
-        print_string "This '";
-        print_string opening;
-        print_string "' might be unmatched"
+      then fprintf ppf "Syntax error: '%s' expected, \
+                   the highlighted '%s' might be unmatched" closing opening
+      else begin
+        fprintf ppf "%aSyntax error: '%s' expected@."
+          Location.print closing_loc closing;
+        fprintf ppf "%aThis '%s' might be unmatched"
+          Location.print opening_loc opening 
       end
   | Other loc ->
-      Location.print loc;
-      print_string "Syntax error"
+      fprintf ppf "%aSyntax error" Location.print loc
 
 

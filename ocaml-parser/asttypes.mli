@@ -20,7 +20,7 @@ type constant =
   | Const_string of string
   | Const_float of string
 
-type rec_flag = Nonrecursive | Recursive
+type rec_flag = Nonrecursive | Recursive | Default
 
 type direction_flag = Upto | Downto
 
@@ -29,3 +29,5 @@ type private_flag = Private | Public
 type mutable_flag = Immutable | Mutable
 
 type virtual_flag = Virtual | Concrete
+
+type label = string

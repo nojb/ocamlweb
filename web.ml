@@ -230,6 +230,7 @@ let list_in_table id t =
 let entry_type_name = function
   | Value | Constructor -> ""
   | Field      -> "(field)"
+  | Label      -> "(label)"
   | Type       -> "(type)"
   | Exception  -> "(exn)"
   | Module     -> "(module)"

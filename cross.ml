@@ -27,9 +27,8 @@ open Parsetree
 (*i*)
 
 (*s Cross references inside Caml files are kept in the following two 
-   global tables, which keep the places where things are defined and
-   used, to produce the final indexes.
- *)
+    global tables, which keep the places where things are defined and
+    used, to produce the final indexes. *)
 
 type where = { w_filename : string; w_loc : int }
 	       
@@ -39,6 +38,7 @@ type entry_type =
   | Value
   | Constructor
   | Field
+  | Label
   | Type
   | Exception
   | Module
@@ -145,6 +145,8 @@ let ids_of_a_pattern p =
     | Ppat_array pl -> List.iter pattern pl
     | Ppat_or (p1,p2) -> pattern p1; pattern p2
     | Ppat_constraint (p,_) -> pattern p
+    | Ppat_variant (_,po) -> option_iter pattern po
+    | Ppat_type _ -> ()
   and pattern p = 
     pattern_d p.ppat_desc
   in
@@ -185,19 +187,22 @@ let rec tr_core_type t =
 and tr_core_type_desc loc = function
   | Ptyp_any | Ptyp_var _ -> 
       ()
-  | Ptyp_arrow (t1,t2) ->
-      tr_core_type t1; tr_core_type t2
+  | Ptyp_arrow (l,t1,t2) ->
+      add_def loc Label l; tr_core_type t1; tr_core_type t2
   | Ptyp_tuple tl ->
       List.iter tr_core_type tl
   | Ptyp_constr (q,tl) ->
       add_uses_q loc Type q; List.iter tr_core_type tl
   | Ptyp_object l ->
       List.iter tr_core_field_type l
-  | Ptyp_class (id,l) ->
+  | Ptyp_class (id,l,ll) ->
       add_uses_q loc Class id;
+      List.iter (add_def loc Label) ll;
       List.iter tr_core_type l
   | Ptyp_alias (ct,_) -> 
       tr_core_type ct
+  | Ptyp_variant (l,_,_) ->
+      List.iter (fun (_,_,ctl) -> List.iter tr_core_type ctl) l
 
 and tr_core_field_type ft =
   tr_core_field_desc ft.pfield_loc ft.pfield_desc
@@ -230,8 +235,9 @@ let rec tr_expression e =
 and tr_expression_desc loc = function
   | Pexp_ident q -> 
       add_uses_q loc Value q
-  | Pexp_apply (e,el) ->
-      tr_expression e; List.iter tr_expression el
+  | Pexp_apply (e,lel) ->
+      tr_expression e; 
+      List.iter (fun (l,e) -> add_uses loc Label l; tr_expression e) lel
   | Pexp_ifthenelse (e1,e2,e3) -> 
       tr_expression e1; tr_expression e2; option_iter tr_expression e3
   | Pexp_sequence (e1,e2) ->
@@ -243,7 +249,9 @@ and tr_expression_desc loc = function
   | Pexp_construct (q,e,_) -> 
       add_uses_q loc Constructor q;
       option_iter tr_expression e
-  | Pexp_function pel -> 
+  | Pexp_function (l,eo,pel) -> 
+      add_def loc Label l;
+      option_iter tr_expression eo;
       List.iter (bind_pattern tr_expression) pel
   | Pexp_match (e,pel) -> 
       tr_expression e; List.iter (bind_pattern tr_expression) pel
@@ -282,6 +290,8 @@ and tr_expression_desc loc = function
       add_uses loc Value id; tr_expression e
   | Pexp_override l ->
       iter_fst (add_uses loc Method) l; iter_snd tr_expression l
+  | Pexp_variant (_,eo) ->
+      option_iter tr_expression eo
 
 (*s Value descriptions. *)
 
@@ -315,7 +325,8 @@ and tr_class_type_desc loc = function
       List.iter tr_core_type l
   | Pcty_signature cs ->
       tr_class_signature cs
-  | Pcty_fun (co,cl) ->
+  | Pcty_fun (l,co,cl) ->
+      add_def loc Label l;
       tr_core_type co;
       tr_class_type cl
 
@@ -353,11 +364,13 @@ and tr_class_expr_desc loc = function
       List.iter tr_core_type l
   | Pcl_structure cs -> 
       tr_class_structure cs
-  | Pcl_fun (p,ce) ->
+  | Pcl_fun (l,eo,p,ce) ->
+      add_def loc Label l;
+      option_iter tr_expression eo;
       bind_variables (ids_of_a_pattern p) tr_class_expr ce
   | Pcl_apply (ce,l) ->
       tr_class_expr ce;
-      List.iter tr_expression l
+      List.iter (fun (l,e) -> add_uses loc Label l; tr_expression e) l
   | Pcl_let (recf,pel,ce) -> 
       let pl = List.map fst pel in
       if recf = Recursive then 
@@ -497,7 +510,9 @@ and tr_structure_item_desc loc = function
       List.iter tr_class_declaration l
   | Pstr_class_type l -> 
       List.iter tr_class_type_declaration l
-
+  | Pstr_exn_rebind (id,q) ->
+      add_def loc Exception id;
+      add_uses_q loc Exception q
 
 (*s Given all that collecting functions, we can now define two functions
     [cross_implem] and [cross_interf] which respectively compute the 

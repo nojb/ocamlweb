@@ -29,6 +29,7 @@ type entry_type =
   | Value
   | Constructor
   | Field
+  | Label
   | Type
   | Exception
   | Module

@@ -25,12 +25,13 @@ type core_type =
 and core_type_desc = 
     Ptyp_any
   | Ptyp_var of string
-  | Ptyp_arrow of core_type * core_type
+  | Ptyp_arrow of label * core_type * core_type
   | Ptyp_tuple of core_type list
   | Ptyp_constr of Longident.t * core_type list
   | Ptyp_object of core_field_type list
-  | Ptyp_class of Longident.t * core_type list
+  | Ptyp_class of Longident.t * core_type list * label list
   | Ptyp_alias of core_type * string
+  | Ptyp_variant of (label * bool * core_type list) list * bool * label list
 
 and core_field_type =
   { pfield_desc: core_field_desc;
@@ -62,10 +63,12 @@ and pattern_desc =
   | Ppat_constant of constant
   | Ppat_tuple of pattern list
   | Ppat_construct of Longident.t * pattern option * bool
+  | Ppat_variant of label * pattern option
   | Ppat_record of (Longident.t * pattern) list
   | Ppat_array of pattern list
   | Ppat_or of pattern * pattern
   | Ppat_constraint of pattern * core_type
+  | Ppat_type of Longident.t
 
 type expression =
   { pexp_desc: expression_desc;
@@ -75,12 +78,13 @@ and expression_desc =
     Pexp_ident of Longident.t
   | Pexp_constant of constant
   | Pexp_let of rec_flag * (pattern * expression) list * expression
-  | Pexp_function of (pattern * expression) list
-  | Pexp_apply of expression * expression list
+  | Pexp_function of label * expression option * (pattern * expression) list
+  | Pexp_apply of expression * (label * expression) list
   | Pexp_match of expression * (pattern * expression) list
   | Pexp_try of expression * (pattern * expression) list
   | Pexp_tuple of expression list
   | Pexp_construct of Longident.t * expression option * bool
+  | Pexp_variant of label * expression option
   | Pexp_record of (Longident.t * expression) list * expression option
   | Pexp_field of expression * Longident.t
   | Pexp_setfield of expression * Longident.t * expression
@@ -128,7 +132,7 @@ and class_type =
 and class_type_desc =
     Pcty_constr of Longident.t * core_type list
   | Pcty_signature of class_signature
-  | Pcty_fun of core_type * class_type
+  | Pcty_fun of label * core_type * class_type
 
 and class_signature = core_type * class_type_field list
 
@@ -152,8 +156,8 @@ and class_expr =
 and class_expr_desc =
     Pcl_constr of Longident.t * core_type list
   | Pcl_structure of class_structure
-  | Pcl_fun of pattern * class_expr
-  | Pcl_apply of class_expr * expression list
+  | Pcl_fun of label * expression option * pattern * class_expr
+  | Pcl_apply of class_expr * (label * expression) list
   | Pcl_let of rec_flag * (pattern * expression) list * class_expr
   | Pcl_constraint of class_expr * class_type
 
@@ -232,6 +236,7 @@ and structure_item_desc =
   | Pstr_primitive of string * value_description
   | Pstr_type of (string * type_declaration) list
   | Pstr_exception of string * exception_declaration
+  | Pstr_exn_rebind of string * Longident.t
   | Pstr_module of string * module_expr
   | Pstr_modtype of string * module_type
   | Pstr_open of Longident.t
@@ -250,3 +255,4 @@ and directive_argument =
   | Pdir_string of string
   | Pdir_int of int
   | Pdir_ident of Longident.t
+  | Pdir_bool of bool

@@ -17,12 +17,15 @@
 val token: Lexing.lexbuf -> Parser.token
 
 type error =
-  | Illegal_character
+  | Illegal_character of char
   | Unterminated_comment
   | Unterminated_string
   | Unterminated_string_in_comment
+  | Keyword_as_label of string
 ;;
 
 exception Error of error * int * int
 
-val report_error: error -> unit
+open Format
+
+val report_error: formatter -> error -> unit
