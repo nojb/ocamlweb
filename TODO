@@ -80,7 +80,7 @@ Document LaTeX
  2. style myheadings avec hauts de pages mentionnant la section (en
     mode web, bien sur)
 
- 3. indexer les entrees de l'index lorsqu'il y a plusieurs types pour
+ 3. indenter les entrees de l'index lorsqu'il y a plusieurs types pour
     un meme identificateur
 
  4. Cesures. Les identificateurs ne subissent pas de cesures, car
@@ -109,8 +109,6 @@ Document LaTeX
 
     val betared : lambda -> lambda;;
 
-
-
     Actuellement, utiliser des crochets [ ... ] ne marche pas car le
     contenu n'est plus formaté en respectant les passages a la
     ligne. La solution temporaire que j'ai utilisée est verbatim, mais
@@ -121,7 +119,12 @@ Document LaTeX
  7. \leqslant et \geqslant pour <= et >= respectivement.
     pbm: il faut \usepackage{amssymb}. ca pose pbm ?
 
-    
+ 8.  option pour ajouter un \usepackage
+ 8a. option pour changer de documentclass
+
+    (Fabien Fleutot <Fabien.Fleutot@inria.fr>)
+
+
 Documentation ocamlweb
 ======================
 
