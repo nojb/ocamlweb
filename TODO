@@ -1,3 +1,10 @@
+(Dis donc emacs, ceci est du -*-text-*- !)
+
+                    Liste des choses à faire
+		    ========================
+
+$Id$
+
 
 Parsing fichiers
 ================
@@ -49,6 +56,15 @@ Document LaTeX
 
  3. Index des modules
 
+ 4. « rule » est composé comme un mot-clé à cause des fichiers LEX,
+    mais ce n'est pas correct ailleurs.	idem pour « parse »
+
+ 5. Les espaces verticaux entre paragraphes sont pas terriblement au
+    point, surtout avec hevea. Il faudrait revoir l'utilisation de
+    \ocwnl et \medskip. Peut-etre remplacer \medskip par une macro
+    customisable \ocwnewpar. Par exemple, mettre un \medskip avant un
+    \ocwinterface n'est pas une bonne idée si \ocwinterface est un
+    \section.
 
 Documentation ocamlweb
 ======================
