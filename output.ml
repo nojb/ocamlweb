@@ -323,7 +323,7 @@ let intervals l =
     identifier is defined) in bold face.
  *)
 
-let output_sec_ref (f,n) = output_string (sprintf "\\ref{%s:sec:%d}" f n)
+let output_sec_ref (f,n) = output_string (sprintf "\\ref{%s:%d}" f n)
 
 let output_elem = function
   | Single (f,n) -> 

@@ -87,28 +87,43 @@ let index_file = function
 let build_index l = List.iter index_file l
 
 
-(*s The sections table. *)
+(*s The locations table. *)
 
-module Intmap = Map.Make(struct type t = int let compare = compare end)
+let sec_locations = ref Idmap.empty
+let code_locations = ref Idmap.empty
 
-let section_table = ref Idmap.empty
-
-let code_table = ref Idmap.empty
-
-let add_in_table table file loc n =
+let add_file_loc table file loc =
   let l = try Idmap.find file !table with Not_found -> [] in
-  table := Idmap.add file ((loc,n)::l) !table
+  table := Idmap.add file (loc::l) !table
 
-let add_section = add_in_table section_table
+let add_par_loc f = function
+  | Code (l,_) -> add_file_loc code_locations f l
+  | Documentation _ -> ()
 
-let add_code = add_in_table code_table
+let add_sec_loc f s = 
+  add_file_loc sec_locations f s.sec_beg;
+  List.iter (add_par_loc f) s.sec_contents
+
+let add_intf_loc it =
+  let f = Filename.basename it.interf_file in
+  List.iter (add_sec_loc f) it.interf_contents
+
+let add_impl_loc im =
+  let f = Filename.basename im.implem_file in
+  List.iter (add_sec_loc f) im.implem_contents;
+  match im.implem_interf with None -> () | Some i -> add_intf_loc i
+
+let locations_for_a_file = function
+  | Implem i -> add_impl_loc i
+  | Interf i -> add_intf_loc i
+  | Other _ -> ()
 
 let find_where w =
   let rec lookup = function
       [] -> raise Not_found
-    | (n,s)::r -> if w.w_loc >= n then s else lookup r
+    | n::r -> if w.w_loc >= n then n else lookup r
   in
-  let table = if !web then !section_table else !code_table in
+  let table = if !web then !sec_locations else !code_locations in
   lookup (Idmap.find w.w_filename table)
 
 
@@ -143,11 +158,8 @@ let rec uniquize = function
   | [] | [_] as l -> l
   | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
 
-let make_code_label_name (f,n) =
-  (Filename.basename f) ^ ":code:" ^ (string_of_int n)
-
-let make_sec_label_name (f,n) =
-  (Filename.basename f) ^ ":sec:" ^ (string_of_int n)
+let make_label_name (f,n) =
+  (Filename.basename f) ^ ":" ^ (string_of_int n)
 
 let print_one_entry s =
   let list_in_table t =
@@ -165,8 +177,8 @@ let print_one_entry s =
       output_index_entry s def use
     else 
       output_raw_index_entry s 
-	(List.map make_code_label_name def) 
-	(List.map make_code_label_name use) 
+	(List.map make_label_name def) 
+	(List.map make_label_name use) 
 
 let print_index () =
   begin_index ();
@@ -176,28 +188,16 @@ let print_index () =
 
 (*s Production of the \LaTeX\ document. *)
 
-let sec_number = ref 0
-
-let code_number = ref 0
-
 let pretty_print_paragraph f = function
   | Documentation s -> 
       pretty_print_doc s
   | Code (l,s) ->
-      if not !web then begin 
-	incr code_number;
-	add_code f l !code_number;
-	output_label (make_code_label_name (f,!code_number))
-      end;
+      output_label (make_label_name (f,l));
       pretty_print_code s
 
 let pretty_print_section f s = 
-  if !web then begin
-    incr sec_number;
-    add_section f s.sec_beg !sec_number;
-    begin_section ();
-    output_label (make_sec_label_name (f,!sec_number))
-  end;
+  if !web then begin_section ();
+  output_label (make_label_name (f,s.sec_beg));
   List.iter (pretty_print_paragraph f) s.sec_contents
     
 let pretty_print_implem imp =
@@ -230,8 +230,8 @@ let pretty_print_file = function
  *)
 
 let produce_document l =
+  List.iter locations_for_a_file l;
   build_index l;
-  sec_number := 0;
   latex_header !latex_options;
   List.iter pretty_print_file l;
   if !index then print_index ();
