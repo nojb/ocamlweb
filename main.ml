@@ -26,14 +26,15 @@ let usage () =
   prerr_endline "Usage: ocamlweb <options and files>";
   prerr_endline "  -o <file>      write output in file <file>";
   prerr_endline "  --no-web       no WEB style";
-  prerr_endline "  --header       do not skip the headers";
+  prerr_endline "  --header       do not skip the headers of Caml file";
   prerr_endline "  --no-doc       suppress LaTeX header and trailer";
+  prerr_endline "  --no-index     do not output the index";
   prerr_endline "  --extern-defs  keep external definitions in the index";
   prerr_endline "  --impl <file>  consider <file> as a .ml file";
   prerr_endline "  --intf <file>  consider <file> as a .mli file";
   prerr_endline "  --tex <file>   consider <file> as a .tex file";
   prerr_endline "  --latex-option <opt>";
-  prerr_endline "                 pass an option to the LaTeX package ocamlweb";
+  prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
   exit 1
 
 let copying () =
@@ -109,6 +110,8 @@ let parse () =
 	web := true; parse_rec rem
     | ("-nodoc" | "--nodoc" | "--no-doc") :: rem ->
 	set_no_doc true; parse_rec rem
+    | ("-noindex" | "--noindex" | "--no-index") :: rem ->
+	index := false; parse_rec rem
     | ("-o" | "--output") :: f :: rem ->
 	set_output_to_file f; parse_rec rem
     | ("-o" | "--output") :: [] -> 

@@ -52,6 +52,8 @@ type file =
 
 (*s Options of the engine. *)
 
+let index = ref true
+
 let web = ref true
 
 let extern_defs = ref false
@@ -227,7 +229,7 @@ let produce_document l =
   sec_number := 0;
   latex_header !latex_options;
   List.iter pretty_print_file l;
-  print_index ();
+  if !index then print_index ();
   latex_trailer ();
   close_output ()
 

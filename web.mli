@@ -50,6 +50,7 @@ type file =
 
 val extern_defs : bool ref
 val add_latex_option : string -> unit
+val index : bool ref
 val web : bool ref
 
 val produce_document : file list -> unit
