@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o a comment in the LaTeX file now indicates that it is a generated
+    file and gives the command line
+
 version 0.8, 02/06/2000
 ======================= 
   o configuration with autoconf (thanks to Luc MAZARDO)

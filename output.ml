@@ -78,7 +78,16 @@ let latex_header opt =
     output_string "\\usepackage[T1]{fontenc}\n";
     output_string "\\usepackage{fullpage}\n";
     output_string "\\begin{document}\n"
-  end
+  end;
+  output_string 
+    "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+  output_string 
+    "%% This file has been automatically generated with the command\n";
+  output_string "%% ";
+  Array.iter (fun s -> output_string s; output_string " ") Sys.argv;
+  output_string "\n";
+  output_string 
+    "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
 
 let latex_trailer () =
   if not !no_preamble then begin
