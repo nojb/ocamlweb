@@ -67,7 +67,7 @@
   \renewcommand{\@evenfoot}{}%
   \renewcommand{\@oddfoot}{\@evenfoot}}
 
-% needed to mak hypertex work
+% needed to make hypertex work
 \AtBeginDocument{\let\Hy@tempa\relax}
 
 %END LATEX
@@ -121,7 +121,7 @@
 
 % newline, and indentation 
 %BEGIN LATEX
-\newcommand{\ocweol}{\setlength\parskip{0pt}\par\nopagebreak}
+\newcommand{\ocweol}{\setlength\parskip{0pt}\par\penalty5000}
 \newcommand{\ocwindent}[1]{\noindent\kern#1}
 %END LATEX
 %HEVEA\newcommand{\ocweol}{\begin{rawhtml}<BR>\end{rawhtml}}
