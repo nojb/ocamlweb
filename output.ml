@@ -63,4 +63,9 @@ let output_latex_id s =
   done
 
 let output_ident s =
-  output_string "\\ocwid{"; output_latex_id s; output_string "}"
+  if String.length s = 1 then
+    output_latex_id s
+  else begin
+    output_string "\\ocwid{"; output_latex_id s; output_string "}"
+  end
+

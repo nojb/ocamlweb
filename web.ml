@@ -61,7 +61,11 @@ let pretty_print_implem imp =
   let pretty_print_section s = 
     incr sec_number;
     output_string (sprintf "\\ocwsection{%d}\n" !sec_number);
-    List.iter pretty_print_paragraph s
+    List.iter 
+      (function p -> 
+	 pretty_print_paragraph p;
+	 output_string "\\medskip")
+      s
   in
   List.iter pretty_print_section imp.implem_contents
 

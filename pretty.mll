@@ -56,17 +56,37 @@
     if n <= !current_indent then current_indent := n
 
   let first_line = ref true
+
+  let math_mode = ref false
 		     
   let reset_pretty () =
-    first_line := true
+    first_line := true;
+    math_mode := false
+
+  let enter_math () =
+    if not !math_mode then begin
+      output_string " $";
+      math_mode := true
+    end
+
+  let leave_math () =
+    if !math_mode then begin
+      output_string "$ ";
+      math_mode := false
+    end
 
   let indentation n =
+    leave_math ();
     if not !first_line then
-      let kern = 1.5 *. (float n) in
-      output_string (sprintf "\\ocwnl{%2.2fem}\n" kern)
+      let space = 1.5 *. (float n) in
+      output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
     else
       first_line := false
 	
+  let keyword s = leave_math (); output_keyword s 
+
+  let ident s = enter_math (); output_ident s
+
 }
 
 let space = [' ' '\t']
@@ -81,14 +101,18 @@ rule pr_code = parse
 	     indentation n;
 	     pr_code_inside lexbuf;
 	     pr_code lexbuf }
-  | eof    { () }
+  | eof    { leave_math () }
    
 (* ...and inside the line *)
 and pr_code_inside = parse
   | '\n' { () }
   | lowercase identchar*
          { let s = Lexing.lexeme lexbuf in
-	   if is_keyword s then output_keyword s else output_ident s;
+	   if is_keyword s then keyword s else ident s;
+	   pr_code_inside lexbuf }
+  | '^'  { output_string "\\^"; pr_code_inside lexbuf }
+  | '*'  { enter_math (); output_string "\\times "; pr_code_inside lexbuf }
+  | ' '  { if !math_mode then output_string " ~ " else output_char ' ';
 	   pr_code_inside lexbuf }
   | _    { output_char (first_char lexbuf); pr_code_inside lexbuf }
   | eof  { () }
