@@ -43,6 +43,7 @@ let usage () =
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
   prerr_endline "  --files <file> read file names to process in <file>";
   prerr_endline "  --quiet        quiet mode";
+  prerr_endline "  --no-greek     disable use of greek letters for type variables";
   exit 1
 
 
@@ -164,6 +165,9 @@ let parse () =
 	extern_defs := true; parse_rec rem
     | ("-q" | "-quiet" | "--quiet") :: rem ->
 	quiet := true; parse_rec rem
+
+    | ("--nogreek" | "--no-greek") :: rem ->
+	use_greek_letters := true; parse_rec rem
 
     | ("-h" | "-help" | "-?" | "--help") :: rem ->
 	usage ()

@@ -26,7 +26,10 @@
 val set_output_to_file : string -> unit
 val close_output : unit -> unit
 
+(* These mutable flags controls the output. If [quiet], no extra output is done on standard output, default is [false]. If [use_greek_letters] is true, greek letters are used to display (some of) the single-letter type variables, default is [true]. *)
+
 val quiet : bool ref
+val use_greek_letters : bool ref
 
 (* Then we introduce some low level output functions, for characters 
    and strings.
@@ -64,7 +67,9 @@ val leave_math : unit -> unit
     [output_escaped_char] pretty-prints the reserved char of \LaTeX, 
     like \verb!&! or \verb!$!.
     [output_latex_special] pretty-prints some mathematical symbols,
-    like $\rightarrow$ for \texttt{->}. *)
+    like $\rightarrow$ for \texttt{->}. 
+    [output_type_variable s] pretty-prints type variables, in particular 
+    one-letter type variables are output as greek letters.  *)
 
 type char_type = Upper | Lower | Symbol
 val what_is_first_char : string -> char_type
@@ -73,7 +78,7 @@ val is_keyword : string -> bool
 val output_ident : string -> unit
 val output_escaped_char : char -> unit
 val output_latex_special : string -> unit
-val output_greek_letter : char -> unit
+val output_type_variable : string -> unit
 
 (* Comments inside code are opened and closed respectively by 
    [output_bc] and [output_ec]. *)

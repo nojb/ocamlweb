@@ -234,6 +234,20 @@ document.
   given on the command line. Useful for program sources splitted in
   several directories. See FAQ.
   
+\item[\texttt{--no-greek}] ~\par
+  
+  Disable use of greek letters for single-letter type variables. For
+  example, the declaration of \verb|List.length| is displayed as
+  \begin{quote}
+    \textit{List.length} : $\alpha$ \textit{list} $\rightarrow$
+    $\alpha$
+  \end{quote}
+  but with this option, it will be displayed as
+  \begin{quote}
+    \textit{List.length} : \textit{'a} \textit{list} $\rightarrow$
+    \textit{'a}
+  \end{quote}
+
 \item[\texttt{-h}, \texttt{--help}] ~\par
 
   Gives a short summary of the options and exit.
@@ -255,9 +269,9 @@ into your own preamble the command
 \begin{quote}
   \verb|\usepackage[|\textit{options}\verb|]{ocamlweb}|
 \end{quote}
-
 Alternatively, you may also pass these options with the
 \verb|--latex-options| option of the \verb|ocamlweb| command.
+
 The options that you may pass to the package are the following:
 
 \begin{description}
@@ -278,7 +292,7 @@ The options that you may pass to the package are the following:
 \item[\texttt{bypages}] ~
   
   When sectioning is done by \LaTeX{} sectioning commands, this option
-  ask that the index must refer to page numbers instead of section
+  asks that the index must refer to page numbers instead of section
   numbers. In WEB sectioning style, this option has no effect.
 
 \end{description}
@@ -288,13 +302,15 @@ redefining some macros:
 \begin{description}
 
 \item[\texttt{ocwkw}, \texttt{ocwbt}, \texttt{ocwupperid},
-  \texttt{ocwlowerid}] ~ 
+  \texttt{ocwlowerid}, \texttt{ocwtv}] ~ 
   
-  The macros for typesetting keywords, base types (such as \verb|int|,
-  \verb|string|, etc.), uppercase identifiers (type constructors,
-  exception names, module names) and lowercase identifiers
-  respectively. Defaults are sans-serif for keywords and italic for
-  all others.
+  The one-argument macros for typesetting keywords, base types (such
+  as \verb|int|, \verb|string|, etc.), uppercase identifiers (type
+  constructors, exception names, module names), lowercase identifiers
+  and type variables respectively. Defaults are sans-serif for
+  keywords and italic for all others. Some of the single-letter type
+  variables are displayed by default as greek letters, but this
+  behaviour can be selected by the \verb|--no-greek| option.
 
   For example, if you would like a slanted font for base types, you
   may insert  
@@ -306,10 +322,11 @@ redefining some macros:
 
 \item[\texttt{ocwinterface}, \texttt{ocwmodule},
   \texttt{ocwinterfacepart}, \texttt{ocwcodepart}] ~ 
-
-  Macros for typesetting the title of a \verb|.mli| file, the title of
-  a \verb|.ml| file, the interface part of a \verb|.ml| file and the
-  code part of a \verb|.ml| file, respectively. Defaults are  is
+  
+  One-argument macros for typesetting the title of a \verb|.mli| file,
+  the title of a \verb|.ml| file, the interface part of a \verb|.ml|
+  file and the code part of a \verb|.ml| file, respectively. Defaults
+  are is
 \begin{verbatim}
 \newcommand{\ocwinterface}[1]{\section*{Interface for module #1}}
 \newcommand{\ocwmodule}[1]{\section*{Module #1}}

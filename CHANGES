@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o more single-letter type variables output as greek letters. other
+    type variables output as \ocwtv{id} which is customizable. An
+    additional option --no-greek to ocamlweb disables to use of greek
+    letters.  
   o option -q, --quiet
 
 version 0.3, 17/06/99 (first official release)

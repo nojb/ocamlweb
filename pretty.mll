@@ -98,8 +98,9 @@ rule pr_code = parse
 
 and pr_code_inside = parse
   | '\n' { end_line () }
-  | "'" ('a'|'b'|'c'|'d')
-         { output_greek_letter (lexeme_char lexbuf 1); 
+  | "'" identifier
+         { let id = lexeme lexbuf in
+	   output_type_variable (String.sub id 1 (pred (String.length id))); 
 	   pr_code_inside lexbuf }
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }

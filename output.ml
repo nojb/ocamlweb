@@ -244,12 +244,32 @@ let output_latex_special = function
   | "[]" -> output_string "[\\,]"
   | s    -> output_string s
 
-let output_greek_letter = function
-  | 'a' -> enter_math (); output_string "\\alpha{}"
-  | 'b' -> enter_math (); output_string "\\beta{}"
-  | 'c' -> enter_math (); output_string "\\gamma{}"
-  | 'd' -> enter_math (); output_string "\\delta{}"
-  | c   -> output_char '\''; output_char c
+let use_greek_letters = ref true
+
+let output_tv id = 
+  output_string "\\ocwtv{"; output_latex_id id; output_char '}'
+
+let output_greek l =
+  enter_math (); output_char '\\'; output_string l; output_string "{}"
+
+let output_type_variable id = 
+  if !use_greek_letters then output_tv id
+  else
+    match id with 
+      | "a" -> output_greek "alpha"
+      | "b" -> output_greek "beta"
+      | "c" -> output_greek "gamma"
+      | "d" -> output_greek "delta"
+      | "e" -> output_greek "varepsilon"
+      | "i" -> output_greek "iota"
+      | "k" -> output_greek "kappa"
+      | "l" -> output_greek "lambda"
+      | "m" -> output_greek "mu"
+      | "n" -> output_greek "nu"
+      | "r" -> output_greek "rho"
+      | "s" -> output_greek "sigma"
+      | "t" -> output_greek "tau"
+      | id   -> output_string "\\ocwtv{"; output_latex_id id; output_char '}'
 
 
 (*s \textbf{Comments.} *)
