@@ -170,39 +170,46 @@ and pr_code_inside = parse
            end else 
 	     output_symbol "+";
 	   pr_code_inside lexbuf } 
-  | "/*" { if is_yacc_file () && !braces_depth = 0 then 
-	     in_C_like_comment := true
-	   else begin
-             output_symbol "/";
-             output_string "\\star{}"
-           end;
-	   pr_comment lexbuf; 
-	   pr_code_inside lexbuf }	
-  | '\n' { end_line () }
+  | "/*"
+      { if is_yacc_file () && !braces_depth = 0 then 
+	  in_C_like_comment := true
+	else begin
+          output_symbol "/";
+          output_string "\\star{}"
+        end;
+	    pr_comment lexbuf; 
+	    pr_code_inside lexbuf 
+      }	
+  | '\n' 
+      { end_line () }
   | space+
-         { output_char '~'; pr_code_inside lexbuf }
+      { output_char '~'; pr_code_inside lexbuf }
   | character
-         { output_verbatim (lexeme lexbuf); pr_code_inside lexbuf }
+      { output_verbatim (lexeme lexbuf); pr_code_inside lexbuf }
   | "'" identifier
-         { let id = lexeme lexbuf in
-	   output_type_variable (String.sub id 1 (pred (String.length id))); 
-	   pr_code_inside lexbuf }
-  | "(*" { output_bc (); comment_depth := 1;
-	   pr_comment lexbuf; pr_code_inside lexbuf }
-  | "(*r" 
-         { output_hfill (); output_bc (); comment_depth := 1;
-	   pr_comment lexbuf; pr_code_inside lexbuf }
-  | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
+      { let id = lexeme lexbuf in
+	output_type_variable (String.sub id 1 (pred (String.length id))); 
+	pr_code_inside lexbuf }
+  | "(*"   (*i comment for emacs font-lock mode i*) 
+      { output_bc (); comment_depth := 1;
+	pr_comment lexbuf; pr_code_inside lexbuf }
+  | "(*r" (*i comment for emacs font-lock mode i*) 
+      { output_hfill (); output_bc (); comment_depth := 1;
+	pr_comment lexbuf; pr_code_inside lexbuf }
+  | '"'  
+      { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
   | symbol_token
-         { output_symbol (lexeme lexbuf); pr_code_inside lexbuf }
+      { output_symbol (lexeme lexbuf); pr_code_inside lexbuf }
   | (identifier '.')* identifier
-         { output_ident (lexeme lexbuf); pr_code_inside lexbuf }
-  | eof  { end_line() }
+      { output_ident (lexeme lexbuf); pr_code_inside lexbuf }
+  | eof  
+      { end_line() }
   | decimal_literal | hex_literal | oct_literal | bin_literal
-         { output_integer (lexeme lexbuf); pr_code_inside lexbuf }
+      { output_integer (lexeme lexbuf); pr_code_inside lexbuf }
   | float_literal
-         { output_float (lexeme lexbuf); pr_code_inside lexbuf }
-  | _    { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
+      { output_float (lexeme lexbuf); pr_code_inside lexbuf }
+  | _ 
+      { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
 
 
 (*s Comments. *)
@@ -347,6 +354,14 @@ and pr_verbatim = parse
     pr_doc (Lexing.from_string s);
     end_doc_paragraph ()
 
+  let pretty_print_lex_code s = 
+    failwith "pretty_print_lex_code not implemented"
+
+  let pretty_print_yacc_code s = 
+    failwith "pretty_print_yacc_code not implemented"
+
 (*i*)
 }
 (*i*)
+
+

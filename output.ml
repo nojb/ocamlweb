@@ -166,7 +166,18 @@ let is_base_type =
     [ "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option";
       "float"; "ref" ]
 
+let is_lex_keyword = 
+  build_table
+    [ "rule"; "let"; "and"; "parse"; "eof"; ]
+ 
+let is_yacc_keyword =
+  build_table
+    [ "%token"; "%left"; "%right"; "%type"; "%start"; "%nonassoc"; "%prec"; "e
+rror"; ]
+    
+
 let is_keyword s = is_base_type s || is_caml_keyword s 
+
 
 let output_keyword s =
   if is_base_type s then 
@@ -176,6 +187,15 @@ let output_keyword s =
   output_string s;
   output_string "}"
 
+let output_lex_keyword s =
+  output_string "\\ocwlexkw{";
+  output_string s;
+  output_string "}"
+
+let output_yacc_keyword s =
+  output_string "\\ocwyacckw{";
+  output_string s;
+  output_string "}"
 
 (*s \textbf{Identifiers.}
     The function [output_raw_ident] prints an identifier,
@@ -259,7 +279,32 @@ let output_ident s =
     enter_math (); output_raw_ident s
   end
 
+let output_lex_ident s =
+  if is_lex_keyword s then 
+    begin
+      leave_math (); output_lex_keyword s
+    end 
+  else
+    begin
+      enter_math ();
+      output_string "\\ocwlexident{";  
+      output_latex_id (s);
+      output_string "}";
+    end
 
+let output_yacc_ident s =
+  if is_yacc_keyword s then 
+    begin
+      leave_math (); output_yacc_keyword s
+    end 
+  else
+    begin
+      enter_math ();
+      output_string "\\ocwyaccident{";  
+      output_latex_id (s);
+      output_string "}";
+    end
+    
 (*s \textbf{Symbols.}
     Some mathematical symbols are printed in a nice way, in order
     to get a more readable code.
@@ -357,6 +402,9 @@ let output_ec () = leave_math (); output_string "\\ocwec{}"
 
 let output_hfill () = leave_math (); output_string "\\hfill "
 
+let output_byc () = leave_math (); output_string "\\ocwbyc{}"
+
+let output_eyc () = leave_math (); output_string "\\ocweyc{}"
 
 (*s \textbf{Strings.} *)
 
@@ -378,16 +426,10 @@ let reset_output () =
 let begin_section () =
   output_string "\\ocwsection\n"
 
-let output_module s =
+let output_module module_name =
   if not !short then begin
     output_string "\\ocwmodule{";
-    let real_module_name =
-      if Filename.check_suffix s ".mll" || Filename.check_suffix s ".mly" then 
-	Filename.chop_extension s
-      else 
-	s
-    in 
-    output_latex_id real_module_name;
+    output_latex_id module_name;
     output_string "}\n"
   end
       
@@ -405,7 +447,11 @@ let begin_code_paragraph () =
   last_is_code := true
 
 let end_code_paragraph is_last_paragraph =
-  output_string (if is_last_paragraph then "\n" else "\\medskip\n\n")
+(*i  output_string (if is_last_paragraph then "\n" else "\\medskip\n\n") VERSI
+ON D'AVANT i*)
+  if is_last_paragraph 
+  then end_line()            (* Guillome Muller *)
+  else output_string "\\medskip\n\n"
 
 let begin_doc_paragraph is_first_paragraph =
   if not is_first_paragraph then
@@ -413,7 +459,7 @@ let begin_doc_paragraph is_first_paragraph =
   last_is_code := false
 
 let end_doc_paragraph () =
-  output_string "\n\n"
+  output_string "\n"
 
 
 (*s \textbf{Index.}

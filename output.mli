@@ -88,6 +88,13 @@ val output_symbol : string -> unit
 val output_type_variable : string -> unit
 val output_ascii_char : int -> unit
 
+(* [output_lex_ident] (resp. [output_yacc_ident]) outputs an
+   identifier as above but taking into account CAMLLEX keywords
+   (resp. CAMLYACC keywords) *) 
+
+val output_lex_ident : string -> unit
+val output_yacc_ident : string -> unit
+
 (*s Constants are typeset by the following functions. *)
 
 val output_integer : string -> unit
@@ -95,10 +102,14 @@ val output_float : string -> unit
 
 (*s Comments inside code are opened and closed respectively by
    [output_bc] and [output_ec]. The function [output_hfill] is called
-   before [output_bc] to justify a comment. *)
+   before [output_bc] to justify a comment. [output_byc] and
+   [output_eyc] are the same for CAMLYACC comments, that is
+   \verb|/*|\ldots\verb|*/|. *)
 
 val output_bc : unit -> unit
 val output_ec : unit -> unit
+val output_byc : unit -> unit
+val output_eyc : unit -> unit
 val output_hfill : unit -> unit
 
 (*s Strings inside code are opened and close respectively by

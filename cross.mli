@@ -35,6 +35,10 @@ type entry_type =
   | ModuleType
   | Class
   | Method
+  | LexParseRule       (*r CAMLLEX entry points *)
+  | RegExpr            (*r CAMLLEX regular expressions *)
+  | YaccNonTerminal    (*r CAMLYACC non-terminal symbols *)
+  | YaccTerminal       (*r CAMLYACC terminal symbols, i.e. tokens *)
 		    
 type index_entry = { e_name : string; e_type : entry_type }
 
@@ -51,3 +55,4 @@ val defined : Whereset.t Idmap.t ref
 
 val cross_implem : string -> string -> unit
 val cross_interf : string -> string -> unit
+ 

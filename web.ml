@@ -236,6 +236,10 @@ let entry_type_name = function
   | ModuleType -> "(sig)"
   | Class      -> "(class)"
   | Method     -> "(method)"
+  | LexParseRule -> "(camllex parsing rule)"
+  | RegExpr      -> "(camllex regexpr)"    
+  | YaccNonTerminal -> "(camlyacc non-terminal)"
+  | YaccTerminal    -> "(camlyacc token)"
 
 let print_one_entry id =
   let def = list_in_table id !defined
@@ -315,5 +319,7 @@ let produce_document l =
   if !index then print_index ();
   latex_trailer ();
   close_output ()
+
+
 
 

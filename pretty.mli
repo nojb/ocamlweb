@@ -23,3 +23,8 @@
 
 val pretty_print_code : bool -> string -> string -> unit
 val pretty_print_doc  : bool -> string -> unit
+
+(*s These two functions pretty-print CAMLLEX code and CAMLYACC code *)
+
+val pretty_print_lex_code : string -> string -> unit
+val pretty_print_yacc_code : string -> string -> unit
