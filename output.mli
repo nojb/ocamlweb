@@ -124,17 +124,18 @@ val end_code_paragraph : bool -> unit
 val begin_doc_paragraph : bool -> unit
 val end_doc_paragraph : unit -> unit
 
-(*s Index functions. [(output_index_entry f def use)] outputs an entry line
-    for function [f], where [def] is the list of sections where [f] is
-    introduced and [use] the list of sections where [f] is used. *)
+(*s Index functions. [(output_index_entry id t def use)] outputs an entry line
+    for identifier [id], with type [t], where [def] is the list of sections 
+    where [f] is introduced and [use] the list of sections where [f] is used.
+    If the type of the entry is [""], then it is omitted. *)
 
 type 'a elem = Single of 'a | Interval of 'a * 'a
 
 val begin_index : unit -> unit
 val output_index_entry : 
-  string -> string elem list -> string elem list -> unit
+  string -> string -> string elem list -> string elem list -> unit
 val output_raw_index_entry : 
-  string -> string list -> string list -> unit
+  string -> string -> string list -> string list -> unit
 val end_index : unit -> unit
 
 val output_label : string -> unit

@@ -25,7 +25,20 @@
    
 type where = { w_filename : string; w_loc : int }
 
-module Idmap : Map.S with type key = string
+type entry_type = 
+  | Value
+  | Constructor
+  | Field
+  | Type
+  | Exception
+  | Module
+  | ModuleType
+  | Class
+  | Method
+		    
+type index_entry = { e_name : string; e_type : entry_type }
+
+module Idmap : Map.S with type key = index_entry
 
 module Stringset : Set.S with type elt = string
 

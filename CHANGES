@@ -3,10 +3,11 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o index entries are now discriminated by their types (value,
+    constructor, type, module, etc.)
   o nicer quotes in identifiers
   o pretty-printing of constants (hex, oct and bin integers, floats)
   o option -s, --short (no titles for files)
-  o update of the documentation
   o pretty-printing for == and !=
   o pretty underscores in identifiers (by redefinition of \_) 
 

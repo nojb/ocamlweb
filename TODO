@@ -6,6 +6,23 @@ $Id$
                     Liste des choses à faire
 		    ========================
 
+Manuel
+======
+
+ 1. documenter truc pour citer du code :
+
+======================================================================
+(*s Voila un commentaire dans lequel je cite du code : *)
+(*i(*i*)
+
+    let f x = x + 1
+    let rec g x = if x = 0 then 1 else g (f (x-1))
+
+(*i*)i*)
+(* et voila c'est fait ! *)
+======================================================================
+
+   noter l'importance de la deuxieme ligne vide.
 
 Parsing fichiers
 ================
@@ -80,17 +97,15 @@ Web (cross)
 Document LaTeX
 ==============
 
- 1. Adequation avec le lexer ocaml
-    Par exemple, les constantes telles que 0x3FFF ne sont pas bien
-    affichees (le 0 est droit et x3FFF est affiche comme un identificateur)
-
-    1b. apostrophes dans les identificateurs
-        x' devrait etre imprimer comme $x'$ et non comme $x$'
+ 1. macros pour les symboles speciaux (incluant lettres grecques)
 
  2. style myheadings avec hauts de pages mentionnant la section (en
     mode web, bien sur)
 
  3. Index des modules
+
+    Plus generalement, indications dans l'index de la nature des
+    entrees (mais rien pour valeurs et constructeurs)
 
  5. Les espaces verticaux entre paragraphes sont pas terriblement au
     point, surtout avec hevea. Il faudrait revoir l'utilisation de

@@ -12,6 +12,17 @@ exception 'a AAA of 'a aatoto * 'b aatruc * aamachin
 type machin = { champ1 : int;
 		champ2 : string }
 
+let (C (x,y)) = z
+
+(*s Voila un commentaire dans lequel je cite du code : *)
+(*i(*i*)
+
+    let f x = x + 1
+    let rec g x = if x = 0 then 1 else g (f (x-1))
+
+(*i*)i*)
+(* et voila c'est fait ! *)
+
 let const = 0X4fff + 0O455 + 0B01010111001 + 1.5152E-4
 let autrec = 0xafaf125
 let f x = x land 0x4fffff

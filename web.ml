@@ -73,12 +73,14 @@ let build_index l = List.iter index_file l
 
 (*s The locations tables. \label{counters} *)
 
-let sec_locations = ref Idmap.empty
-let code_locations = ref Idmap.empty
+module Smap = Map.Make(struct type t = string let compare = compare end)
+
+let sec_locations = ref Smap.empty
+let code_locations = ref Smap.empty
 
 let add_file_loc table file loc =
-  let l = try Idmap.find file !table with Not_found -> [] in
-  table := Idmap.add file (loc::l) !table
+  let l = try Smap.find file !table with Not_found -> [] in
+  table := Smap.add file (loc::l) !table
 
 let add_par_loc =
   let par_counter = ref 0 in
@@ -109,7 +111,7 @@ let find_where w =
     | (l,n)::r -> if w.w_loc >= l then ((w.w_filename,l),n) else lookup r
   in
   let table = if !web then !sec_locations else !code_locations in
-  lookup (Idmap.find w.w_filename table)
+  lookup (Smap.find w.w_filename table)
 
 
 (*s Printing of the index. *)
@@ -148,14 +150,19 @@ let alpha_string s1 s2 =
     | _, Symbol -> false
     | _,_ -> norm_string s1 < norm_string s2
 
+let order_entry e1 e2 =
+  (alpha_string e1.e_name e2.e_name) || 
+  (e1.e_name = e2.e_name && e1.e_type < e2.e_type)
 
 (*s The following function collects all the index entries and sort them
     using [alpha_string], returning a list. *)
 
+module Idset = Set.Make(struct type t = index_entry let compare = compare end)
+
 let all_entries () =
-  let s = Idmap.fold (fun x _ s -> Stringset.add x s) !used Stringset.empty in
-  let s = Idmap.fold (fun x _ s -> Stringset.add x s) !defined s in
-  Sort.list alpha_string (Stringset.elements s)
+  let s = Idmap.fold (fun x _ s -> Idset.add x s) !used Idset.empty in
+  let s = Idmap.fold (fun x _ s -> Idset.add x s) !defined s in
+  Sort.list order_entry (Idset.elements s)
 
 
 (*s When we are in \LaTeX\ style, an index entry only consists in two lists
@@ -220,14 +227,26 @@ let list_in_table id t =
   with Not_found -> 
     []
 
+let entry_type_name = function
+  | Value | Constructor -> ""
+  | Field      -> "(f)"
+  | Type       -> "(t)"
+  | Exception  -> "(e)"
+  | Module     -> "(m)"
+  | ModuleType -> "(s)"
+  | Class      -> "(c)"
+  | Method     -> "(#)"
+
 let print_one_entry id =
   let def = list_in_table id !defined
   and use = list_in_table id !used in
+  let s = id.e_name in
+  let t = entry_type_name id.e_type in
   if !extern_defs || def <> [] then
     if !web then 
-      output_index_entry id (web_list def) (web_list use)
+      output_index_entry s t (web_list def) (web_list use)
     else 
-      output_raw_index_entry id (label_list def) (label_list use)
+      output_raw_index_entry s t (label_list def) (label_list use)
 
 
 (*s Then printing the index is just iterating [print_one_entry] on all the

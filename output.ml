@@ -452,12 +452,13 @@ let output_elem = function
 let output_bf_elem n = 
   output_string "\\textbf{"; output_elem n; output_string "}"
 
-let output_index_entry s def use =
+let output_index_entry s t def use =
   let sep () = output_string ", " in
   output_string "\\ocwwebindexentry{";
   enter_math ();
-  output_raw_ident s;
+  output_raw_ident_in_index s;
   leave_math ();
+  if t <> "" then output_string (" " ^ t);
   output_string "}{";
   print_list output_bf_elem sep def;
   output_string "}{";
@@ -473,13 +474,14 @@ let output_index_entry s def use =
     it is defined and used, respectively.
  *)
 
-let output_raw_index_entry s def use =
+let output_raw_index_entry s t def use =
   let sep () = output_string "," 
   and sep' () = output_string ", " in
   output_string "\\ocwrefindexentry{";
   enter_math ();
   output_raw_ident_in_index s;
   leave_math ();
+  if t <> "" then output_string (" " ^ t);
   output_string "}{";
   print_list output_string sep def;
   output_string "}{";

@@ -34,8 +34,21 @@ open Parsetree
 type where = { w_filename : string; w_loc : int }
 	       
 module Whereset = Set.Make(struct type t = where let compare = compare end)
+
+type entry_type = 
+  | Value
+  | Constructor
+  | Field
+  | Type
+  | Exception
+  | Module
+  | ModuleType
+  | Class
+  | Method
 		    
-module Idmap = Map.Make(struct type t = string let compare = compare end)
+type index_entry = { e_name : string; e_type : entry_type }
+
+module Idmap = Map.Make(struct type t = index_entry let compare = compare end)
 		 
 let defined = ref Idmap.empty
 let used = ref Idmap.empty
@@ -50,25 +63,24 @@ let add_global table k i =
     let s = Idmap.find k !table in
     table := Idmap.add k (Whereset.add i s) !table
   with Not_found ->
-    table := Idmap.add k (Whereset.add i Whereset.empty) !table
+    table := Idmap.add k (Whereset.singleton i) !table
       
 let current_file = ref ""
 
 let current_location loc = 
   { w_filename = !current_file; w_loc = loc.loc_start }
 
-let add_def loc s =
-  if String.length s > 1 then begin
-    add_global defined s (current_location loc)
-  end
+let add_def loc t s =
+  if String.length s > 1 then
+    let e = { e_name = s; e_type = t } in
+    add_global defined e (current_location loc)
 
 
 (*s Another table, [locals], keeps the bound variables, in order to
     distinguish them from global identifiers. Then the function [add_uses]
     registers that an identifier is used (in the table [used]), taking care 
     of the fact that it is not a bound variable (in the table [locals]).
-    [add_uses_q] iters [add_uses] on a qualified identifier.
- *)
+    [add_uses_q] iters [add_uses] on a qualified identifier. *)
       
 module Stringset = Set.Make(struct type t = string let compare = compare end)
 		     
@@ -79,20 +91,26 @@ let reset_cross () =
 
 let add_local s =
   locals := Stringset.add s !locals
-    
-let add_uses loc s =
-  if not (is_keyword s) 
-    && String.length s > 1 && not (Stringset.mem s !locals) then
-      add_global used s (current_location loc)
-	
-let add_uses_q loc q =
-  let rec add = function
-    | Lident s -> add_uses loc s
-    | Ldot (q,s) -> add q; add_uses loc s
-    | Lapply (q1,q2) -> add q1; add q2
-  in
-  add q
 
+let is_uppercase = function 'A'..'Z' -> true | _ -> false
+    
+let add_uses loc t s =
+  if String.length s > 1 && 
+     not (is_keyword s) && not (Stringset.mem s !locals) 
+  then
+    let e = { e_name = s; e_type = t } in
+    add_global used e (current_location loc)
+	
+let add_uses_q loc t q =
+  let rec addmod = function
+    | Lident s -> add_uses loc Module s
+    | Ldot (q,s) -> addmod q; add_uses loc Module s
+    | Lapply (q1,q2) -> addmod q1; addmod q2 
+  in
+  match q with
+    | Lident s -> add_uses loc t s
+    | Ldot (q,s) -> addmod q; add_uses loc t s
+    | Lapply (q1,q2) -> addmod q1; addmod q2
 
 (*s Some useful functions. *)
 
@@ -123,15 +141,15 @@ let ids_of_a_pattern p =
     | Ppat_array pl -> List.iter pattern pl
     | Ppat_or (p1,p2) -> pattern p1; pattern p2
     | Ppat_constraint (p,_) -> pattern p
-
-  and pattern p = pattern_d p.ppat_desc
+  and pattern p = 
+    pattern_d p.ppat_desc
   in
   pattern p; !r
 
 let pattern_for_def p =
   let loc = p.ppat_loc in
   let ids = ids_of_a_pattern p in
-  List.iter (add_def loc) ids
+  List.iter (add_def loc Value) ids
 
 
 (*s The following function locally adds some given variables to the set of
@@ -168,11 +186,11 @@ and tr_core_type_desc loc = function
   | Ptyp_tuple tl ->
       List.iter tr_core_type tl
   | Ptyp_constr (q,tl) ->
-      add_uses_q loc q; List.iter tr_core_type tl
+      add_uses_q loc Type q; List.iter tr_core_type tl
   | Ptyp_object l ->
       List.iter tr_core_field_type l
   | Ptyp_class (id,l) ->
-      add_uses_q loc id;
+      add_uses_q loc Class id;
       List.iter tr_core_type l
   | Ptyp_alias (ct,_) -> 
       tr_core_type ct
@@ -182,14 +200,14 @@ and tr_core_field_type ft =
 
 and tr_core_field_desc loc = function
   | Pfield (id,ct) ->
-      add_uses loc id;
+      add_uses loc Method id;
       tr_core_type ct
   | Pfield_var -> ()
 
 (*s Type expressions for the class language. *)
 
 let tr_class_infos f p =
-  add_def p.pci_loc p.pci_name;
+  add_def p.pci_loc Class p.pci_name;
   f p.pci_expr
 
 (*s Value expressions for the core language. *)
@@ -207,7 +225,7 @@ let rec tr_expression e =
 
 and tr_expression_desc loc = function
   | Pexp_ident q -> 
-      add_uses_q loc q
+      add_uses_q loc Value q
   | Pexp_apply (e,el) ->
       tr_expression e; List.iter tr_expression el
   | Pexp_ifthenelse (e1,e2,e3) -> 
@@ -218,7 +236,8 @@ and tr_expression_desc loc = function
       tr_expression e1; tr_expression e2
   | Pexp_tuple el ->
       List.iter tr_expression el
-  | Pexp_construct (_,e,_) -> 
+  | Pexp_construct (q,e,_) -> 
+      add_uses_q loc Constructor q;
       option_iter tr_expression e
   | Pexp_function pel -> 
       List.iter (bind_pattern tr_expression) pel
@@ -234,12 +253,12 @@ and tr_expression_desc loc = function
 	iter_snd tr_expression pel; 
       bind_patterns tr_expression pl e
   | Pexp_record (l,e) ->
-      iter_fst (add_uses_q loc) l; iter_snd tr_expression l; 
+      iter_fst (add_uses_q loc Field) l; iter_snd tr_expression l; 
       option_iter tr_expression e
   | Pexp_field (e,q) ->
-      tr_expression e; add_uses_q loc q
+      tr_expression e; add_uses_q loc Field q
   | Pexp_setfield (e1,q,e2) ->
-      tr_expression e1; add_uses_q loc q; tr_expression e2
+      tr_expression e1; add_uses_q loc Field q; tr_expression e2
   | Pexp_array el ->
       List.iter tr_expression el
   | Pexp_for (i,e1,e2,_,e) ->
@@ -252,13 +271,13 @@ and tr_expression_desc loc = function
       tr_module_expr m; bind_variables [x] tr_expression e
   | Pexp_constant _ -> ()
   | Pexp_send (e,id) ->
-      add_uses loc id; tr_expression e
+      add_uses loc Method id; tr_expression e
   | Pexp_new id ->
-      add_uses_q loc id
+      add_uses_q loc Class id
   | Pexp_setinstvar (id,e) ->
-      add_uses loc id; tr_expression e
+      add_uses loc Value id; tr_expression e
   | Pexp_override l ->
-      iter_fst (add_uses loc) l; iter_snd tr_expression l
+      iter_fst (add_uses loc Method) l; iter_snd tr_expression l
 
 (*s Value descriptions. *)
 
@@ -273,10 +292,10 @@ and tr_type_declaration td =
 and tr_type_kind loc = function
   | Ptype_abstract -> ()
   | Ptype_variant cl ->
-      iter_fst (add_def loc) cl;
+      iter_fst (add_def loc Constructor) cl;
       iter_snd (List.iter tr_core_type) cl
   | Ptype_record fl ->
-      List.iter (fun (f,_,t) -> add_def loc f; tr_core_type t) fl
+      List.iter (fun (f,_,t) -> add_def loc Field f; tr_core_type t) fl
 
 and tr_exception_declaration ed =
   List.iter tr_core_type ed
@@ -288,7 +307,7 @@ and tr_class_type c =
 
 and tr_class_type_desc loc = function
   | Pcty_constr (id,l) ->
-      add_uses_q loc id;
+      add_uses_q loc Class id;
       List.iter tr_core_type l
   | Pcty_signature cs ->
       tr_class_signature cs
@@ -301,15 +320,16 @@ and tr_class_signature (ct,l) =
   List.iter tr_class_type_field l
 
 and tr_class_type_field = function
-  | Pctf_inher ct -> tr_class_type ct
+  | Pctf_inher ct -> 
+      tr_class_type ct
   | Pctf_val (id,_,ct,loc) ->
-      add_def loc id;
+      add_def loc Value id;
       option_iter tr_core_type ct
   | Pctf_virt (id,_,ct,loc) ->
-      add_def loc id;
+      add_def loc Method id;
       tr_core_type ct
   | Pctf_meth (id,_,ct,loc) ->
-      add_def loc id;
+      add_def loc Method id;
       tr_core_type ct
   | Pctf_cstr (ct1,ct2,_) ->
       tr_core_type ct1;
@@ -325,9 +345,10 @@ and tr_class_expr ce = tr_class_expr_desc ce.pcl_loc ce.pcl_desc
 
 and tr_class_expr_desc loc = function
   | Pcl_constr (id,l) ->
-      add_uses_q loc id;
+      add_uses_q loc Class id;
       List.iter tr_core_type l
-  | Pcl_structure cs -> tr_class_structure cs
+  | Pcl_structure cs -> 
+      tr_class_structure cs
   | Pcl_fun (p,ce) ->
       bind_variables (ids_of_a_pattern p) tr_class_expr ce
   | Pcl_apply (ce,l) ->
@@ -351,13 +372,13 @@ and tr_class_field = function
   | Pcf_inher (ce,_) ->
       tr_class_expr ce
   | Pcf_val (id,_,e,loc) ->
-      add_def loc id;
+      add_def loc Value id;
       tr_expression e
   | Pcf_virt(id,_,ct,loc) ->
-      add_def loc id;
+      add_def loc Method id;
       tr_core_type ct
   | Pcf_meth (id,_,e,loc) ->
-      add_def loc id;
+      add_def loc Method id;
       tr_expression e
   | Pcf_cstr (ct1,ct2,_) ->
       tr_core_type ct1;
@@ -379,14 +400,17 @@ and tr_module_type mt =
   tr_module_type_desc mt.pmty_loc mt.pmty_desc
 
 and tr_module_type_desc loc = function
-  | Pmty_ident id -> add_uses_q loc id
-  | Pmty_signature s -> tr_signature s
+  | Pmty_ident id -> 
+      add_uses_q loc ModuleType id
+  | Pmty_signature s -> 
+      tr_signature s
   | Pmty_functor (id,mt1,mt2) -> 
       tr_module_type mt1;
       bind_variables [id] tr_module_type mt2
   | Pmty_with (mt,cl) ->
       tr_module_type mt;
-      List.iter (fun (id,c) -> add_uses_q loc id; tr_with_constraint loc c) cl
+      List.iter 
+	(fun (id,c) -> add_uses_q loc Type id; tr_with_constraint loc c) cl
 
 and tr_signature s =
   List.iter tr_signature_item s
@@ -396,17 +420,17 @@ and tr_signature_item i =
 
 and tr_signature_item_desc loc = function
   | Psig_value (x,vd) ->
-      add_def loc x; tr_value_description vd
+      add_def loc Value x; tr_value_description vd
   | Psig_type l ->
-      iter_fst (add_def loc) l; iter_snd tr_type_declaration l
+      iter_fst (add_def loc Type) l; iter_snd tr_type_declaration l
   | Psig_exception (id,ed) ->
-      add_def loc id; tr_exception_declaration ed
+      add_def loc Exception id; tr_exception_declaration ed
   | Psig_module (id,mt) ->
-      add_def loc id; tr_module_type mt
+      add_def loc Module id; tr_module_type mt
   | Psig_modtype (id,mtd) ->
-      add_def loc id; tr_modtype_declaration mtd
+      add_def loc ModuleType id; tr_modtype_declaration mtd
   | Psig_open q -> 
-      add_uses_q loc q
+      add_uses_q loc Module q
   | Psig_include mt ->
       tr_module_type mt
   | Psig_class l ->
@@ -420,7 +444,7 @@ and tr_modtype_declaration = function
 
 and tr_with_constraint loc = function
   | Pwith_type td -> tr_type_declaration td
-  | Pwith_module id -> add_uses_q loc id
+  | Pwith_module id -> add_uses_q loc Module id
 
 (*s Value expressions for the module language. *)
 
@@ -428,8 +452,10 @@ and tr_module_expr me =
   tr_module_expr_desc me.pmod_loc me.pmod_desc
 
 and tr_module_expr_desc loc = function
-  | Pmod_ident id -> add_uses_q loc id
-  | Pmod_structure s -> tr_structure s
+  | Pmod_ident id -> 
+      add_uses_q loc Module id
+  | Pmod_structure s -> 
+      tr_structure s
   | Pmod_functor (id,mt,me) ->
       tr_module_type mt;
       bind_variables [id] tr_module_expr me
@@ -452,19 +478,21 @@ and tr_structure_item_desc loc = function
   | Pstr_value (_,pel) -> 
       iter_fst pattern_for_def pel; iter_snd tr_expression pel
   | Pstr_primitive (id,vd) ->
-      add_def loc id; tr_value_description vd
+      add_def loc Value id; tr_value_description vd
   | Pstr_type l ->
-      iter_fst (add_def loc) l; iter_snd tr_type_declaration l
+      iter_fst (add_def loc Type) l; iter_snd tr_type_declaration l
   | Pstr_exception (id,ed) ->
-      add_def loc id; tr_exception_declaration ed
+      add_def loc Exception id; tr_exception_declaration ed
   | Pstr_module (id,me) ->
-      add_def loc id; tr_module_expr me
+      add_def loc Module id; tr_module_expr me
   | Pstr_modtype (id,mt) ->
-      add_def loc id; tr_module_type mt
+      add_def loc ModuleType id; tr_module_type mt
   | Pstr_open m -> 
-      add_uses_q loc m
-  | Pstr_class l -> List.iter tr_class_declaration l
-  | Pstr_class_type l -> List.iter tr_class_type_declaration l
+      add_uses_q loc Module m
+  | Pstr_class l -> 
+      List.iter tr_class_declaration l
+  | Pstr_class_type l -> 
+      List.iter tr_class_type_declaration l
 
 
 (*s Given all that collecting functions, we can now define two functions
@@ -472,7 +500,7 @@ and tr_structure_item_desc loc = function
     cross-references in implementations and interfaces. *)
 
 let add_module m = 
-  add_def { loc_start = 0; loc_end = 0 } m
+  add_def { loc_start = 0; loc_end = 0 } Module m
 
 let wrapper parsing_function traverse_function f m =
   reset_cross ();
