@@ -118,3 +118,5 @@ word :
     { $1 :: $2 }
   | Tprec Tident word
     { $2 :: $3 }
+  | Terror word
+    { $2 }

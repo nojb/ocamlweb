@@ -188,12 +188,12 @@ let is_base_type =
 
 let is_lex_keyword = 
   build_table
-    [ "rule"; "let"; "and"; "parse"; "eof"; ]
+    [ "rule"; "let"; "and"; "parse"; "eof" ]
  
 let is_yacc_keyword =
   build_table
-    [ "%token"; "%left"; "%right"; "%type"; "%start"; "%nonassoc"; "%prec"; "e
-rror"; ]
+    [ "%token"; "%left"; "%right"; "%type"; "%start"; "%nonassoc"; "%prec"; 
+      "error" ]
     
 
 let is_keyword s = is_base_type s || is_caml_keyword s 
