@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o pretty underscores in identifiers (by redefinition of \_) 
+
 version 0.7, 31/01/2000
 =======================
   o support of .mll and .mly files using the --impl option 
