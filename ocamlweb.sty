@@ -80,7 +80,7 @@
 \newbox\boxA
 \newbox\boxB
 \newdimen\boxwidth
-\def\comment{\unskip\hskip 2em\null\par\nointerlineskip
+\def\ocwcomment{\unskip\hskip 2em\null\par\nointerlineskip
   \setbox\boxA=\lastbox
   \setbox\boxB=\hbox{\strut\unhbox\boxA}\boxwidth=\wd\boxB
   \noindent\box\boxB\par
@@ -88,10 +88,10 @@
   \else\boxwidth=.5\hsize\fi
   \noindent\hangafter=0 \hangindent=\boxwidth
   \llap{$(*$ }\ignorespaces}
-\def\endcomment{\unskip~$*)$\strut\par}
+\def\ocwendcomment{\unskip~$*)$\strut\par}
 %END LATEX
-%HEVEA\newcommand{\comment}{(*}
-%HEVEA\newcommand{\endcomment}{*)}
+%HEVEA\newcommand{\ocwcomment}{(*}
+%HEVEA\newcommand{\ocwendcomment}{*)}
 
 %BEGIN LATEX
 \def\codeline{\vbox\bgroup\noindent\strut\ignorespaces}
