@@ -18,6 +18,20 @@ INSTALLATION
 
   2. type "make install"
 
+  Notes:
+
+  The following paths are recommended:
+
+       BINDIR = /usr/local/bin
+       TEXDIR = /usr/share/texmf/tex/latex/misc
+
+  For some TeX installations, it may be necessary to run the
+  command
+     
+       mktexlsr	
+
+  by hand to make ocamlweb.sty accessible by LaTeX.
+      
   Alternatively, you may copy the needed files by hand: copy the binary 
   file "ocamlweb" in some directory that exists in your PATH environment 
   variable, and copy the file "ocamlweb.sty" somewhere in your LaTeX 

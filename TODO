@@ -13,6 +13,8 @@ Parsing fichiers
  4. possibilité d'échapper [ ou ] dans les quotations de code
     (actuellement ce n'est pas possible et cela provoque des incohérences)
 
+ 4bis. les commandes LaTeX \[ et \] ne sont pas supportees
+
  5. Une commande pour rajouter une entrée dans l'index
 
  6. Eviter les erreurs du style un commentaire qui commence comme

@@ -3,10 +3,10 @@
 #########################################
 
 # where to install the binary executable
-BINDIR = $(HOME)/bin/$(OSTYPE)
+BINDIR = /usr/local/bin
 
 # where to put the style file
-TEXDIR = $(HOME)/tex/inputs
+TEXDIR = /usr/share/texmf/tex/latex/misc
 
 #########################################
 # End of configuration part
