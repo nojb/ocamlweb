@@ -51,7 +51,9 @@ let output_file f =
   with End_of_file -> close_in ch
 
 
-(*s High level output.
+(* \hrulefill *)
+
+(*s \textbf{High level output.}
     In this section and the following, we introduce functions which are 
     \LaTeX\ dependent. 
   *)
@@ -243,24 +245,24 @@ let reset_output () =
 
 (*s Sectioning commands. *)
 
-let output_section n =
-  output_string (sprintf "\\ocwsection{%d}\n" n)
+let begin_section () =
+  output_string "\\ocwsection\n"
 
 let output_module s =
   output_string "\\ocwmodule{";
   output_latex_id s;
-  output_string "}"
+  output_string "}\n"
 
 let interface_part () =
-  output_string "\\ocwinterfacepart{}"
+  output_string "\\ocwinterfacepart{}\n"
 
 let code_part () =
-  output_string "\\ocwcodepart{}"
+  output_string "\\ocwcodepart{}\n"
 
 let output_interface s =
   output_string "\\ocwinterface{";
   output_latex_id s;
-  output_string "}"
+  output_string "}\n"
 
 let begin_paragraph () =
   output_string "\\noindent{}"
@@ -301,18 +303,18 @@ let print_list print sep l =
  *)
 
 type elem =
-  | Single of int
-  | Interval of int * int
+  | Single of string * int
+  | Interval of (string * int) * (string * int)
 
 let intervals l =
   let rec group = function
     | (acc, []) -> List.rev acc
-    | (Interval (n1,n2)::acc, n::rem) when n = succ n2 -> 
-	group (Interval (n1,n)::acc, rem)
-    | ((Single n2)::(Single n1)::acc, n::rem) when n = n1+2 ->
-	group (Interval (n1,n)::acc, rem)
-    | (acc, n::rem) ->
-	group ((Single n)::acc, rem)
+    | (Interval (s1,(_,n2))::acc, (f,n)::rem) when n = succ n2 -> 
+	group (Interval (s1,(f,n))::acc, rem)
+    | ((Single _)::(Single (f1,n1) as s1)::acc, (f,n)::rem) when n = n1+2 ->
+	group (Interval ((f1,n1),(f,n))::acc, rem)
+    | (acc, (f,n)::rem) ->
+	group ((Single (f,n))::acc, rem)
   in
   group ([],l)
 
@@ -321,13 +323,15 @@ let intervals l =
     identifier is defined) in bold face.
  *)
 
+let output_sec_ref (f,n) = output_string (sprintf "\\ref{%s:sec:%d}" f n)
+
 let output_elem = function
-  | Single n -> 
-      output_string (string_of_int n)
-  | Interval (n1,n2) -> 
-      output_string (string_of_int n1);
+  | Single (f,n) -> 
+      output_sec_ref (f,n)
+  | Interval (s1,s2) -> 
+      output_sec_ref s1;
       output_string "--";
-      output_string (string_of_int n2)
+      output_sec_ref s2
 
 let output_bf_elem n = 
   output_string "\\textbf{"; output_elem n; output_string "}"
@@ -362,4 +366,4 @@ let output_raw_index_entry s def use =
   output_string "}\n"
 
 let output_label l =
-  output_string "\\label{"; output_string l; output_string "}\n"
+  output_string "\\label{"; output_string l; output_string "}%\n"

@@ -94,7 +94,7 @@ val output_interface : string -> unit
 val interface_part : unit -> unit
 val code_part : unit -> unit
 
-val output_section : int -> unit
+val begin_section : unit -> unit
 val begin_paragraph : unit -> unit
 val end_paragraph : unit -> unit
 
@@ -103,8 +103,10 @@ val end_paragraph : unit -> unit
     introduced and [use] the list of sections where [f] is used. *)
 
 val begin_index : unit -> unit
-val output_index_entry : string -> int list -> int list -> unit
-val output_raw_index_entry : string -> string list -> string list -> unit
+val output_index_entry : 
+  string -> (string*int) list -> (string*int) list -> unit
+val output_raw_index_entry : 
+  string -> string list -> string list -> unit
 val end_index : unit -> unit
 
 val output_label : string -> unit

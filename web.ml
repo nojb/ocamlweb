@@ -87,7 +87,7 @@ let index_file = function
 let build_index l = List.iter index_file l
 
 
-(*s The sections' table. *)
+(*s The sections table. *)
 
 module Intmap = Map.Make(struct type t = int let compare = compare end)
 
@@ -143,8 +143,11 @@ let rec uniquize = function
   | [] | [_] as l -> l
   | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
 
-let make_label_name (f,n) =
-  (Filename.basename f) ^ ":" ^ (string_of_int n)
+let make_code_label_name (f,n) =
+  (Filename.basename f) ^ ":code:" ^ (string_of_int n)
+
+let make_sec_label_name (f,n) =
+  (Filename.basename f) ^ ":sec:" ^ (string_of_int n)
 
 let print_one_entry s =
   let list_in_table t =
@@ -159,10 +162,11 @@ let print_one_entry s =
   and use = list_in_table used in
   if !extern_defs || def <> [] then
     if !web then 
-      output_index_entry s (List.map snd def) (List.map snd use) 
+      output_index_entry s def use
     else 
       output_raw_index_entry s 
-	(List.map make_label_name def) (List.map make_label_name use) 
+	(List.map make_code_label_name def) 
+	(List.map make_code_label_name use) 
 
 let print_index () =
   begin_index ();
@@ -183,7 +187,7 @@ let pretty_print_paragraph f = function
       if not !web then begin 
 	incr code_number;
 	add_code f l !code_number;
-	output_label (make_label_name (f,!code_number))
+	output_label (make_code_label_name (f,!code_number))
       end;
       pretty_print_code s
 
@@ -191,7 +195,8 @@ let pretty_print_section f s =
   if !web then begin
     incr sec_number;
     add_section f s.sec_beg !sec_number;
-    output_section !sec_number
+    begin_section ();
+    output_label (make_sec_label_name (f,!sec_number))
   end;
   List.iter (pretty_print_paragraph f) s.sec_contents
     

@@ -67,8 +67,8 @@ test: ocamlweb
 BOOTSTRAP= bootstrap.tex output.ml cross.ml
 
 bootstrap: ocamlweb $(BOOTSTRAP)
-	ocamlweb -o tmp/ocamlweb.tex $(BOOTSTRAP)
-	cd tmp; latex ocamlweb
+	./ocamlweb -o tmp/ocamlweb.tex $(BOOTSTRAP)
+	cd tmp; latex ocamlweb; latex ocamlweb
 
 # export
 ########

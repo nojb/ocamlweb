@@ -88,8 +88,12 @@
 % code part of a module
 \newcommand{\ocwcodepart}{\subsection*{Code}}
 
-% new section
-\newcommand{\ocwsection}[1]{\bigskip\noindent{\bf#1.}{\kern1em}}
+% new WEB section
+\newcounter{ocwcounter}
+\setcounter{ocwcounter}{0}
+\newcommand{\ocwsection}{%
+\refstepcounter{ocwcounter}%
+\bigskip\noindent{\bf\theocwcounter.}\kern1em}
 
 % index
 \newcommand{\ocwbeginindex}{\begin{theindex}}
