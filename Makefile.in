@@ -45,7 +45,7 @@ CMO = output.cmo yacc_parser.cmo yacc_lexer.cmo cross.cmo pretty.cmo \
 
 CMX = $(CMO:.cmo=.cmx)
 
-all: @BEST@
+all: @OCAMLBEST@
 
 opt: ocamlweb
 
@@ -67,7 +67,7 @@ version.ml: Makefile
 
 install:
 	mkdir -p $(BINDIR)
-	if test @BEST@ = opt ; then \
+	if test @OCAMLBEST@ = opt ; then \
 		cp ocamlweb $(BINDIR) ; \
 	else \
 		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
