@@ -30,9 +30,8 @@ CAML_CMO = ocaml-parser/misc.cmo ocaml-parser/clflags.cmo	\
 
 CAML_CMX = $(CAML_CMO:.cmo=.cmx)
 
-BUFFER = buffer.cmo
-CMO = $(BUFFER) output.cmo cross.cmo pretty.cmo web.cmo doclexer.cmo \
-       version.cmo main.cmo
+CMO = output.cmo cross.cmo pretty.cmo web.cmo doclexer.cmo \
+      version.cmo main.cmo
 
 CMX = $(CMO:.cmo=.cmx)
 
