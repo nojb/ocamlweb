@@ -168,7 +168,7 @@
 %HEVEA\newcommand{\ocwbegincode}{}
 %HEVEA\newcommand{\ocwendcode}{}
 
-%HEVEA\newcommand{\endgraf}{}
+%HEVEA\def\endgraf{}
 
 % visible space in a string
 %BEGIN LATEX
@@ -185,6 +185,9 @@
 \def\currentmodule{}
 \newcommand{\ocwheader}[1]{\gdef\currentmodule{#1}}
 
+\iflatexsectioning
+\newcommand{\ocwtitle}[1]{}
+\else
 \newcommand{\ocwtitle}[1]{%
  \section*{#1}%
  \def\currentmodule{#1}%
@@ -192,6 +195,7 @@
  \mark{#1\noexpand\else\theocwcounter}%
  \addtocounter{ocwcounter}{-1}%
 }
+\fi
 %END LATEX
 %HEVEA\newcommand{\ocwtitle}[1]{\section*{#1}}
 
