@@ -49,6 +49,7 @@ let usage () =
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
   prerr_endline "  --class-options <opt>";
   prerr_endline "                 set the document class options (defaults to `12pt')";
+  prerr_endline "  --old-fullpage uses LaTeX package fullpage with no option";
   prerr_endline "  -p <string>    insert something in LaTeX preamble";
   prerr_endline "  --files <file> read file names to process in <file>";
   prerr_endline "  --quiet        quiet mode";
@@ -222,6 +223,8 @@ let parse () =
 	add_latex_option s; parse_rec rem
     | "--latex-option" :: [] ->
 	usage ()
+    | "--old-fullpage" :: rem ->
+	fullpage_headings := false; parse_rec rem
 
     | ("-impl" | "--impl") :: f :: rem -> 
 	check_if_file_exists f;

@@ -16,9 +16,12 @@ MKTEXLSR = @MKTEXLSR@
 UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/null
 
 # Version
+# ATTENTION A BIEN UTILISER UN NUMERO DE VERSION DE LA FORME X.YY
+# (requete de Ralf pour la Debian)
 MAJORVN=1
 MINORVN=35
 VERSION=$(MAJORVN).$(MINORVN)
+
 OCAMLBEST=@OCAMLBEST@
 
 CAMLC    = @OCAMLC@

@@ -88,12 +88,17 @@ let push_in_preamble s = Queue.add s preamble
 
 let class_options = ref "12pt"
 
+let fullpage_headings = ref true
+
 let latex_header opt =
   if not !no_preamble then begin
     output_string (sprintf "\\documentclass[%s]{article}\n" !class_options);
     output_string "\\usepackage[latin1]{inputenc}\n";
-    (* output_string "\\usepackage[T1]{fontenc}\n"; *)
-    output_string "\\usepackage{fullpage}\n";
+    (*i output_string "\\usepackage[T1]{fontenc}\n"; i*)
+    if !fullpage_headings then
+      output_string "\\usepackage[headings]{fullpage}\n"
+    else
+      output_string "\\usepackage{fullpage}\n";
     output_string "\\usepackage";
     if opt <> "" then output_string (sprintf "[%s]" opt);
     output_string "{ocamlweb}\n";

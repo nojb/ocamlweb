@@ -56,6 +56,7 @@ val output_verbatim : string -> unit
 val class_options : string ref
 val set_no_preamble : bool -> unit
 val push_in_preamble : string -> unit
+val fullpage_headings : bool ref
 val latex_header : string -> unit
 val latex_trailer : unit -> unit
 
