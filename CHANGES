@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o make LaTeX output the name of the latex file being typeset
   o better redirections of messages/errors from LaTeX/dvips/hevea 
   o LaTeX messages now displayed (with -dvi,-ps), unless -q
   o big sections with (*S
