@@ -1,9 +1,10 @@
 (Dis donc emacs, ceci est du -*-text-*- !)
 
+$Id$
+
+
                     Liste des choses à faire
 		    ========================
-
-$Id$
 
 
 Parsing fichiers
@@ -14,6 +15,33 @@ Parsing fichiers
 
  5. Une commande pour rajouter une entrée dans l'index
 
+ 6. Eviter les erreurs du style un commentaire qui commence comme
+    (*i... : mettre une synatxe plus stricte pour ces « commandes »
+    ocamlweb (s,c et i). Suggestions :
+
+    a) imposer qu'apres la lettre s,c ou i il n'y ait pas une lettre.
+    b) demander une syntaxe plus explicite. par exemple (**s, (**i ou
+       (**c 
+
+ 7. Rajouter une commande « latex only », par exemple (*l.... *). Ceci 
+    est utile pour insérer du latex invisible. Par exemple :
+
+    (*l \newcommand{\toto}{...} *)
+
+    Actuellement, faire ceci fonctionne (la macro \toto est bien
+    définie *) mais : si c'est un paragraphe de commentaire isolé cela
+    insère des espaces, si c'est un commentaire de code cela fait
+    apparaitre les (* et *) !
+
+    Autre utilisation possible :
+
+    let f .... =
+
+       .... (*l \node{dest}{ *)  x  (*l } *) ....
+
+
+       (*   notez que la variable x \node{orig}{ici}
+       \line{->}{orig}{dest} est ... *)
 
 Web (cross)
 ===========
@@ -64,6 +92,35 @@ Document LaTeX
     \ocwinterface n'est pas une bonne idée si \ocwinterface est un
     \section.
 
+ 6. (Claude) Possibilité d'insérer du code caml dans les commentaires :
+    cela est utile pour citer des exemples d'utilisation des
+    fonctions.  Par exemple :
+
+    (* [betared t] retourne la forme normale du lambda-terme [t]. Par
+       exemple,
+       \begin{code}
+       (betared 
+         (App 
+	   (App
+	     (Lambda "x",(App .... ))
+              ....)
+	    ...)
+	  ..)
+       \end{code}
+
+    *)
+
+    val betared : lambda -> lambda;;
+
+
+
+    Actuellement, utiliser des crochets [ ... ] ne marche pas car le
+    contenu n'est plus formaté en respectant les passages a la
+    ligne. La solution temporaire que j'ai utilisée est verbatim, mais
+    ce n'est pas joli.
+
+    (Demandé aussi par Pierre)
+    
 Documentation ocamlweb
 ======================
 
