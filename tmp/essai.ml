@@ -24,7 +24,9 @@ type machin = { champ1 : TRUC.truc;
 let ma_fonction x = function (yyy,z) ->
   x + yyy*zzz (* commentaire : $[y]\not=0$ *)
 
-(*c un vrai commentaire *)
+let s = "\\" + du_code c + "autre chaine"
+
+(*s un vrai commentaire *)
 
 let autre_bout x =
   if x <= 0 then x+1 else x+2; (*c un vrai commentaire *)

@@ -118,8 +118,13 @@ and pr_code_string = parse
   | '"'  { output_es () }
   | '\n' { indentation 0; pr_code_string lexbuf }
   | ' '  { output_vspace (); pr_code_string lexbuf }
-  | '\\' '"'
-         { output_escaped_char '\\'; output_char '"'; pr_code_string lexbuf }
+  | '\\' ['"' 'n' 't' 'b' 'r']
+         { output_escaped_char '\\'; 
+	   output_char (Lexing.lexeme_char lexbuf 1); 
+	   pr_code_string lexbuf }
+  | '\\' '\\'
+         { output_escaped_char '\\'; output_escaped_char '\\'; 
+	   pr_code_string lexbuf }
   | tex_reserved
          { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
   | eof  { () }
