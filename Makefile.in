@@ -1,6 +1,3 @@
-#########################################
-# Configuration part : where to install
-#########################################
 
 # where to install the binary executable
 PREFIX = @prefix@
@@ -14,10 +11,7 @@ TEXDIR = $(BASETEXDIR)/tex/latex/misc
 MKTEXLSR = @MKTEXLSR@
 UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/null
 
-#########################################
-# End of configuration part
-#########################################
-
+# Version
 MAJORVN=0
 MINORVN=7
 VERSION=$(MAJORVN).$(MINORVN)

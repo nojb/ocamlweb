@@ -4,6 +4,8 @@ dnl ocamlweb autoconf input
 dnl begin
 AC_INIT(web.mli)
 
+AC_PREFIX_DEFAULT(/usr)
+
 AC_CONFIG_AUX_DIR(./support)
 # need support/install-sh
 # need support/missing
