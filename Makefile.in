@@ -121,7 +121,7 @@ NAME=ocamlweb-$(VERSION)
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = *.ml* ocamlweb.sty bootstrap.tex				\
-	Makefile.in configure .depend README INSTALL COPYING GPL CHANGES
+	Makefile.in configure .depend README INSTALL COPYING LGPL CHANGES
 
 OCAMLFILES = misc.mli misc.ml clflags.ml	\
         terminfo.mli terminfo.ml		\
@@ -142,7 +142,7 @@ OCAMLLEXFILES = lex_syntax.mli lex_parser.mly lex_lexer.mll
 DOCFILES = doc/ocamlweb-man.ps doc/ocamlweb-man.html
 
 export: source linux
-	cp README COPYING GPL CHANGES $(FTP)
+	cp README COPYING LGPL CHANGES $(FTP)
 	cd doc; make all export
 	make export-bootstrap
 
@@ -171,7 +171,7 @@ linux: clean binary
 solaris:
 	rmake sun-demons $(HOME)/soft/ocaml/ocamlweb clean binary
 
-BINARYFILES = README INSTALL COPYING GPL ocamlweb ocamlweb.sty
+BINARYFILES = README INSTALL COPYING LGPL ocamlweb ocamlweb.sty
 
 binary: ocamlweb manual
 	mkdir -p export/$(BINARY)/doc
