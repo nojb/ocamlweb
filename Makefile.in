@@ -59,7 +59,9 @@ version.ml: Makefile
 	echo "let date = \""`date`"\"" >> version.ml
 
 install:
+	mkdir -p $(BINDIR)
 	cp ocamlweb $(BINDIR)		
+	mkdir -p $(TEXDIR)
 	cp ocamlweb.sty $(TEXDIR)	
 	$(UPDATETEX)
 
