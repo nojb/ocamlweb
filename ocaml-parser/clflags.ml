@@ -1,8 +1,18 @@
+(***********************************************************************)
+(*                                                                     *)
+(*                           Objective Caml                            *)
+(*                                                                     *)
+(*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+(*                                                                     *)
+(*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the Q Public License version 1.0.               *)
+(*                                                                     *)
+(***********************************************************************)
 
-(* This is the only part of the original file clflags.ml from ocaml sources
- * needed by the parser. 
- * Like this, we avoid using the file config.ml which contains platform
- * dependent informations. *)
+(* $Id$ *)
 
-let fast = ref false
-and noassert = ref false
+(* Command-line parameters *)
+
+let fast = ref false                    (* -unsafe *)
+and noassert = ref false                (* -noassert *)

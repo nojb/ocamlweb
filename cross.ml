@@ -500,7 +500,7 @@ and tr_structure_item_desc loc = function
     cross-references in implementations and interfaces. *)
 
 let add_module m = 
-  add_def { loc_start = 0; loc_end = 0 } Module m
+  add_def { loc_start = 0; loc_end = 0; loc_ghost = false } Module m
 
 let wrapper parsing_function traverse_function f m =
   reset_cross ();

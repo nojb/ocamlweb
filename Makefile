@@ -187,7 +187,8 @@ clean:
 	rm -f ocamlweb doclexer.ml pretty.ml version.ml
 	rm -f ocaml-parser/*~ ocaml-parser/*.cm[iox] ocaml-parser/*.o
 	rm -f ocaml-parser/lexer.ml ocaml-parser/linenum.ml
-	rm -f ocaml-parser/parser.mli ocaml-parser/parser.ml
+	rm -f ocaml-parser/parser.mli ocaml-parser/parser.ml 
+	rm -f ocaml-parser/parser.output
 	make -C doc clean
 	cd test; rm -f *.aux *.log *.dvi *.ps *.tex
 

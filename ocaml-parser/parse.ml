@@ -5,7 +5,8 @@
 (*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
 (*                                                                     *)
 (*  Copyright 1996 Institut National de Recherche en Informatique et   *)
-(*  Automatique.  Distributed only by permission.                      *)
+(*  en Automatique.  All rights reserved.  This file is distributed    *)
+(*  under the terms of the Q Public License version 1.0.               *)
 (*                                                                     *)
 (***********************************************************************)
 
@@ -25,7 +26,9 @@ let rec skip_phrase lexbuf =
   with
     | Lexer.Error (Lexer.Unterminated_comment, _, _) -> ()
     | Lexer.Error (Lexer.Unterminated_string, _, _) -> ()
-    | Lexer.Error(_,_,_) -> skip_phrase lexbuf
+    | Lexer.Error (Lexer.Unterminated_string_in_comment, _, _) -> ()
+    | Lexer.Error (Lexer.Illegal_character,_,_) -> skip_phrase lexbuf
+;;
 
 let maybe_skip_phrase lexbuf =
   if Parsing.is_current_lookahead Parser.SEMISEMI
@@ -39,20 +42,23 @@ let wrap parsing_fun lexbuf =
     Parsing.clear_parser();
     ast
   with
-    | Lexer.Error(Lexer.Unterminated_comment, _, _) as err -> raise err
-    | Lexer.Error(Lexer.Unterminated_string, _, _) as err -> raise err
-    | Lexer.Error(_, _, _) as err ->
-        if !Location.input_name = "" then skip_phrase lexbuf;
-        raise err
-    | Syntaxerr.Error _ as err ->
-        if !Location.input_name = "" then maybe_skip_phrase lexbuf;
-        raise err
-    | Parsing.Parse_error | Syntaxerr.Escape_error ->
-        let loc = { loc_start = Lexing.lexeme_start lexbuf;
-                    loc_end = Lexing.lexeme_end lexbuf } in
-        if !Location.input_name = "" 
-        then maybe_skip_phrase lexbuf;
-        raise(Syntaxerr.Error(Syntaxerr.Other loc))
+  | Lexer.Error(Lexer.Unterminated_comment, _, _) as err -> raise err
+  | Lexer.Error(Lexer.Unterminated_string, _, _) as err -> raise err
+  | Lexer.Error(Lexer.Unterminated_string_in_comment, _, _) as err -> raise err
+  | Lexer.Error(Lexer.Illegal_character, _, _) as err ->
+      if !Location.input_name = "" then skip_phrase lexbuf;
+      raise err
+  | Syntaxerr.Error _ as err ->
+      if !Location.input_name = "" then maybe_skip_phrase lexbuf;
+      raise err
+  | Parsing.Parse_error | Syntaxerr.Escape_error ->
+      let loc = { loc_start = Lexing.lexeme_start lexbuf;
+                  loc_end = Lexing.lexeme_end lexbuf;
+                  loc_ghost = false } in
+      if !Location.input_name = "" 
+      then maybe_skip_phrase lexbuf;
+      raise(Syntaxerr.Error(Syntaxerr.Other loc))
+;;
 
 let implementation = wrap Parser.implementation
 and interface = wrap Parser.interface
