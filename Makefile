@@ -63,13 +63,14 @@ manual:
 
 test: ocamlweb
 	cd tmp; ../ocamlweb --latex-sects essai.ml -o essai.tex ; \
-	latex essai ; latex essai
+	latex essai ; grep -q "Rerun" essai.log && latex essai || true
 
 BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml 
 
 bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
-	cd test; latex ocamlweb; latex ocamlweb
+	cd test; latex ocamlweb
+	cd test; grep -q "Rerun" ocamlweb.log && latex ocamlweb || true
 	cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
 
 check: bootstrap
