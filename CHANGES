@@ -1,5 +1,5 @@
 
-version 0.25, 02/06/99
+version 0.26, 02/06/99
 ======================
   o ocamlweb.sty: greatly improved by Claude Marché
   o various command line options: --no-index, --no-web, --latex-option, 
