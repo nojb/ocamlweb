@@ -540,7 +540,37 @@ let cross_implem = wrapper Parse.implementation tr_structure
 
 let cross_interf = wrapper Parse.interface tr_signature
 
+(*s cross-referencing lex description files *)
 
+let cross_structure_inside_file f m loc = ()
+
+let cross_expression_inside_file f m loc = ()
+
+let add_used_regexps f m r = ()
+
+let traverse_lex_defs f m lexdefs =
+  (* traverse header *)
+  cross_structure_inside_file f m lexdefs.Lex_syntax.header;
+  (* traverse named regexps *)
+  List.iter
+    (fun (id,regexp) -> 
+       (*i add_def id RegExpr; i*)
+       add_used_regexps f m regexp)
+    lexdefs.Lex_syntax.named_regexps;
+  (* traverse lexer rules *)
+  List.iter
+    (fun (id,rules) -> 
+       (* add_defs id LexParseRule; *)
+       List.iter 
+	 (fun (regexp,action) ->
+	    add_used_regexps f m regexp;
+	    cross_expression_inside_file f m action)
+	 rules)
+    lexdefs.Lex_syntax.entrypoints;
+  (* traverse trailer *)
+  cross_structure_inside_file f m lexdefs.Lex_syntax.trailer
+
+  
 
 let cross_lex f m =
   reset_cross ();
@@ -550,6 +580,7 @@ let cross_lex f m =
   let lexbuf = Lexing.from_channel c in
   try
     let lexdefs = Lex_parser.lexer_definition Lex_lexer.main lexbuf in
+    traverse_lex_defs f m lexdefs;
     close_in c
   with Parsing.Parse_error | Lex_lexer.Lexical_error _ -> begin
     if not !quiet then
