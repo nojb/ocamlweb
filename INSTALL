@@ -7,7 +7,7 @@ COMPILATION
   1. Compile with "make". It creates a binary file "ocamlweb".
 
      If your platform supports native compilation, do instead "make opt"
-     to get a native-code binary (still named "ocamlweb").
+     to get a faster binary (still named "ocamlweb").
 
 
 INSTALLATION

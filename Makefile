@@ -16,14 +16,17 @@ CAMLC    = ocamlc
 CAMLCOPT = ocamlopt 
 CAMLDEP  = ocamldep
 ZLIBS    = -I ocaml-parser
-DEBUG    = -g
+DEBUG    = 
 PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-CAML_CMO = misc.cmo clflags.cmo terminfo.cmo warnings.cmo	\
-           linenum.cmo location.cmo longident.cmo pstream.cmo	\
-           syntaxerr.cmo parser.cmo lexer.cmo parse.cmo
+CAML_CMO = ocaml-parser/misc.cmo ocaml-parser/clflags.cmo	\
+	   ocaml-parser/terminfo.cmo ocaml-parser/warnings.cmo	\
+           ocaml-parser/linenum.cmo ocaml-parser/location.cmo	\
+	   ocaml-parser/longident.cmo ocaml-parser/pstream.cmo	\
+           ocaml-parser/syntaxerr.cmo ocaml-parser/parser.cmo	\
+           ocaml-parser/lexer.cmo ocaml-parser/parse.cmo
 
 CAML_CMX = $(CAML_CMO:.cmo=.cmx)
 
@@ -35,21 +38,15 @@ CMX = $(CMO:.cmo=.cmx)
 
 all: ocamlweb
 
-ocamlweb: ocaml-parser-byte $(CMO)
+ocamlweb: $(CAML_CMO) $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_CMO) $(CMO)
 
-opt: ocaml-parser-opt $(CMX)
+opt: $(CAML_CMX) $(CMX)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
 	-strip ocamlweb
 
-debug: ocaml-parser-byte $(CMO)
+debug: $(CAML_CMO) $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
-
-ocaml-parser-byte:
-	cd ocaml-parser; make byte
-
-ocaml-parser-opt:
-	cd ocaml-parser; make opt
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -87,7 +84,7 @@ FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 FILES = buffer.mli buffer.ml					\
         doclexer.mll cross.ml cross.mli pretty.mli pretty.mll	\
 	output.mli output.ml web.mli web.ml main.ml		\
-	ocamlweb.sty bootstrap.tex			\
+	ocamlweb.sty bootstrap.tex				\
 	Makefile .depend README INSTALL COPYING GPL CHANGES
 
 OCAMLFILES = misc.mli misc.ml clflags.ml	\
@@ -151,19 +148,24 @@ binary: ocamlweb
 .ml.cmx:
 	$(CAMLCOPT) -c $(OPTFLAGS) $<
 
+ocaml-parser/parser.mli ocaml-parser/parser.ml: ocaml-parser/parser.mly
+	ocamlyacc -v ocaml-parser/parser.mly
+
 
 # clean and depend
 ##################
 
 clean:
-	rm -f *~ *.cm[iox] *.o ocamlweb doclexer.ml pretty.ml version.ml
-	make -C ocaml-parser clean
+	rm -f *~ *.cm[iox] *.o 
+	rm -f ocamlweb doclexer.ml pretty.ml version.ml
+	rm -f ocaml-parser/*~ ocaml-parser/*.cm[iox] ocaml-parser/*.o
+	rm -f ocaml-parser/lexer.ml
+	rm -f ocaml-parser/parser.mli ocaml-parser/parser.ml
 	make -C doc clean
 
-depend: doclexer.ml pretty.ml
+depend: doclexer.ml pretty.ml ocaml-parser/parser.ml ocaml-parser/lexer.ml
 	rm -f .depend
-	ocamldep $(ZLIBS) *.mli *.ml > .depend
-	make -C ocaml-parser depend
+	ocamldep $(ZLIBS) *.mli *.ml ocaml-parser/*.ml ocaml-parser/*.mli > .depend
 
 include .depend
 
