@@ -4,20 +4,20 @@
 
 type location = Lex_syntax.location
 
+type token_decls =
+    Typed_tokens of location * string list      (*r \verb|%token <type> ...| *)
+  | Untyped_tokens of string list               (*r \verb|%token ...| *)
+  | Typed_non_terminals of location * string list (*r \verb|%type <type> ...| *)
+  | Non_terminals of string list          (*r \verb|%start ...| *)
+  | Tokens_assoc of string list        (*r \verb|%left|, \verb|%right| or \verb|%nonassoc| *)
+
+
 type yacc_definitions =
     {
       header : location ;
-      (* list of pairs (type,token names) *)
-      token_decls : (location * string list) list;
-      (* list of token properties, pairs (prop,token names) where prop is either  start, left, right or nonassoc) *)
-      token_props : (string * string list) list;
-      (* type of non-terminals *)
-      type_decls : (location * string) list;
-      (* grammar rules and actions *)
+      token_decls : token_decls list;
       rules : (string * (string list * location) list) list ;
-      (* trailer *)
-      trailer : location
-    }
+      trailer : location }
 
 
 

@@ -29,9 +29,7 @@
 yacc_definitions: 
   header tokendecls Tmark rules header EOF 
   { { header = $1 ; 
-      token_decls = [];
-      token_props = [];
-      type_decls = [];
+      token_decls = $2;
       rules = $4;
       trailer = $5 } }
 ;
@@ -52,19 +50,19 @@ tokendecls:
 
 tokendecl:
   | Ttoken Ttypedecl idlist
-      { ($2,$3) }
+      { Typed_tokens($2,$3) }
   | Ttoken idlist
-      { (dummy_loc,$2) }
+      { Untyped_tokens($2) }
   | Ttype Ttypedecl idlist
-      { ($2,$3) }
+      { Typed_non_terminals($2,$3) }
   | Tstart idlist
-      { (dummy_loc,$2) }
+      { Non_terminals($2) }
   | Tleft idlist
-      { (dummy_loc,$2) }
+      { Tokens_assoc($2) }
   | Tnonassoc idlist
-      { (dummy_loc,$2) }
+      { Tokens_assoc($2) }
   | Tright idlist
-      { (dummy_loc,$2) }
+      { Tokens_assoc($2) }
 ;
 
 idlist:
