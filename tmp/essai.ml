@@ -12,7 +12,7 @@ exception 'a AAA of 'a aatoto * 'b aatruc * aamachin
 type machin = { champ1 : int;
 		champ2 : string }
 
-let (C (x,y)) = z
+let (C (x,y)) = x != y
 
 (*s Voila un commentaire dans lequel je cite du code : *)
 (*i(*i*)
