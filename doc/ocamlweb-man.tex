@@ -8,7 +8,7 @@
 
 %%% titre %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{ocamlweb: a literate programming tool \\ 
-       for Objective Caml}
+               for Objective Caml}
 \author{Jean-Christophe Filli\^{a}tre \\
         \normalsize\texttt{www.lri.fr/\~{}filliatr}}
 \date{}
@@ -21,14 +21,81 @@
 
 \section{Principles}
 
-Documentation is inserted into \Caml\ files as \emph{comments}.
+Documentation is inserted into \Caml\ files as \emph{comments}.  Thus
+your files may compile as usual, whether you use \ocamlweb\ or not.
+\ocamlweb\ presupposes that the given \Caml\ files are well-formed (at
+least lexically, but also syntactically it you want the cross
+references to be correct).  \ocamlweb\ understands each \Caml\ file as
+a sequence of paragraph, each paragraph being either a piece code or a
+piece of documentation.  Documentation starts and ends with \Caml\ 
+comment's delimiters \texttt{(*} and \texttt{*)}, and is a regular
+\LaTeX\ text. Code starts with any characters sequence other than
+\texttt{(*} and ends with an empty line.
+
+Documentation and code are displayed in \emph{sections}, numbered
+consecutively starting with~1. A new section is started at the
+beginning of each file. You can also start a new section manually (see
+the paragraph below about controls). The role of sections is to be
+used as references in the various indexes produced at the end of the
+document.
+Indeed, the main task of \ocamlweb, after the pretty-printing job
+consisting in making a readable documentation of the code, is to
+generate a global index of cross-references, where each identifier is
+associated to the lists of sections where it is defined and used.
+
+
+\paragraph{Escapings: code inside documentation and vice versa.}
+The first feature you will require is the ability to quote code inside
+documentation and conversely. The latter, namely documentation inside
+code, is simply obtained by normal \Caml\ comments filled in with a
+\LaTeX\ contents. The former is obtained by quoting code between the
+delimiters \texttt{[} and \texttt{]}. Square brackets may be nested,
+the inner ones being understood as being part of the quoted code (thus
+you can quote a list expression like $[1;2;3]$ by writing
+\texttt{[[1;2;3]]}). Inside quotations, the code is pretty-printed in
+the same way as it is in code parts.
+
+
+\paragraph{Controls.}
+In addition to the default behavior of \ocamlweb, you can control it
+through a small set of commands, which are comments of a particular
+shape. These commands are the following:
+\begin{description}
+
+\item[\texttt{(*s}] ~\par
+  
+  Starts a new section.
+
+\item[\texttt{(*i} \quad\dots\quad \texttt{i*)}] ~\par
+  
+  Ignores all the text between those two delimiters.  Such ``comments''
+  cannot be nested but any \Caml\ code and comments may appear between
+  them, included nested \Caml\ comments.  You can use those delimiters
+  to enclose a comment that shouldn't appear in the document, but also
+  to comment some \Caml\ code between \texttt{(*i*)} and
+  \texttt{(*i*)} in such a way that your code still compile but is
+  ignored by \ocamlweb.
+
+\item[\texttt{(*c}] ~\par
+  
+  Tells \ocamlweb\ that this is a real \Caml\ comment an not a
+  documentation text. Mainly useful is you want to insert comments
+  after empty lines. However, this is not the spirit of \ocamlweb, and
+  you are encouraged to put the documentation in separate paragraphs
+  and not in traditional \Caml\ comments.
+
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Hints to get a pretty document}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Usage}
 
-\ocamlweb\ is invoked with a shell command line as
+\ocamlweb\ is invoked on a shell command line as follows:
 \begin{displaymath}
   \texttt{ocamlweb }<\textit{options and files}>
 \end{displaymath}
@@ -41,33 +108,55 @@ on the command line is kept in the final document.
 
 \begin{description}
 
-\item[\texttt{-header}:]
+\item[\texttt{--o }\textit{file}, \texttt{--output }\textit{file}] ~\par
+  
+  Redirects the output to file \textit{file}.
 
-  Do not skip the header of \Caml\ files. The default behavior is to
+\item[\texttt{--header}] ~\par
+
+  Does not skip the header of \Caml\ files. The default behavior is to
   skip them, since there are usually made of copyright and license
   informations, which you do not want to see in the final document.
   Headers are identified as comments right at the beginning of the
   \Caml\ file, and are stopped by any character other then a space
   outside a comment or by an empty line. 
 
-\item[\texttt{-o }\textit{file}:] 
-  
-  Redirect the output to file \textit{file}.
+\item[\texttt{--extern-defs}] ~\par
 
-\item[\texttt{-nodoc}:]
+  Keeps the external definitions in the index i.e. the identifiers
+  which are not defined in any part of the code. (The default behavior
+  is to suppress them from the index, even if they are used somewhere
+  in the code.)
 
-  Suppress the header and trailer of the document. Thus, you can
-  insert the resulting document into a larger document.
+\item[\texttt{--nodoc}] ~\par
 
-\item[\texttt{-h}:]
+  Suppresses the header and trailer of the final document. Thus, you can
+  insert the resulting document into a larger one.
 
-  Give a short summary of the options.
+\item[\texttt{-h}, \texttt{--help}] ~\par
 
-\item[\texttt{-v}:]
+  Gives a short summary of the options and exit.
 
-  Print the version and exit.
+\item[\texttt{-v}, \texttt{--version}] ~\par
+
+  Prints the version and exit.
 
 \end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{FAQ}
+
+\begin{enumerate}
+\item \textbf{How can I insert `usepackage' commands, or whatever else,
+  in the \LaTeX\ preamble ?} ~\par
+
+  Use the option \texttt{--nodoc} and catenate the result with your
+  own header and trailer.
+
+\end{enumerate}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
