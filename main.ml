@@ -271,6 +271,8 @@ let clean_temp_files basefile =
   remove (basefile ^ ".haux");
   remove (basefile ^ ".html")
 
+let clean_and_exit basefile res = clean_temp_files basefile; exit res
+
 let cat file =
   let c = open_in file in
   try
@@ -305,7 +307,8 @@ let produce_output fl =
     in
     let res = locally (dirname texfile) Sys.command command in
     if res <> 0 then begin
-      eprintf "Couldn't run LaTeX successfully\n"; exit res
+      eprintf "Couldn't run LaTeX successfully\n"; 
+      clean_and_exit basefile res
     end;
     let dvifile = basefile ^ ".dvi" in
     if !dvi then begin
@@ -325,7 +328,8 @@ let produce_output fl =
       in
       let res = Sys.command command in
       if res <> 0 then begin
-	eprintf "Couldn't run dvips successfully\n"; exit res
+	eprintf "Couldn't run dvips successfully\n"; 
+	clean_and_exit basefile res
       end;
       if !output_file = "" then cat psfile
     end;
@@ -340,7 +344,8 @@ let produce_output fl =
       in
       let res = Sys.command command in
       if res <> 0 then begin
-	eprintf "Couldn't run hevea successfully\n"; exit res
+	eprintf "Couldn't run hevea successfully\n"; 
+	clean_and_exit basefile res
       end;
       if !output_file = "" then cat htmlfile
     end;
