@@ -353,13 +353,12 @@ let output_index_entry s def use =
 
 let output_raw_index_entry s def use =
   let sep () = output_string "," in
-  let output_label n = output_string ("code" ^ (string_of_int n)) in
   output_string "\\ocwrefindexentry{";
   output_raw_ident s;
   output_string "}{";
-  print_list output_label sep def;
+  print_list output_string sep def;
   output_string "}{";
-  print_list output_label sep use;
+  print_list output_string sep use;
   output_string "}\n"
 
 let output_label l =

@@ -141,12 +141,15 @@ let rec uniquize = function
   | [] | [_] as l -> l
   | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
 
+let make_label_name (f,n) =
+  (Filename.basename f) ^ ":" ^ (string_of_int n)
+
 let print_one_entry s =
   let list_in_table t =
     try 
       let l = Whereset.elements (Idmap.find s !t) in
-      let l = List.map find_where l in
-      uniquize (Sort.list (<) l)
+      let l = List.map (fun w -> w.w_filename,find_where w) l in
+      uniquize (Sort.list (fun (_,y) (_,y') -> y<y') l)
     with Not_found -> 
       []
   in
@@ -154,9 +157,10 @@ let print_one_entry s =
   and use = list_in_table used in
   if !extern_defs || def <> [] then
     if !web then 
-      output_index_entry s def use 
+      output_index_entry s (List.map snd def) (List.map snd use) 
     else 
-      output_raw_index_entry s def use
+      output_raw_index_entry s 
+	(List.map make_label_name def) (List.map make_label_name use) 
 
 let print_index () =
   begin_index ();
@@ -177,7 +181,7 @@ let pretty_print_paragraph f = function
       if not !web then begin 
 	incr code_number;
 	add_code f l !code_number;
-	output_label ("code" ^ (string_of_int !code_number))
+	output_label (make_label_name (f,!code_number))
       end;
       pretty_print_code s
 

@@ -25,6 +25,12 @@
 \newif\ifvisiblespaces\visiblespacestrue
 \DeclareOption{novisiblespaces}{\visiblespacesfalse}
 
+% option for index by pages
+
+\newif\ifbypage\bypagefalse
+\DeclareOption{bypages}{\bypagetrue}
+
+
 \ProcessOptions
 
 
@@ -93,4 +99,24 @@
 \newcommand{\ocwwebindexentry}[3]{\item #1,\quad#2#3}
 
 % index entry in LaTeX style
-\newcommand{\ocwrefindexentry}[3]{\item #1,\quad\textbf{#2}, #3}
+
+\def\loopbody{%
+\edef\ocwnext{%
+\@ifundefined{r@\ocwloop}{??}{\ifbypage\pageref{\ocwloop}\else
+    \ref{\ocwloop}\fi}}%
+\ifx\ocwprevious\ocwnext\relax
+\else
+\ocwsep\ocwoutputref{\ocwnext}%
+\edef\ocwprevious{\ocwnext}%
+\def\ocwsep{, }%
+\fi}
+\def\compresslist#1{%
+\def\ocwprevious{0}%
+\def\ocwsep{\relax}%
+\@for \ocwloop:=#1\do{\loopbody}}
+
+\newcommand{\ocwrefindexentry}[3]{\item #1,\quad
+\def\ocwoutputref{\textbf}%
+\compresslist{#2}, 
+\def\ocwoutputref{\textrm}%
+\compresslist{#3}}

@@ -104,7 +104,7 @@ val end_paragraph : unit -> unit
 
 val begin_index : unit -> unit
 val output_index_entry : string -> int list -> int list -> unit
-val output_raw_index_entry : string -> int list -> int list -> unit
+val output_raw_index_entry : string -> string list -> string list -> unit
 val end_index : unit -> unit
 
 val output_label : string -> unit
