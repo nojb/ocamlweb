@@ -1,5 +1,5 @@
 
-  o style WEB and style USER
+  o style WEB and style LaTeX
   o ocamlweb now uses the ocaml parser to extract definitions and uses
   o better adequacy to the ocaml lexer when separating code and documentation
 

@@ -16,6 +16,13 @@
 
 (* $Id$ *)
 
+(* That module exports to global tables [used] and [defined], indexed
+   by identifiers (strings) and containing respectively the sets of locations
+   where they are defined and used.
+   Those locations are of type [where], which contain the name of the file
+   and the absolute position in the source.
+ *)
+   
 type where = { w_filename : string; w_loc : int }
 
 module Idmap : Map.S with type key = string
@@ -26,6 +33,8 @@ module Whereset : Set.S with type elt = where
 
 val used : Whereset.t Idmap.t ref
 val defined : Whereset.t Idmap.t ref
+
+(*s The two following functions fill the above table for a given file. *)
 
 val cross_implem : string -> unit
 val cross_interf : string -> unit

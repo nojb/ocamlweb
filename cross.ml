@@ -16,14 +16,19 @@
 
 (* $Id$ *)
 
+(*i*)
 open Location
 open Longident
 open Output
 open Printf
 open Asttypes
 open Parsetree
+(*i*)
 
-(* Cross references inside Caml files *)
+(* Cross references inside Caml files are kept in the following two 
+   global tables, which keep the places where things are defined and
+   used, to produce the final indexes.
+ *)
 
 type where = { w_filename : string; w_loc : int }
 	       
@@ -31,11 +36,11 @@ module Whereset = Set.Make(struct type t = where let compare = compare end)
 		    
 module Idmap = Map.Make(struct type t = string let compare = compare end)
 		 
-(* Those two global tables keep the places where things are defined and
-   used, to produce the final indexes *)
-
 let defined = ref Idmap.empty
 let used = ref Idmap.empty
+
+
+(*s The following generic function is used to add an entry in one table. *)
 	     
 let add_global table k i =
   try
@@ -44,7 +49,10 @@ let add_global table k i =
   with Not_found ->
     table := Idmap.add k (Whereset.add i Whereset.empty) !table
       
-(* The following tables are used locally, at each step *)
+
+(*s Another table, [locals], keeps the local identifiers, in order to
+    distinguish them from global identifiers.
+ *)
       
 module Stringset = Set.Make(struct type t = string let compare = compare end)
 		     
