@@ -39,7 +39,7 @@ CAMLLEX_CMO = ocamllex-parser/lex_parser.cmo ocamllex-parser/lex_lexer.cmo
 
 CAMLLEX_CMX = $(CAMLLEX_CMO:.cmo=.cmx)
 
-CMO = output.cmo cross.cmo pretty.cmo \
+CMO = output.cmo yacc_parser.cmo yacc_lexer.cmo cross.cmo pretty.cmo \
       web.cmo doclexer.cmo \
       version.cmo main.cmo
 
@@ -97,7 +97,8 @@ test: test/test.tex
 	-hevea -o test.html ../ocamlweb.sty test.tex; \
 	xdvi test.dvi
 
-BOOTSTRAP= bootstrap.tex output.mli output.ml cross.mli cross.ml \
+BOOTSTRAP= bootstrap.tex output.mli output.ml \
+	   yacc_parser.mly yacc_parser.mll cross.mli cross.ml \
            pretty.mli pretty.mll \
 	   web.mli web.ml doclexer.mli doclexer.mll main.ml 
 
@@ -203,6 +204,9 @@ binary: ocamlweb manual
 ocaml-parser/parser.mli ocaml-parser/parser.ml: ocaml-parser/parser.mly
 	ocamlyacc -v ocaml-parser/parser.mly
 
+yacc_parser.mli yacc_parser.ml: yacc_parser.mly
+	ocamlyacc -v yacc_parser.mly
+
 ocamllex-parser/lex_parser.mli ocamllex-parser/lex_parser.ml: ocamllex-parser/lex_parser.mly
 	ocamlyacc -v ocamllex-parser/lex_parser.mly
 
@@ -210,7 +214,8 @@ ocamllex-parser/lex_parser.mli ocamllex-parser/lex_parser.ml: ocamllex-parser/le
 # clean and depend
 ##################
 
-GENERATED = doclexer.ml pretty.ml version.ml \
+GENERATED = doclexer.ml pretty.ml version.ml yacc_lexer.ml \
+	    yacc_parser.ml yacc_parser.mli \
             ocaml-parser/lexer.ml ocaml-parser/linenum.ml \
 	    ocaml-parser/parser.mli ocaml-parser/parser.ml \
 	    ocamllex-parser/lex_lexer.ml ocamllex-parser/lex_parser.ml \

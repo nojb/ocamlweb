@@ -5,7 +5,11 @@
 */
 
 /* Header Yacc en \LaTeX\ */
+
+C'est censé marcher, ça ?????????
+
 /*i*/
+
 %{
 
 (*i*)

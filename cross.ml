@@ -71,8 +71,10 @@ let add_global table k i =
       
 let current_file = ref ""
 
+let current_offset = ref 0
+
 let current_location loc = 
-  { w_filename = !current_file; w_loc = loc.loc_start }
+  { w_filename = !current_file; w_loc = !current_offset + loc.loc_start }
 
 let add_def loc t s =
   if String.length s > 1 then
@@ -90,8 +92,11 @@ module Stringset = Set.Make(struct type t = string let compare = compare end)
 		     
 let locals = ref Stringset.empty
 
-let reset_cross () =
-  locals := Stringset.empty
+let reset_cross f offs =
+  assert (Stringset.cardinal !locals = 0);
+  locals := Stringset.empty;
+  current_file := f;
+  current_offset := offs
 
 let add_local s =
   locals := Stringset.add s !locals
@@ -522,8 +527,7 @@ let add_module m =
   add_def { loc_start = 0; loc_end = 0; loc_ghost = false } Module m
 
 let wrapper parsing_function traverse_function f m =
-  reset_cross ();
-  current_file := f;
+  reset_cross f 0;
   add_module m;
   let c = open_in f in
   let lexbuf = Lexing.from_channel c in
@@ -540,17 +544,39 @@ let cross_implem = wrapper Parse.implementation tr_structure
 
 let cross_interf = wrapper Parse.interface tr_signature
 
+(*s cross-referencing lex and yacc description files *)
+
+let lexer_function_inside_file ic loc =
+  seek_in ic loc.Lex_syntax.start_pos;
+  let left = ref (loc.Lex_syntax.end_pos - loc.Lex_syntax.start_pos) in
+  fun buf len ->
+    let m = input ic buf 0 (min !left len) in
+    for i=0 to pred m do
+      if String.get buf i = '$' then String.set buf i ' '
+    done;
+    left := !left - m;
+    m
+
+let cross_action_inside_file f m loc = 
+  reset_cross f loc.Lex_syntax.start_pos;
+  let c = open_in f in
+  let lexbuf = Lexing.from_function (lexer_function_inside_file c loc) in
+  try
+    tr_structure (Parse.implementation lexbuf);
+    close_in c
+  with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
+    if not !quiet then
+      eprintf " ** warning: syntax error while parsing action in %s\n" f;
+    close_in c
+  end
+
 (*s cross-referencing lex description files *)
-
-let cross_structure_inside_file f m loc = ()
-
-let cross_expression_inside_file f m loc = ()
 
 let add_used_regexps f m r = ()
 
 let traverse_lex_defs f m lexdefs =
   (* traverse header *)
-  cross_structure_inside_file f m lexdefs.Lex_syntax.header;
+  cross_action_inside_file f m lexdefs.Lex_syntax.header;
   (* traverse named regexps *)
   List.iter
     (fun (id,regexp) -> 
@@ -564,17 +590,16 @@ let traverse_lex_defs f m lexdefs =
        List.iter 
 	 (fun (regexp,action) ->
 	    add_used_regexps f m regexp;
-	    cross_expression_inside_file f m action)
+	    cross_action_inside_file f m action)
 	 rules)
     lexdefs.Lex_syntax.entrypoints;
   (* traverse trailer *)
-  cross_structure_inside_file f m lexdefs.Lex_syntax.trailer
+  cross_action_inside_file f m lexdefs.Lex_syntax.trailer
 
   
 
 let cross_lex f m =
-  reset_cross ();
-  current_file := f;
+  reset_cross f 0;
   add_module m;
   let c = open_in f in
   let lexbuf = Lexing.from_channel c in
@@ -588,3 +613,46 @@ let cross_lex f m =
     close_in c
   end
   
+(*s cross-referencing yacc description files *)
+
+let traverse_yacc f m yacc_defs = 
+  (* traverse header *)
+  cross_action_inside_file f m yacc_defs.Yacc_syntax.header;
+  (* traverse token decls *)
+
+  (* traverse grammar rules *)
+  List.iter
+    (fun (lhs,rhs) ->
+       (*i add_def lhs YaccNonTerminal; i*)
+       List.iter
+	 (fun (rhs,action) ->
+	    (*i add_used rhs YaccNonTerminal i*)
+	    Printf.eprintf "yacc action between %d and %d\n" action.Lex_syntax.start_pos action.Lex_syntax.end_pos; 
+	    cross_action_inside_file f m action)
+	 rhs)
+    yacc_defs.Yacc_syntax.rules;
+  (* traverse trailer *)
+  cross_action_inside_file f m yacc_defs.Yacc_syntax.trailer
+
+let cross_yacc f m =
+  reset_cross f 0;
+  add_module m;
+  let c = open_in f in
+  let lexbuf = Lexing.from_channel c in
+  try
+    let yacc_defs = Yacc_parser.yacc_definitions Yacc_lexer.main lexbuf in
+    traverse_yacc f m yacc_defs;
+    close_in c
+  with Parsing.Parse_error -> begin
+    if not !quiet then
+      eprintf " ** warning: syntax error while parsing %s\n" f;
+    close_in c
+  end
+    | Yacc_lexer.Lexical_error(msg,line,col) -> begin
+    if not !quiet then
+      eprintf " ** warning: while parsing %s, lexical error (%s) at line %d, character %d\n" f msg line col;
+    close_in c
+  end
+
+
+
