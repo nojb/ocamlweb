@@ -129,6 +129,8 @@ and code = parse
   | "(*" | "(*c"
          { comment_depth := 1; Buffer.add_string codeb "(*";
 	   comment lexbuf; code lexbuf }
+  | space* "(*i"
+         { ignore lexbuf; skip_until_nl lexbuf; code lexbuf }
   | '"'  { Buffer.add_char codeb '"'; code_string lexbuf; code lexbuf }
   | character
          { Buffer.add_string codeb (Lexing.lexeme lexbuf); code lexbuf }
