@@ -97,7 +97,7 @@ rule pr_code = parse
 (*s That function pretty-prints the code anywhere else. *)
 
 and pr_code_inside = parse
-  | '\n' { () }
+  | '\n' { end_line () }
   | "'" ('a'|'b'|'c'|'d')
          { output_greek_letter (lexeme_char lexbuf 1); 
 	   pr_code_inside lexbuf }
@@ -112,7 +112,7 @@ and pr_code_inside = parse
          { output_latex_special (lexeme lexbuf); pr_code_inside lexbuf }
   | (identifier '.')* identifier
          { output_ident (lexeme lexbuf); pr_code_inside lexbuf }
-  | eof  { () }
+  | eof  { end_line() }
   | _    { output_char (first_char lexbuf); pr_code_inside lexbuf }
 
 

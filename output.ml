@@ -103,14 +103,21 @@ let leave_math () =
   end
 
 
+(*s \textbf{End of lines.}
+    [(end_line ())] ends a line. (used for code only). *)
+
+let end_line () =
+  leave_math ();
+  output_string "\\ocweol\n"
+
+
 (*s \textbf{Indentation.}
     An indentation at the beginning of a line of $n$ spaces 
     is produced by [(indentation n)] (used for code only). *)
 
 let indentation n =
-  leave_math ();
   let space = 0.5 *. (float n) in
-  output_string (sprintf "\\ocwnl{%2.2fem}\n" space)
+  output_string (sprintf "\\ocwindent{%2.2fem}\n" space)
 
 
 (*s \textbf{Keywords.}

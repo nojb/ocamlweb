@@ -1,4 +1,14 @@
+(Dis donc emacs, ceci est du -*-text-*- !)
 
+                    LIST OF CHANGES
+		    ===============
+
+$Id$
+
+
+  o \ocwnl has been splitted into \ocweol and \ocwindent for better
+    code printing. a new corresponding function end_line has been
+    added into output.ml.
   o \verb and \begin{verbatim} correctly handled during pretty-printing
   o option --no-web becomes --latex-sects
   o option --no-doc becomes --no-preamble

@@ -36,18 +36,20 @@ val output_string : string -> unit
 val output_file : string -> unit
 val output_verbatim : string -> unit
 
-(*s The following functions are mainly useful for a \LaTeX\ output, but
-    will work correctly in other cases. A call to [set_no_doc] suppresses
-    the output of the header and trailer. [(indentation n)] introduces an
-    indentation of size [n] at the beggining of a line. 
-    [latex_header] takes as argument the options of the \LaTeX\ package
-    ocamlweb.sty.
+(*s The following functions are mainly useful for a \LaTeX\ output,
+    but will work correctly in other cases. A call to
+    [set_no_preamble] suppresses the output of the header and
+    trailer. [(end_line ())] ends a line, [(indentation n)] introduces
+    an indentation of size [n] at the beggining of a line.
+    [latex_header] takes as argument the options of the \LaTeX\
+    package ocamlweb.sty.
 *)
 
 val set_no_preamble : bool -> unit
 val latex_header : string -> unit
 val latex_trailer : unit -> unit
 
+val end_line : unit -> unit
 val indentation : int -> unit
 val enter_math : unit -> unit
 val leave_math : unit -> unit

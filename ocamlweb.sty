@@ -65,11 +65,13 @@
 \newcommand{\ocwlowerid}[1]{\textit{#1\/}}
 \newcommand{\ocwupperid}[1]{\textit{#1\/}}
 
-% newline with indentation of the next line as argument
+% newline, and indentation 
+\newcommand{\ocweol}{\par}
 %BEGIN LATEX
-\newcommand{\ocwnl}[1]{\par\noindent\kern#1}
+\newcommand{\ocwindent}[1]{\noindent\kern#1}
 %END LATEX
-%HEVEA\newcommand{\ocwnl}[1]{\\\hspace{#1}\hspace{#1}}
+%HEVEA\newcommand{\ocwindent}[1]{\hspace{#1}\hspace{#1}}
+
 
 
 % visible space in a string
