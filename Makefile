@@ -9,7 +9,7 @@ BINDIR = $(HOME)/bin/$(OSTYPE)
 #########################################
 
 MAJORVN=0
-MINORVN=01
+MINORVN=02
 VERSION=$(MAJORVN).$(MINORVN)
 
 CAMLC    = ocamlc

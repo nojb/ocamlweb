@@ -20,13 +20,11 @@ type paragraph =
     Documentation of string
   | Code of string
 
-type section = { 
-  section_ids : string list;
-  section_contents : paragraph list }
+type raw_section = paragraph list
 
 type implem = { 
   implem_name : string;
-  implem_contents : section list }
+  implem_contents : raw_section list }
 
 type decl = { 
   decl_id : string;

@@ -27,32 +27,37 @@
   let comment_depth = ref 0
 
   let parlist = ref ([] : paragraph list)
-  let seclist = ref ([] : section list)
+  let seclist = ref ([] : raw_section list)
   let declist = ref ([] : decl list)
-  let idslist = ref ([] : string list)
-
-  let new_section () =
-    parlist := [];
-    idslist := []
 
   let reset_lexer () =
     comment_depth := 0;
-    new_section ();
+    parlist := [];
     seclist := [];
     declist := []
 
-  let push_section () =
+  let new_section () =
     if !parlist <> [] then begin
-      seclist :=
-      { section_ids = !idslist; section_contents = List.rev !parlist } 
-      :: !seclist;
-      new_section ()
-    end
+      seclist := (List.rev !parlist) :: !seclist
+    end;
+    parlist := []
 
   let first_char lexbuf = Lexing.lexeme_char lexbuf 0
 
   let docub = Buffer.create 8192
   let codeb = Buffer.create 8192
+
+  let push_code () =
+    if Buffer.length codeb > 0 then begin
+      parlist := (Code (Buffer.contents codeb)) :: !parlist;
+      Buffer.clear codeb
+    end
+
+  let push_doc () =
+    if Buffer.length docub > 0 then begin
+      parlist := (Documentation (Buffer.contents docub)) :: !parlist;
+      Buffer.clear docub
+    end
 
   let current_indent = ref 0
   let line_indent = ref 0
@@ -85,23 +90,21 @@ rule header = parse
   | _      { lexbuf.lex_curr_pos <- lexbuf.lex_curr_pos - 1 }
   | eof    { () }
 
-(* to `parse' a module (we always start at the beginning of a line) *)
+(* inside a module, at the beginning of a line) *)
 and implementation = parse
-  | "(*"   { comment_depth := 1;
-	     if !line_indent > !current_indent then begin
-	       Buffer.add_string codeb "(*"; comment lexbuf
-	     end else begin
-	       Buffer.clear docub; 
-	       parlist := (documentation lexbuf) :: !parlist
-	     end;
+  | "(*"   { comment_depth := 1; Buffer.clear docub; documentation lexbuf;
 	     implementation lexbuf }
-  | space+ { beginning_of_line (Lexing.lexeme lexbuf); implementation lexbuf }
-  | '\n'   { beginning_of_line ""; implementation lexbuf }
-  | _      { Buffer.add_char codeb (first_char lexbuf); 
-	     code_until_nl lexbuf; implementation lexbuf }
-  | eof    { push_section (); List.rev !seclist }
+  | "(*s"  { new_section (); 
+	     comment_depth := 1; Buffer.clear docub; documentation lexbuf;
+	     implementation lexbuf }
+  | space+ { implementation lexbuf }
+  | '\n'   { implementation lexbuf }
+  | _      { Buffer.clear codeb; Buffer.add_char codeb (first_char lexbuf); 
+	     code_until_nl lexbuf; code lexbuf;
+	     implementation lexbuf }
+  | eof    { new_section (); List.rev !seclist }
       
-(* the documentation part *)
+(* inside the documentation part *)
 and documentation = parse
   | "(*" { comment_depth := succ !comment_depth; documentation lexbuf }
   | "*)" { comment_depth := pred !comment_depth;
@@ -109,24 +112,21 @@ and documentation = parse
 	     documentation lexbuf 
 	   else begin
 	     skip_until_nl lexbuf;
-	     Documentation (Buffer.contents docub) 
+	     push_doc ()
 	   end}
-  | "$Id\:" [^ '$']* "$"
+  | "$Id\058" [^ '$']* "$"
          { documentation lexbuf }
   | '\n' " * "
          { Buffer.add_string docub "\n "; documentation lexbuf }
+  | eof  { push_doc () }
   | _    { Buffer.add_char docub (first_char lexbuf); documentation lexbuf }
-  | eof  { Documentation (Buffer.contents docub) }
 
-(* to `parse' an interface *)
-and interface = parse
-  | eof  { !declist }
-
-(* to skip everything until a newline *)
-and skip_until_nl = parse
-  | '\n' { () }
-  | eof  { () }
-  | _    { skip_until_nl lexbuf }
+(* inside the code part, at the beginning of a line *)
+and code = parse
+  | '\n' { push_code () }
+  | eof  { push_code () }
+  | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf;
+	   code lexbuf }
 
 (* to read the code until the newline *)
 and code_until_nl = parse
@@ -136,16 +136,23 @@ and code_until_nl = parse
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); code_until_nl lexbuf }
 
+(* inside an interface *)
+and interface = parse
+  | eof  { !declist }
+
+(* to skip everything until a newline *)
+and skip_until_nl = parse
+  | '\n' { () }
+  | eof  { () }
+  | _    { skip_until_nl lexbuf }
+
 (* to read a comment inside a piece of code *)
 and comment = parse
   | "(*" { Buffer.add_string codeb "(*";
 	   comment_depth := succ !comment_depth; comment lexbuf }
   | "*)" { Buffer.add_string codeb "*)";
 	   comment_depth := pred !comment_depth;
-           if !comment_depth > 0 then 
-	     comment lexbuf 
-	   else 
-	     code_until_nl lexbuf }
+           if !comment_depth > 0 then comment lexbuf }
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); comment lexbuf }
 
