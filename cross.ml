@@ -547,6 +547,15 @@ let cross_interf = wrapper Parse.interface tr_signature
 
 (*s cross-referencing lex and yacc description files *)
 
+let input_string_inside_file ic loc =
+  seek_in ic loc.Lex_syntax.start_pos;
+  let len = loc.Lex_syntax.end_pos - loc.Lex_syntax.start_pos in
+  let buf = String.create len in
+  try
+    really_input ic buf 0 len;
+    buf
+  with End_of_file -> assert false
+
 let lexer_function_inside_file ic loc =
   seek_in ic loc.Lex_syntax.start_pos;
   let left = ref (loc.Lex_syntax.end_pos - loc.Lex_syntax.start_pos) in
@@ -572,6 +581,22 @@ let cross_action_inside_file msg f m loc =
     if not !quiet then begin
       eprintf "File \"%s\", character %d\n" f loc.Lex_syntax.start_pos;
       eprintf " ** warning: syntax error while parsing %s\n" msg
+    end;
+    close_in c
+  end
+
+let cross_type_inside_file f m loc = 
+  reset_cross f (loc.Lex_syntax.start_pos - 7);
+  let c = open_in f in
+  let lexbuf = 
+    Lexing.from_string ("type t=" ^ input_string_inside_file c loc) in
+  try
+    tr_structure (Parse.implementation lexbuf);
+    close_in c
+  with Syntaxerr.Error _ | Syntaxerr.Escape_error | Lexer.Error _ -> begin
+    if not !quiet then begin
+      eprintf "File \"%s\", character %d\n" f loc.Lex_syntax.start_pos;
+      eprintf " ** warning: syntax error while parsing type\n"
     end;
     close_in c
   end
@@ -714,9 +739,9 @@ let traverse_yacc f m yacc_defs =
   List.iter
     (function 
        | Yacc_syntax.Typed_tokens(typ,idl) ->
-	   cross_action_inside_file "type" f m typ
+	   cross_type_inside_file f m typ
        | Yacc_syntax.Non_terminals_type(typ,idl) -> 
-	   cross_action_inside_file "type" f m typ
+	   cross_type_inside_file f m typ
        | _ -> ())
     yacc_defs.Yacc_syntax.decls;
   (* traverse actions *)
