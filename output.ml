@@ -95,7 +95,7 @@ let latex_header opt =
     output_string "\\usepackage";
     if opt <> "" then output_string (sprintf "[%s]" opt);
     output_string "{ocamlweb}\n";
-    output_string "\pagestyle{ocamlweb}\n";
+    output_string "\\pagestyle{ocamlweb}\n";
     Queue.iter (fun s -> output_string s; output_string "\n") preamble;
     output_string "\\begin{document}\n"
   end;
@@ -142,7 +142,7 @@ let leave_math () =
 
 let indentation n =
   let space = 0.5 *. (float n) in
-  output_string (sprintf "\ocwindent{%2.2fem}\n" space)
+  output_string (sprintf "\\ocwindent{%2.2fem}\n" space)
 
 
 (*s \textbf{End of lines.}
@@ -329,14 +329,14 @@ let output_yacc_ident s =
 
 let output_symbol = function
   | "*"  -> enter_math (); output_string "\\times{}"
-  | "**" -> enter_math (); output_string "*\!*"
+  | "**" -> enter_math (); output_string "*\\!*"
   | "->" -> enter_math (); output_string "\\rightarrow{}"
   | "<-" -> enter_math (); output_string "\\leftarrow{}"
   | "<=" -> enter_math (); output_string "\\le{}"
   | ">=" -> enter_math (); output_string "\\ge{}"
   | "<>" -> enter_math (); output_string "\\not="
   | "==" -> enter_math (); output_string "\\equiv"
-  | "!=" -> enter_math (); output_string "\\not\equiv"
+  | "!=" -> enter_math (); output_string "\\not\\equiv"
   | "~-" -> enter_math (); output_string "-"
   | "[<" -> enter_math (); output_string "[\\langle{}"
   | ">]" -> enter_math (); output_string "\\rangle{}]"
