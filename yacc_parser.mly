@@ -14,7 +14,7 @@
 /*s yacc tokens */
 
 %token Ttoken Tstart Ttype Tleft Tright Tnonassoc Tprec Terror
-%token <string> Tident
+%token <Yacc_syntax.ident> Tident
 %token <Yacc_syntax.location> Taction Ttypedecl
 %token Tor Tsemicolon Tcolon Tmark
 %token EOF
@@ -29,7 +29,7 @@
 yacc_definitions: 
   header tokendecls Tmark rules header EOF 
   { { header = $1 ; 
-      token_decls = $2;
+      decls = $2;
       rules = $4;
       trailer = $5 } }
 ;
@@ -54,9 +54,9 @@ tokendecl:
   | Ttoken idlist
       { Untyped_tokens($2) }
   | Ttype Ttypedecl idlist
-      { Typed_non_terminals($2,$3) }
+      { Non_terminals_type($2,$3) }
   | Tstart idlist
-      { Non_terminals($2) }
+      { Start_symbols($2) }
   | Tleft idlist
       { Tokens_assoc($2) }
   | Tnonassoc idlist

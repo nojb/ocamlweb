@@ -22,7 +22,7 @@
   let warning = ref false;;
 %}
 %token EOF LIFULA
-%token <string->string(*mettre une fleche ici *)> IDENT
+%token <end string->string(*mettre une fleche ici *)> IDENT
 
 %right LET
 %left IN 

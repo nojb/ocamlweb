@@ -63,6 +63,18 @@ let keyword_token lexbuf =
              ("unknown keyword " ^ String.escaped(Lexing.lexeme lexbuf),
               !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) 
 
+let cur_loc lexbuf = 
+  { start_pos = Lexing.lexeme_start lexbuf; 
+    end_pos = Lexing.lexeme_end lexbuf; 
+    start_line = !line_num; 
+    start_col = Lexing.lexeme_start lexbuf - !line_start_pos } 
+
+let reset_lexer () =
+  mark_count := 0;
+  line_num := 1;
+  line_start_pos := 0
+  
+
 }
 
 (*s main rule for tokens in yacc files *)
@@ -80,7 +92,12 @@ rule main = parse
   | ['A'-'Z' 'a'-'z'] ['A'-'Z' 'a'-'z' '\'' '_' '0'-'9'] *
     { match Lexing.lexeme lexbuf with
 	  "error" -> Terror
-	| s -> Tident(s) }
+	| s -> 	  let l = cur_loc lexbuf in
+	  (*i
+	  Printf.eprintf "ident '%s' occurs at (%d,%d)\n" 
+	    s l.start_pos l.end_pos;
+	  i*)
+	  Tident (s,l) }
   | '{' 
     { let n1 = Lexing.lexeme_end lexbuf
       and l1 = !line_num

@@ -26,10 +26,10 @@ type regular_expression =
   | Sequence of regular_expression * regular_expression
   | Alternative of regular_expression * regular_expression
   | Repetition of regular_expression
-  | Ident of string
+  | Ident of string * location
 
 type lexer_definition =
     { header: location;
-      named_regexps : (string * regular_expression) list;
-      entrypoints: (string * (regular_expression * location) list) list;
+      named_regexps : (string * location * regular_expression) list;
+      entrypoints: (string * location * (regular_expression * location) list) list;
       trailer: location }

@@ -53,78 +53,6 @@ type file =
   | Other  of string
 
 
-(*s To print a [file] (for testing) *)
-
-let print_string s = Format.printf "\"%s\"" s
-
-(* To print c "(" arg with the function pr ")" *)
-let print c pr arg =
-  Format.printf "@[<hv 0>%s(@," c;
-  pr arg;
-  Format.printf ")@]"
-
-(* to print a list between "[" "]" *)
-
-let rec print_end_list f l =
-  match l with
-      [] -> Format.printf "]@]"
-    | x::l ->
-	Format.printf ";@ ";
-	f x;
-	print_end_list f l
-;;
-
-let print_list f l =
-  match l with
-      [] -> Format.printf "[]"
-    | x::l ->
-	Format.printf "@[<hv 2>[ ";
-	f x;
-	print_end_list f l
-;;
-
- 
-(* To print a subparagraph *)
-let print_sub_paragraph = function 
-  | CamlCode(s)  -> print "CamlCode" print_string s;
-  | LexCode (s)  -> print "LexCode"  print_string s;
-  | YaccCode (s) -> print "YaccCode" print_string s
-      
-(* To print a paragraph *)
-let print_paragraph = function 
-  | Documentation(s) -> print "Documentation" print_string s
-  | Code(i,s) -> 
-      Format.printf "Code(%d,@ %s)" i s
-  | LexYaccCode(i,spl) -> 
-      Format.printf "@[<hv 5>LexYaccCode(%d,@ " i;
-      print_list print_sub_paragraph spl; 
-      Format.printf ")@]"
-      
-(* To print a section *)
-let print_raw_section { sec_contents = sc;
-			sec_beg = sb } =
-  Format.printf "@[<hv 2>{ sec_beg = %d ;@ sec_contents =@ " sb ; 
-  print_list print_paragraph sc;
-  Format.printf ";@ }@]"
-
-(* To print a [content] *)
-let print_content { content_file = c;
-		    content_name = cn;
-		    content_contents  = rl } =
-  Format.printf "@[<hv 2>{ content_file = \"%s\" ;@ content_name = \"%s\" ;@ contents_contents =@ " c cn ; 
-  print_list print_raw_section rl ;
-  Format.printf ";@ }@]"
-
-(* To print a [file] *)
-let print_file = function 
-  | Implem c -> print "Implem" print_content c
-  | Interf c -> print "Interf" print_content c
-  | Lex c    -> print "Lex"    print_content c
-  | Yacc c   -> print "Yacc"   print_content c
-  | Other s  -> print "Other"  print_string s
-      
-
-
 
 (*is To print a "Web.file" (for testing) *)
 
@@ -189,12 +117,17 @@ let print_content { content_file = c;
   Format.printf ";@ }@]"
 
 (* To print a [Web.file] *)
-let print_file = function 
-  | Implem c -> print "Implem" print_content c
-  | Interf c -> print "Interf" print_content c
-  | Lex c    -> print "Lex"    print_content c
-  | Yacc c   -> print "Yacc"   print_content c
-  | Other s  -> print "Other"  print_string s
+let print_file f = 
+  begin
+    match f with
+      | Implem c -> print "Implem" print_content c
+      | Interf c -> print "Interf" print_content c
+      | Lex c    -> print "Lex"    print_content c
+      | Yacc c   -> print "Yacc"   print_content c
+      | Other s  -> print "Other"  print_string s
+  end;
+  Format.printf "@."
+
       
 
 (*i*)
@@ -256,6 +189,10 @@ let add_sec_loc =
   fun f s ->
     incr sec_counter;
     add_file_loc sec_locations f (s.sec_beg,!sec_counter);
+    (*i
+    Printf.eprintf "section %d starts at character %d of file %s\n" 
+      !sec_counter s.sec_beg f;
+    i*)
     List.iter (add_par_loc f) s.sec_contents
 
 let add_file_loc it =
@@ -495,7 +432,7 @@ let pretty_print_file = function
 let produce_document l =
   (*i
     List.iter print_file l;
-  i*)
+    i*)
   List.iter locations_for_a_file l;
   build_index l;
   latex_header !latex_options;
@@ -503,3 +440,8 @@ let produce_document l =
   if !index then print_index ();
   latex_trailer ();
   close_output ()
+
+
+
+
+

@@ -552,6 +552,9 @@ let lexer_function_inside_file ic loc =
   fun buf len ->
     let m = input ic buf 0 (min !left len) in
     for i=0 to pred m do
+      (*i
+	Printf.eprintf "%c" (String.get buf i); 
+	i*)
       if String.get buf i = '$' then String.set buf i ' '
     done;
     left := !left - m;
@@ -570,23 +573,52 @@ let cross_action_inside_file f m loc =
     close_in c
   end
 
+let transl_loc loc =
+  { loc_start = loc.Lex_syntax.start_pos; 
+    loc_end = loc.Lex_syntax.end_pos; 
+    loc_ghost = false }
+  
 (*s cross-referencing lex description files *)
 
-let add_used_regexps f m r = ()
+let rec add_used_regexps f m r = 
+  match r with
+      Lex_syntax.Ident (id,loc) -> 
+	add_uses (transl_loc loc) RegExpr id
+    | Lex_syntax.Sequence(r1,r2) ->
+	add_used_regexps f m r1;
+	add_used_regexps f m r2
+    | Lex_syntax.Alternative(r1,r2) ->
+	add_used_regexps f m r1;
+	add_used_regexps f m r2
+    | Lex_syntax.Repetition(r) -> add_used_regexps f m r
+    | Lex_syntax.Epsilon
+    | Lex_syntax.Characters _ -> ()
+
 
 let traverse_lex_defs f m lexdefs =
-  (* traverse header *)
-  cross_action_inside_file f m lexdefs.Lex_syntax.header;
+  (* Caution : header, actions and trailer must be traversed last,
+    since traversing an action changes the location offset *)
   (* traverse named regexps *)
   List.iter
-    (fun (id,regexp) -> 
-       (*i add_def id RegExpr; i*)
+    (fun (id,loc,regexp) -> 
+       add_def (transl_loc loc) RegExpr id;
        add_used_regexps f m regexp)
     lexdefs.Lex_syntax.named_regexps;
+
   (* traverse lexer rules *)
   List.iter
-    (fun (id,rules) -> 
-       (*i add_defs id LexParseRule; i*)
+    (fun (id,loc,rules) -> 
+       add_def (transl_loc loc) LexParseRule id;
+       List.iter
+	 (fun (r,_) -> add_used_regexps f m r)	 
+	 rules)
+    lexdefs.Lex_syntax.entrypoints;
+  (* now we can traverse actions *)
+  (* traverse header *)
+  cross_action_inside_file f m lexdefs.Lex_syntax.header;
+  (* traverse actions *)
+  List.iter
+    (fun (id,loc,rules) -> 
        List.iter 
 	 (fun (regexp,action) ->
 	    add_used_regexps f m regexp;
@@ -609,26 +641,88 @@ let cross_lex f m =
     close_in c
   with Parsing.Parse_error | Lex_lexer.Lexical_error _ -> begin
     if not !quiet then
-      eprintf " ** warning: syntax error while parsing %s\n" f;
+      eprintf " ** warning: syntax error while parsing lex file %s\n" f;
     close_in c
   end
   
 (*s cross-referencing yacc description files *)
 
 let traverse_yacc f m yacc_defs = 
-  (* traverse header *)
-  cross_action_inside_file f m yacc_defs.Yacc_syntax.header;
-  (* traverse token decls *)
-  (*i add_defs Terminal i*)
+  (* Caution : header, actions and trailer must be traversed last,
+    since traversing an action changes the location offset *)
+  (* traverse decls *)
+  let tokens = 
+    List.fold_left
+      (fun acc decl ->
+	 match decl with
+	   | Yacc_syntax.Typed_tokens(typ,idl) ->
+	       List.fold_left
+		 (fun acc (id,loc) -> 
+		    add_def (transl_loc loc) YaccTerminal id;
+		    Stringset.add id acc)
+		 acc
+		 idl
+	   | Yacc_syntax.Untyped_tokens(idl) ->
+	       List.fold_left
+		 (fun acc (id,loc) -> 
+		    add_def (transl_loc loc) YaccTerminal id;
+		    Stringset.add id acc)
+		 acc
+		 idl
+	   | Yacc_syntax.Non_terminals_type(typ,idl) -> 
+	       List.iter
+		 (fun (id,loc) -> 
+		    add_uses (transl_loc loc) YaccNonTerminal id)
+		 idl;
+	       acc
+	   | Yacc_syntax.Start_symbols(idl) ->
+	       List.iter
+		 (fun (id,loc) -> 
+		    add_uses (transl_loc loc) YaccNonTerminal id)
+		 idl;
+	       acc
+	   | Yacc_syntax.Tokens_assoc(idl) ->
+	       List.iter
+		 (fun (id,loc) -> 
+		    add_uses (transl_loc loc) YaccTerminal id)
+		 idl;
+	       acc)
+      Stringset.empty
+      yacc_defs.Yacc_syntax.decls
+  in
   (* traverse grammar rules *)
   List.iter
-    (fun (lhs,rhs) ->
-       (*i add_def lhs YaccNonTerminal; i*)
+    (fun ((id,loc),rhss) ->
+       add_def (transl_loc loc) YaccNonTerminal id;
        List.iter
-	 (fun (rhs,action) ->
-	    (*i add_used rhs i*)
+	 (fun (rhs,_) ->
+	    List.iter 
+	      (fun (id,loc) -> 
+		 if Stringset.mem id tokens 
+		 then add_uses (transl_loc loc) YaccTerminal id
+		 else add_uses (transl_loc loc) YaccNonTerminal id)
+	      rhs)
+	 rhss)
+    yacc_defs.Yacc_syntax.rules;
+  (* now let's traverse types, actions, header, trailer *)
+  (* traverse header *)
+  cross_action_inside_file f m yacc_defs.Yacc_syntax.header;
+  (* traverse types in decls *)
+  List.iter
+    (function 
+       | Yacc_syntax.Typed_tokens(typ,idl) ->
+	   cross_action_inside_file f m typ
+       | Yacc_syntax.Non_terminals_type(typ,idl) -> 
+	   cross_action_inside_file f m typ
+       | _ -> ())
+    yacc_defs.Yacc_syntax.decls;
+  (* traverse actions *)
+  List.iter
+    (fun (_,rhss) ->
+       List.iter
+	 (fun (_,action) ->
 	    cross_action_inside_file f m action)
-	 rhs)
+	 rhss)
     yacc_defs.Yacc_syntax.rules;
   (* traverse trailer *)
   cross_action_inside_file f m yacc_defs.Yacc_syntax.trailer
@@ -639,19 +733,21 @@ let cross_yacc f m =
   let c = open_in f in
   let lexbuf = Lexing.from_channel c in
   try
+    Yacc_lexer.reset_lexer();
     let yacc_defs = Yacc_parser.yacc_definitions Yacc_lexer.main lexbuf in
     traverse_yacc f m yacc_defs;
     close_in c
-  with Parsing.Parse_error -> begin
-    if not !quiet then
-      eprintf " ** warning: syntax error while parsing %s\n" f;
-    close_in c
-  end
+  with 
+    | Parsing.Parse_error -> begin
+	if not !quiet then
+	  eprintf " ** warning: syntax error while parsing yacc file %s\n" f;
+	close_in c
+      end
     | Yacc_lexer.Lexical_error(msg,line,col) -> begin
-    if not !quiet then
-      eprintf " ** warning: while parsing %s, lexical error (%s) at line %d, character %d\n" f msg line col;
-    close_in c
-  end
+	if not !quiet then
+	  eprintf " ** warning: while parsing yacc file %s, lexical error (%s) at line %d, character %d\n" f msg line col;
+	close_in c
+      end
 
 
 

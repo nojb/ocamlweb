@@ -67,6 +67,13 @@ let handle_lexical_error fn lexbuf =
     fn lexbuf
   with Lexical_error(msg, _, _) ->
     raise(Lexical_error(msg, line, column))
+
+let cur_loc lexbuf = 
+  { start_pos = Lexing.lexeme_start lexbuf; 
+    end_pos = Lexing.lexeme_end lexbuf; 
+    start_line = !line_num; 
+    start_col = Lexing.lexeme_start lexbuf - !line_start_pos } 
+
 }
 
 rule main = parse
@@ -87,7 +94,13 @@ rule main = parse
       | "and" -> Tand
       | "eof" -> Teof
       | "let" -> Tlet
-      | s -> Tident s }
+      | s -> 
+	  let l = cur_loc lexbuf in
+	  (*i
+	  Printf.eprintf "ident '%s' occurs at (%d,%d)\n" 
+	    s l.start_pos l.end_pos;
+	  i*)
+	  Tident (s,l) }
   | '"' 
     { reset_string_buffer();
       handle_lexical_error string lexbuf;

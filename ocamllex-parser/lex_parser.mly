@@ -40,9 +40,11 @@ let rec subtract l1 l2 =
   match l1 with
     [] -> []
   | a::r -> if List.mem a l2 then subtract r l2 else a :: subtract r l2
+
+
 %}
 
-%token <string> Tident
+%token <string * Lex_syntax.location> Tident
 %token <int> Tchar
 %token <string> Tstring
 %token <Lex_syntax.location> Taction
@@ -75,7 +77,7 @@ header:
 ;
 named_regexps:
     named_regexps Tlet Tident Tequal regexp
-        { ($3,$5)::$1 }
+        { let (s,l) = $3 in (s,l,$5)::$1 }
   | /*epsilon*/
         { [] }
 ;
@@ -87,7 +89,7 @@ other_definitions:
 ;
 definition:
     Tident Tequal entry
-        { ($1,$3) }
+        { let(s,l)=$1 in (s,l,$3) }
 ;
 entry:
     Tparse case rest_of_entry
@@ -129,7 +131,7 @@ regexp:
   | Tlparen regexp Trparen
         { $2 }
   | Tident
-        { Ident $1 }
+        { let (s,l)=$1 in Ident(s,l) }
 ;
 char_class:
     Tcaret char_class1

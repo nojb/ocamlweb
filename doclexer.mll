@@ -120,7 +120,9 @@
     section_beg := 0;
     code_beg := 0;
     parlist := [];
-    seclist := []
+    seclist := [];
+    in_lexyacc_action := false;
+    doublepercentcounter := 0
 
   let backtrack lexbuf = 
     (*i

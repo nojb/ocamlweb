@@ -92,10 +92,10 @@ test/test.tex: ocamlweb test/test.ml test/test.mli
 	cd test; ../ocamlweb test.mli test.ml -o test.tex
 
 test: test/test.tex
-	cd test; \
-	$(LATEX) test ; grep -q "Rerun" test.log && $(LATEX) test || true; \
-	-hevea -o test.html ../ocamlweb.sty test.tex; \
-	xdvi test.dvi
+	cd test; $(LATEX) test 
+	cd test ; grep -q "Rerun" test.log && ($(LATEX) test) || true
+	- cd test ; hevea -o test.html ../ocamlweb.sty test.tex
+	xdvi test/test.dvi
 
 BOOTSTRAP= bootstrap.tex output.mli output.ml \
 	   yacc_parser.mly yacc_lexer.mll cross.mli cross.ml \
@@ -105,8 +105,8 @@ BOOTSTRAP= bootstrap.tex output.mli output.ml \
 bootstrap: ocamlweb
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; $(LATEX) ocamlweb
-	cd test; grep -q "Rerun" ocamlweb.log && $(LATEX) ocamlweb || true
-	-cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
+	cd test; grep -q "Rerun" ocamlweb.log && ($(LATEX) ocamlweb) || true
+	- cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
 	cd test; dvips ocamlweb.dvi -o ocamlweb.ps
 
 check: bootstrap

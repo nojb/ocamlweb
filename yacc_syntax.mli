@@ -4,20 +4,24 @@
 
 type location = Lex_syntax.location
 
+type ident = string * location
+
 type token_decls =
-    Typed_tokens of location * string list      (*r \verb|%token <type> ...| *)
-  | Untyped_tokens of string list               (*r \verb|%token ...| *)
-  | Typed_non_terminals of location * string list (*r \verb|%type <type> ...| *)
-  | Non_terminals of string list          (*r \verb|%start ...| *)
-  | Tokens_assoc of string list        (*r \verb|%left|, \verb|%right| or \verb|%nonassoc| *)
+  | Typed_tokens of location * ident list      (*r \verb|%token <type> ...| *)
+  | Untyped_tokens of ident list               (*r \verb|%token ...| *)
+  | Non_terminals_type of location * ident list (*r \verb|%type <type> ...| *)
+  | Start_symbols of ident list          (*r \verb|%start ...| *)
+  | Tokens_assoc of ident list        (*r \verb|%left|, \verb|%right| or \verb|%nonassoc| *)
 
 
 type yacc_definitions =
     {
       header : location ;
-      token_decls : token_decls list;
-      rules : (string * (string list * location) list) list ;
-      trailer : location }
+      decls : token_decls list;
+      rules : (ident * (ident list * location) list) list ;
+      trailer : location
+    }
+
 
 
 
