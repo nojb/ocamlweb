@@ -270,7 +270,10 @@ let end_paragraph () =
 
 
 (*s Index. 
-    Index is started in 
+    It is opened and closed with the two macros \verb!ocwbeginindex! and
+    \verb!ocwendindex!.
+    The auxiliary function [print_list] is a generic function to print a 
+    list with a given printing function and a given separator.
   *)
 
 let begin_index () =
@@ -291,6 +294,10 @@ let print_list print sep l =
 (*s Index in WEB style. 
     When we are in WEB style, the index is directly printed by the following
     code, and consists in two lists of sections.
+    To get a nice output, we want a list like 1,2,3,4,7,8,10 to appear
+    as 1--4,7,8,10, as in usual \LaTeX\ indexes.
+    The following function [intervals] is used to group together the lists 
+    of at least three consecutive integers.
  *)
 
 type elem =
@@ -308,6 +315,11 @@ let intervals l =
 	group ((Single n)::acc, rem)
   in
   group ([],l)
+
+
+(*s Then we can output the index entry, the first sections (where the 
+    identifier is defined) in bold face.
+ *)
 
 let output_elem = function
   | Single n -> 
