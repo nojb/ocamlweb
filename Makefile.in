@@ -75,7 +75,7 @@ install:
 	else \
 		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
 	fi
-	mkdir -p $(MANDIR)
+	mkdir -p $(MANDIR)/man1
 	cp doc/ocamlweb.1 $(MANDIR)/man1
 	mkdir -p $(TEXDIR)
 	cp ocamlweb.sty $(TEXDIR)	
