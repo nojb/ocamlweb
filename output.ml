@@ -154,8 +154,7 @@ let output_escaped_char c =
     | _ -> output_char '\\'; output_char c; output_string "{}"
 
 let output_latex_special = function
-    " " -> output_string "~" 
-           (* if !math_mode then output_string "~" else output_char ' ' *)
+  | " " -> output_string "~" 
 
   | "*" -> enter_math (); output_string "\\times{}"
   | "->" -> enter_math (); output_string "\\rightarrow{}"
@@ -169,7 +168,7 @@ let output_latex_special = function
   | s    -> output_string s
 
 let output_greek_letter = function
-    'a' -> enter_math (); output_string "\\alpha{}"
+  | 'a' -> enter_math (); output_string "\\alpha{}"
   | 'b' -> enter_math (); output_string "\\beta{}"
   | 'c' -> enter_math (); output_string "\\gamma{}"
   | c   -> output_char '\''; output_char c

@@ -54,36 +54,15 @@ let extern_defs = ref false
 
 (*s Construction of the global index. *)
 
-let sec_number = ref 0
+let build_interf inte =
+  cross_interf inte.interf_file
 
-let build_code s =
-  let buf = Lexing.from_string s in
-  let _ = cross_implem buf in ()
-
-let build_interf s =
-  let buf = Lexing.from_string s in
-  let _ = cross_interf buf in ()
-
-let build_paragraph is_mod = function
-  | Documentation s -> ()
-  | Code s -> if is_mod then build_code s else build_interf s
-
-let build_section is_mod s = 
-  incr sec_number;
-  cross_new_section !sec_number;
-  List.iter (build_paragraph is_mod) s
-    
 let build_implem imp =
-  cross_new_module imp.implem_name;
+  cross_implem imp.implem_file;
   begin match imp.implem_interf with
     | None -> ()
-    | Some i -> List.iter (build_section false) i.interf_contents
-  end;
-  List.iter (build_section true) imp.implem_contents
-
-let build_interf inte =
-  cross_new_module inte.interf_name;
-  List.iter (build_section false) inte.interf_contents
+    | Some i -> build_interf i
+  end
 
 let build_index l =
   List.iter 
@@ -125,7 +104,7 @@ let print_one_entry s =
   let list_in_table t =
     try 
       let l = Whereset.elements (Idmap.find s !t) in
-      let l = List.map (fun x -> x.w_section) l in
+      let l = List.map (fun x -> x.w_loc) l in
       Sort.list (<) l
     with Not_found -> 
       []
@@ -141,6 +120,8 @@ let print_index () =
   end_index ()
 
 (*s Production of the \LaTeX\ document. *)
+
+let sec_number = ref 0
 
 let pretty_print_paragraph = function
   | Documentation s -> pretty_print_doc s
@@ -170,6 +151,10 @@ let pretty_print_implem imp =
 let pretty_print_interf inte =
   output_interface inte.interf_name;
   List.iter pretty_print_section inte.interf_contents
+
+
+(*s Production of the document. 
+    1. Build the index. 2. Pretty-print. 3. Print the index. *)
 
 let produce_document l =
   build_index l;

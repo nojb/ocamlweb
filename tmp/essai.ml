@@ -5,15 +5,10 @@
 
 (* documentation $\beta$ 1 *)
 
-val toto : string -> string
-     (* et si j'aime bien ce style,
-      * c'est mon droit
-      *)
-
 type truc = AA | BB | CC
 
-type machin = { champ1 : TRUC.truc;
-		champ2 : truc }
+type machin = { champ1 : int;
+		champ2 : string }
 
 (*s documentation 2 où je parle de [ma_fonction x] ci-dessous définie
     et de bien d'autres choses que j'aimerais voir s'afficher sur un
@@ -22,9 +17,9 @@ type machin = { champ1 : TRUC.truc;
     ou encore << échapper >> cette ["chaine de caractères"]. *)
 
 let ma_fonction x = function (yyy,z) ->
-  x + yyy*zzz (* commentaire : $[y]\not=0$ *)
+  x + yyy*z (* commentaire : $[y]\not=0$ *)
 
-let s = "\\" + du_code c + "autre chaine"
+let s c = "\\" ^ c ^ "autre chaine"
 
 (*s un vrai commentaire *)
 
@@ -40,7 +35,9 @@ let autre_bout x =
 
 let mon_autre_fonction x1 x2 =
   x1 := x2;
-  List.ma_fonction !x1 (x2,x2/3)
+  ma_fonction !x1 (x2,x2/3)
+
+let toto = match truc with tagada -> ma_fonction tagada
 
 let test_pat = function
     A1 -> 1

@@ -54,7 +54,7 @@ manual:
 	cd doc; make all
 
 test: ocamlweb
-	cd tmp; ../ocamlweb --extern-defs essai.ml -o essai.tex ; \
+	cd tmp; ../ocamlweb essai.ml ../output.ml -o essai.tex ; \
 	latex essai
 
 # export
