@@ -619,15 +619,14 @@ let traverse_yacc f m yacc_defs =
   (* traverse header *)
   cross_action_inside_file f m yacc_defs.Yacc_syntax.header;
   (* traverse token decls *)
-
+  (*i add_defs Terminal i*)
   (* traverse grammar rules *)
   List.iter
     (fun (lhs,rhs) ->
        (*i add_def lhs YaccNonTerminal; i*)
        List.iter
 	 (fun (rhs,action) ->
-	    (*i add_used rhs YaccNonTerminal i*)
-	    Printf.eprintf "yacc action between %d and %d\n" action.Lex_syntax.start_pos action.Lex_syntax.end_pos; 
+	    (*i add_used rhs i*)
 	    cross_action_inside_file f m action)
 	 rhs)
     yacc_defs.Yacc_syntax.rules;
