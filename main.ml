@@ -31,6 +31,9 @@ let usage () =
   prerr_endline "";
   prerr_endline "Usage: ocamlweb <options and files>";
   prerr_endline "  -o <file>      write output in file <file>";
+  prerr_endline "  --dvi          output the DVI";
+  prerr_endline "  --ps           output the PostScript";
+  prerr_endline "  --html         output the HTML";
   prerr_endline "  -s             (short) no titles for files";
   prerr_endline "  --noweb        use manual LaTeX sectioning, not WEB";
   prerr_endline "  --header       do not skip the headers of Caml file";
@@ -147,7 +150,13 @@ let files_from_file f =
     exit 1
   end
 
-(*s \textbf{Parsing of the command line.} *)
+(*s \textbf{Parsing of the command line.} Output file, if specified, is kept
+    in [output_file]. *)
+
+let output_file = ref ""
+let dvi = ref false
+let ps = ref false
+let html = ref false
 
 let parse () =
   let files = ref [] in
@@ -170,11 +179,17 @@ let parse () =
     | ("-noindex" | "--noindex" | "--no-index") :: rem ->
 	index := false; parse_rec rem
     | ("-o" | "--output") :: f :: rem ->
-	set_output_to_file f; parse_rec rem
+	output_file := f; parse_rec rem
     | ("-o" | "--output") :: [] -> 
 	usage ()
     | ("-s" | "--short") :: rem ->
 	short := true; parse_rec rem
+    | ("-dvi" | "--dvi") :: rem ->
+	dvi := true; parse_rec rem
+    | ("-ps" | "--ps") :: rem ->
+	ps := true; parse_rec rem
+    | ("-html" | "--html") :: rem ->
+	html := true; parse_rec rem
     | ("-extern-defs" | "--extern-defs") :: rem ->
 	extern_defs := true; parse_rec rem
     | ("-q" | "-quiet" | "--quiet") :: rem ->
@@ -226,6 +241,92 @@ let parse () =
   parse_rec (List.tl (Array.to_list Sys.argv));
   List.rev !files
 
+(*s The following function produces the output. The default output is
+    the \LaTeX\ document: in that case, we just call [Web.produce_document]. 
+    If option \verb!-dvi!, \verb!-ps! or \verb!-html! is invoked, then
+    we make calls to \verb!latex!, \verb!dvips! and/or \verb!hevea!
+    accordingly. *)
+
+let locally dir f x =
+  let cwd = Sys.getcwd () in
+  try
+    Sys.chdir dir; let y = f x in Sys.chdir cwd; y
+  with e ->
+    Sys.chdir cwd; raise e
+
+let clean_temp_files basefile =
+  let remove f = try Sys.remove f with _ -> () in
+  remove (basefile ^ ".tex");
+  remove (basefile ^ ".log");
+  remove (basefile ^ ".aux");
+  remove (basefile ^ ".dvi");
+  remove (basefile ^ ".ps");
+  remove (basefile ^ ".haux");
+  remove (basefile ^ ".html")
+
+let cat file =
+  let c = open_in file in
+  try
+    while true do print_char (input_char c) done
+  with End_of_file ->
+    close_in c
+
+let copy src dst =
+  let cin = open_in src 
+  and cout = open_out dst in
+  try
+    while true do Pervasives.output_char cout (input_char cin) done
+  with End_of_file ->
+    close_in cin; close_out cout
+
+let produce_output fl =
+  if not (!dvi || !ps || !html) then begin
+    if !output_file <> "" then set_output_to_file !output_file;
+    produce_document fl
+  end else begin
+    let texfile = temp_file "ocamlweb" ".tex" in
+    let basefile = chop_suffix texfile ".tex" in
+    set_output_to_file texfile;
+    produce_document fl;
+    let command = 
+      let file = basename texfile in
+      sprintf "(latex %s && latex %s) > /dev/null 2>&1" file file
+    in
+    let res = locally (dirname texfile) Sys.command command in
+    if res <> 0 then begin
+      eprintf "Couldn't run LaTeX successfully\n"; exit res
+    end;
+    let dvifile = basefile ^ ".dvi" in
+    if !dvi then begin
+      if !output_file <> "" then 
+	(* we cannot use Sys.rename accross file systems *)
+	copy dvifile !output_file 
+      else 
+	cat dvifile
+    end;
+    if !ps then begin
+      let psfile = 
+	if !output_file <> "" then !output_file else basefile ^ ".ps" 
+      in
+      let res = Sys.command (sprintf "dvips %s -o %s" dvifile psfile) in
+      if res <> 0 then begin
+	eprintf "Couldn't run dvips successfully\n"; exit res
+      end;
+      if !output_file = "" then cat psfile
+    end;
+    if !html then begin
+      let htmlfile = 
+	if !output_file <> "" then !output_file else basefile ^ ".html" 
+      in
+      let command = sprintf "hevea ocamlweb.sty %s -o %s" texfile htmlfile in
+      let res = Sys.command command in
+      if res <> 0 then begin
+	eprintf "Couldn't run hevea successfully\n"; exit res
+      end;
+      if !output_file = "" then cat htmlfile
+    end;
+    clean_temp_files basefile
+  end
 
 (*s \textbf{Main program.} Print the banner, parse the command line,
     read the files and then call [produce_document] from module [Web]. *)
@@ -243,7 +344,7 @@ let main () =
     end else 
       web := false;
     if not !web then add_latex_option "noweb";
-    produce_document l
+    produce_output l
   end
 
 let _ = Printexc.catch main ()

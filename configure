@@ -11,7 +11,6 @@
 ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
-ac_default_prefix=/usr
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -524,7 +523,7 @@ fi
 
 
 # default prefix is /usr
-
+# AC_PREFIX_DEFAULT(/usr)
 
 # Check for Ocaml compilers
 
@@ -532,7 +531,7 @@ fi
 # Extract the first word of "ocamlc", so it can be a program name with args.
 set dummy ocamlc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:536: checking for $ac_word" >&5
+echo "configure:535: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_OCAMLC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -575,7 +574,7 @@ echo "ocaml library path is $OCAMLLIB"
 # Extract the first word of "ocamlopt", so it can be a program name with args.
 set dummy ocamlopt; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:579: checking for $ac_word" >&5
+echo "configure:578: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_OCAMLOPT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -607,7 +606,7 @@ if test "$OCAMLOPT" = no ; then
 	echo "configure: warning: Cannot find ocamlopt; bytecode compilation only." 1>&2
 else
 	echo $ac_n "checking ocamlopt version""... $ac_c" 1>&6
-echo "configure:611: checking ocamlopt version" >&5
+echo "configure:610: checking ocamlopt version" >&5
 	TMPVERSION=`$OCAMLOPT -v | sed -n -e 's|.*version* *\(.*\)$|\1|p' `
 	if test "$TMPVERSION" != $OCAMLVERSION ; then
 	    echo "$ac_t""differs from ocamlc; ocamlopt discarded." 1>&6
@@ -622,7 +621,7 @@ fi
 # Extract the first word of "ocamlc.opt", so it can be a program name with args.
 set dummy ocamlc.opt; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:626: checking for $ac_word" >&5
+echo "configure:625: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_OCAMLCDOTOPT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -651,7 +650,7 @@ fi
 
 if test "$OCAMLCDOTOPT" != no ; then
 	echo $ac_n "checking ocamlc.opt version""... $ac_c" 1>&6
-echo "configure:655: checking ocamlc.opt version" >&5
+echo "configure:654: checking ocamlc.opt version" >&5
 	TMPVERSION=`$OCAMLCDOTOPT -v | sed -n -e 's|.*version* *\(.*\)$|\1|p' `
 	if test "$TMPVERSION" != $OCAMLVERSION ; then
 	    echo "$ac_t""differs from ocamlc; ocamlc.opt discarded." 1>&6
@@ -666,7 +665,7 @@ if test "$OCAMLOPT" != no ; then
     # Extract the first word of "ocamlopt.opt", so it can be a program name with args.
 set dummy ocamlopt.opt; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:670: checking for $ac_word" >&5
+echo "configure:669: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_OCAMLOPTDOTOPT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -695,7 +694,7 @@ fi
 
     if test "$OCAMLOPTDOTOPT" != no ; then
 	echo $ac_n "checking ocamlc.opt version""... $ac_c" 1>&6
-echo "configure:699: checking ocamlc.opt version" >&5
+echo "configure:698: checking ocamlc.opt version" >&5
 	TMPVER=`$OCAMLOPTDOTOPT -v | sed -n -e 's|.*version* *\(.*\)$|\1|p' `
 	if test "$TMPVER" != $OCAMLVERSION ; then
 	    echo "$ac_t""differs from ocamlc; ocamlopt.opt discarded." 1>&6
@@ -710,7 +709,7 @@ fi
 # Extract the first word of "ocamldep", so it can be a program name with args.
 set dummy ocamldep; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:714: checking for $ac_word" >&5
+echo "configure:713: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_OCAMLDEP'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -752,7 +751,7 @@ fi
 # Extract the first word of "mktexlsr", so it can be a program name with args.
 set dummy mktexlsr; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:756: checking for $ac_word" >&5
+echo "configure:755: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MKTEXLSR'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1051,3 +1050,4 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
+chmod a-w Makefile

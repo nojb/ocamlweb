@@ -1,4 +1,3 @@
-
 % This is ocamlweb.sty, by Jean-Christophe Filliâtre
 % modified by Claude Marché
 % This LaTeX package is used by ocamlweb (http://www.lri.fr/~filliatr/ocamlweb)
@@ -42,24 +41,30 @@
 
 % Headings
 
-\usepackage{fancyhdr}
+\newcommand{\ps@ocamlweb}{%
+  \renewcommand{\@oddhead}{%
+    \vbox{\hbox to \textwidth{%
+     \expandafter\iftrue\firstmark\fi%
+     \hfil\vphantom{\S}%
+     \S\expandafter\iffalse\firstmark\fi
+     --%
+     \S\expandafter\iffalse\botmark\fi
+     \qquad\thepage}\hrule}%
+  }%
+  \renewcommand{\@evenhead}{\@oddhead}%
+  \renewcommand{\@evenfoot}{}%
+  \renewcommand{\@oddfoot}{\@evenfoot}}
 
-\iflatexsectioning
-\newcommand{\ocwleftpageheader}{\thepage}
-\newcommand{\ocwrightpageheader}{\thepage}
-\else
-\newcommand{\ocwleftpageheader}{\thepage\qquad\S\,\theocwcounter}
-\newcommand{\ocwrightpageheader}{\S\,\theocwcounter\qquad\thepage}
-\fi
-
-\pagestyle{fancyplain}
-%BEGIN LATEX
-\plainheadrulewidth 0.4pt
-\plainfootrulewidth 0pt
-\lhead[\ocwleftpageheader]{\leftmark}
-\rhead[\leftmark]{\ocwrightpageheader}
-\cfoot{}
-%END LATEX
+\newcommand{\ps@ocamlwebindex}{%
+  \renewcommand{\@oddhead}{%
+    \vbox{\hbox to \textwidth{%
+     \expandafter\iftrue\firstmark\fi%
+     \hfil\vphantom{\S}%
+     \thepage}\hrule}%
+  }%
+  \renewcommand{\@evenhead}{\@oddhead}%
+  \renewcommand{\@evenfoot}{}%
+  \renewcommand{\@oddfoot}{\@evenfoot}}
 
 % Hevea puts to much space with \medskip and \bigskip
 %HEVEA\renewcommand{\medskip}{}
@@ -175,12 +180,28 @@
 %END LATEX
 %HEVEA\newcommand{\ocwvspace}{\hspace{1em}}
 
+% macro to insert a title and to set the header accordingly
+%BEGIN LATEX
+\def\currentmodule{}
+\newcommand{\ocwtitle}[1]{%
+ \section*{#1}%
+ \def\currentmodule{#1}%
+ \addtocounter{ocwcounter}{1}%
+ \mark{%
+   #1%
+   \noexpand\else%
+   \theocwcounter%
+ }%
+ \addtocounter{ocwcounter}{-1}%
+}
+%END LATEX
+%HEVEA\newcommand{\ocwtitle}[1]{\section*{#1}}
+
 % macro for typesetting the title of a module implementation
-\newcommand{\ocwmodule}[1]{\section*{Module #1}\markboth{Module #1}{}}
+\newcommand{\ocwmodule}[1]{\ocwtitle{Module #1}}
 
 % macro for typesetting the title of a module interface
-\newcommand{\ocwinterface}[1]{\section*{Interface for module #1}%
-\markboth{Interface for module #1}{}}
+\newcommand{\ocwinterface}[1]{\ocwtitle{Interface for module #1}}
 
 % interface part of a module
 \newcommand{\ocwinterfacepart}{\subsection*{Interface}}
@@ -189,12 +210,10 @@
 \newcommand{\ocwcodepart}{\subsection*{Code}}
 
 % macro for typesetting the title of a lex description
-\newcommand{\ocwlexmodule}[1]{\section*{Module #1 (Lex)}%
-\markboth{Module #1 (Lex)}{}}
+\newcommand{\ocwlexmodule}[1]{\ocwtitle{Module #1 (Lex)}}
 
 % macro for typesetting the title of a yacc description
-\newcommand{\ocwyaccmodule}[1]{\section*{Module #1 (Yacc)}%
-\markboth{Module #1 (Yacc)}{}}
+\newcommand{\ocwyaccmodule}[1]{\ocwtitle{Module #1 (Yacc)}}
 
 % new WEB section
 \newcounter{ocwcounter}
@@ -203,14 +222,24 @@
 \refstepcounter{ocwcounter}%
 \bigskip\noindent{\bf\theocwcounter.}%
 %BEGIN LATEX
+\mark{%
+   \currentmodule%
+   \noexpand\else%
+   \theocwcounter%
+}%
 \kern1em%
 %END LATEX
 %HEVEA\hspace{1em}
 }
+%HEVEA\newcommand{\currentmodule}{}
 
 % index
 %BEGIN LATEX
-\newcommand{\ocwbeginindex}{\begin{theindex}}
+\newcommand{\ocwbeginindex}{%
+  \mark{Index\noexpand\else\theocwcounter}%
+  \let\ps@plain\ps@ocamlwebindex%
+  \begin{theindex}%
+}%
 \newcommand{\ocwendindex}{\end{theindex}}
 %END LATEX
 %HEVEA\newcommand{\ocwbeginindex}{\section{Index}\begin{itemize}}
@@ -249,3 +278,4 @@
 %HEVEA\newcommand{\lnot}{\ocwkw{not}}
 %HEVEA\newcommand{\lor}{\ocwkw{or}}
 %HEVEA\newcommand{\land}{\&}
+%HEVEA\newcommand{\mark}{}

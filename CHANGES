@@ -3,7 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
-  o page style with headings
+  o options -dvi, -ps and -html to produce DVI, PS and HTML
+  o page style with headings (thanks to Ralf Treinen)
   o insertion into LaTeX preamble with option -p and (*p
   o macros \ocwbegincode and \ocwendcode before and after code pieces
     (no more use of \codeline and \endcodeline)
