@@ -102,9 +102,13 @@
       subparlist := []
     end
 
+  let big_section = ref false
+
   let push_doc () =
     if Buffer.length parbuf > 0 then begin
-      parlist := (Documentation (Buffer.contents parbuf)) :: !parlist;
+      let doc = Documentation (!big_section, Buffer.contents parbuf) in
+      parlist := doc :: !parlist;
+      big_section := false;
       Buffer.clear parbuf
     end
 
@@ -344,9 +348,10 @@ and yacc_paragraph = parse
 and start_of_documentation = parse
   | space_or_nl+   
       { in_documentation lexbuf }
-  | 's' space_or_nl*
+  | ('s' | 'S') space_or_nl*
       { web_style := true; push_section (); 
 	section_beg := lexeme_start lexbuf;
+	big_section := (lexeme_char lexbuf 0 == 'S');
 	in_documentation lexbuf }
   | 'p' up_to_end_of_comment
       { let s = lexeme lexbuf in
@@ -362,9 +367,10 @@ and start_of_documentation = parse
 and start_of_yacc_documentation = parse
   | space_or_nl+   
       { in_yacc_documentation lexbuf }
-  | 's' space_or_nl*
+  | ('s' | 'S') space_or_nl*
       { web_style := true; push_section (); 
 	section_beg := lexeme_start lexbuf;
+	big_section := (lexeme_char lexbuf 0 == 'S');
 	in_yacc_documentation lexbuf }
   | 'p' up_to_end_of_comment
       { let s = lexeme lexbuf in

@@ -183,15 +183,13 @@
 % macro to insert a title and to set the header accordingly
 %BEGIN LATEX
 \def\currentmodule{}
+\newcommand{\ocwheader}[1]{\gdef\currentmodule{#1}}
+
 \newcommand{\ocwtitle}[1]{%
  \section*{#1}%
  \def\currentmodule{#1}%
  \addtocounter{ocwcounter}{1}%
- \mark{%
-   #1%
-   \noexpand\else%
-   \theocwcounter%
- }%
+ \mark{#1\noexpand\else\theocwcounter}%
  \addtocounter{ocwcounter}{-1}%
 }
 %END LATEX

@@ -30,7 +30,7 @@ let a_longer_string = "this is a longer string\
 
 let an_array = [| [| 1; 3; 2 |]; [| 4; 5; 6 |] |]
 
-(*s More types and exceptions declarations. *)
+(*S More types and exceptions declarations. *)
 
 type stuff = AA | BB | CC
 

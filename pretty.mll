@@ -394,6 +394,14 @@ and pr_doc = parse
   | _   
       { output_char (first_char lexbuf); pr_doc lexbuf }
 
+and pr_doc_title = parse
+  | '.'
+      { output_string ".}\\quad{}" }
+  | eof
+      { () }
+  | _ 
+      { output_char (first_char lexbuf); pr_doc_title lexbuf }
+
 and pr_verb = parse
   | eof  { () }
   | _    { let c = lexeme_char lexbuf 0 in
@@ -431,9 +439,11 @@ and pr_verbatim = parse
     end_code ();
     end_code_paragraph is_last_paragraph
 
-  let pretty_print_doc is_first_paragraph s = 
+  let pretty_print_doc is_first_paragraph (big,s) = 
     begin_doc_paragraph is_first_paragraph;
-    pr_doc (Lexing.from_string s);
+    let lb = Lexing.from_string s in
+    if big then begin output_string "\\textbf{"; pr_doc_title lb end;
+    pr_doc lb;
     end_doc_paragraph ()
 
 }

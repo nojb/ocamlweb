@@ -32,7 +32,7 @@ type sub_paragraph =
   | YaccCode of string
  
 type paragraph =
-  | Documentation of string
+  | Documentation of bool * string
   | Code of int * string
   | LexYaccCode of int * (sub_paragraph list)
 
@@ -54,7 +54,7 @@ type file =
 
 
 
-(*is To print a "Web.file" (for testing) *)
+(*i To print a "Web.file" (for testing) *)
 
 let print_string s = Format.printf "\"%s\"" s
 
@@ -66,44 +66,42 @@ let print c pr arg =
 
 (* to print a list between "[" "]" *)
 
-let rec print_end_list f l =
-  match l with
-      [] -> Format.printf "]@]"
-    | x::l ->
-	Format.printf ";@ ";
-	f x;
-	print_end_list f l
-;;
+let rec print_end_list f = function
+  | [] -> 
+      Format.printf "]@]"
+  | x :: l ->
+      Format.printf ";@ ";
+      f x;
+      print_end_list f l
 
-let print_list f l =
-  match l with
-      [] -> Format.printf "[]"
-    | x::l ->
-	Format.printf "@[<hv 2>[ ";
-	f x;
-	print_end_list f l
-;;
+let print_list f = function
+  | [] -> 
+      Format.printf "[]"
+  | x :: l ->
+      Format.printf "@[<hv 2>[ ";
+      f x;
+      print_end_list f l
 
  
 (* To print a subparagraph *)
 let print_sub_paragraph = function 
-  | CamlCode(s)  -> print "CamlCode" print_string s;
-  | LexCode (s)  -> print "LexCode"  print_string s;
-  | YaccCode (s) -> print "YaccCode" print_string s
+  | CamlCode s -> print "CamlCode" print_string s;
+  | LexCode s  -> print "LexCode"  print_string s;
+  | YaccCode s -> print "YaccCode" print_string s
       
 (* To print a paragraph *)
 let print_paragraph = function 
-  | Documentation(s) -> print "Documentation" print_string s
-  | Code(i,s) -> 
+  | Documentation (_,s) -> 
+      print "Documentation" print_string s
+  | Code (i,s) -> 
       Format.printf "Code(%d,@ %s)" i s
-  | LexYaccCode(i,spl) -> 
+  | LexYaccCode (i,spl) -> 
       Format.printf "@[<hv 5>LexYaccCode(%d,@ " i;
       print_list print_sub_paragraph spl; 
       Format.printf ")@]"
       
 (* To print a section *)
-let print_raw_section { sec_contents = sc;
-			sec_beg = sb } =
+let print_raw_section { sec_contents = sc; sec_beg = sb } =
   Format.printf "@[<hv 2>{ sec_beg = %d ;@ sec_contents =@ " sb ; 
   print_list print_paragraph sc;
   Format.printf ";@ }@]"
@@ -375,8 +373,8 @@ let rec pretty_print_sub_paragraph = function
 
 
 let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
-  | Documentation s -> 
-      pretty_print_doc is_first_paragraph s;
+  | Documentation (b,s) -> 
+      pretty_print_doc is_first_paragraph (b,s);
       end_line()  (*i ajout Dorland-Muller i*)
   | Code (l,s) ->
       if l > 0 then output_label (make_label_name (f,l));
