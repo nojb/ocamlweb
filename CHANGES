@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o added targets "install-byte" and "dist-clean" in Makefile
+
 version 1.2, 14/01/2002
 =======================
   o single-character identifiers now indexed
