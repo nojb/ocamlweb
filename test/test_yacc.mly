@@ -1,6 +1,6 @@
 /* ON NE VEUT PAS VOIR CE COMMENTAIRE */
 
-/*s Bonjour */
+/*s Bonjour et \$ */
 
 %{
 

@@ -83,4 +83,5 @@ let test_pat = function
   | BB -> foo 2
   | CC -> C.f 3
 
-(*s Test escaped dollar in comments: \$ *)
+(*s Test escaped dollar in comments: \$ and even inside mathematical 
+    mode: $\$$ *)

@@ -34,6 +34,8 @@ let usage () =
   prerr_endline "  --dvi          output the DVI";
   prerr_endline "  --ps           output the PostScript";
   prerr_endline "  --html         output the HTML";
+  prerr_endline "  --hevea-option <opt>";
+  prerr_endline "                 pass an option hevea (HTML output)";
   prerr_endline "  -s             (short) no titles for files";
   prerr_endline "  --noweb        use manual LaTeX sectioning, not WEB";
   prerr_endline "  --header       do not skip the headers of Caml file";
@@ -157,6 +159,7 @@ let output_file = ref ""
 let dvi = ref false
 let ps = ref false
 let html = ref false
+let hevea_options = ref ([] : string list)
 
 let parse () =
   let files = ref [] in
@@ -190,6 +193,10 @@ let parse () =
 	ps := true; parse_rec rem
     | ("-html" | "--html") :: rem ->
 	html := true; parse_rec rem
+    | ("-hevea-option" | "--hevea-option") :: [] -> 
+	usage ()
+    | ("-hevea-option" | "--hevea-option") :: s :: rem -> 
+	hevea_options := s :: !hevea_options; parse_rec rem
     | ("-extern-defs" | "--extern-defs") :: rem ->
 	extern_defs := true; parse_rec rem
     | ("-q" | "-quiet" | "--quiet") :: rem ->
@@ -318,7 +325,9 @@ let produce_output fl =
       let htmlfile = 
 	if !output_file <> "" then !output_file else basefile ^ ".html" 
       in
-      let command = sprintf "hevea ocamlweb.sty %s -o %s" texfile htmlfile in
+      let options = String.concat " " (List.rev !hevea_options) in
+      let command = 
+	sprintf "hevea %s ocamlweb.sty %s -o %s" options texfile htmlfile in
       let res = Sys.command command in
       if res <> 0 then begin
 	eprintf "Couldn't run hevea successfully\n"; exit res

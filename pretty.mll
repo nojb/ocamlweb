@@ -274,21 +274,27 @@ and pr_comment = parse
 	if !comment_depth > 0 then pr_comment lexbuf }
 (*i utile ????? 
   | '\n' space* '*' ' '
-         { output_string "\n "; pr_comment lexbuf }
-i*)
-  | '"' { output_bs (); 
-	  pr_code_string lexbuf; 
-	  pr_comment lexbuf; }
-  | '['  { if !user_math_mode then 
-	     output_char '['
-	   else begin
-	     bracket_depth := 1; 
-	     begin_code (); escaped_code lexbuf; end_code ()
-	   end; 
-	   pr_comment lexbuf }
-  | eof  { () }
-  | '$'  { user_math(); pr_comment lexbuf }
-  | _    { output_char (first_char lexbuf); pr_comment lexbuf }
+         { output_string "\n "; pr_comment lexbuf } i*)
+  | '"' 
+      { output_bs (); 
+	pr_code_string lexbuf; 
+	pr_comment lexbuf; }
+  | '['  
+      { if !user_math_mode then 
+	  output_char '['
+	else begin
+	  bracket_depth := 1; 
+	  begin_code (); escaped_code lexbuf; end_code ()
+	end; 
+	pr_comment lexbuf }
+  | eof  
+      { () }
+  | "\\$" 
+      { output_string (lexeme lexbuf); pr_comment lexbuf }
+  | '$'  
+      { user_math(); pr_comment lexbuf }
+  | _    
+      { output_char (first_char lexbuf); pr_comment lexbuf }
 
 
 (* The [C_like_comments] are not inbricable *)
@@ -304,6 +310,7 @@ and pr_yacc_comment = parse
 	   end; 
 	   pr_yacc_comment lexbuf }
   | eof  { () }
+  | "\\$" { output_string (lexeme lexbuf); pr_yacc_comment lexbuf }
   | '$'  { user_math(); pr_yacc_comment lexbuf }
   | _    { output_char (first_char lexbuf); pr_yacc_comment lexbuf }
 
@@ -371,16 +378,21 @@ and pr_doc = parse
 	  begin_code (); escaped_code lexbuf; end_code ()
 	end; 
 	pr_doc lexbuf }
-  | '$' { user_math(); pr_doc lexbuf }
+  | "\\$" 
+      { output_string (lexeme lexbuf); pr_doc lexbuf }
+  | '$' 
+      { user_math(); pr_doc lexbuf }
   | "\\verb" _  
-         { verb_delim := lexeme_char lexbuf 5;
-           output_string (lexeme lexbuf);
-	   pr_verb lexbuf; pr_doc lexbuf }
+      { verb_delim := lexeme_char lexbuf 5;
+        output_string (lexeme lexbuf);
+	pr_verb lexbuf; pr_doc lexbuf }
   | "\\begin{verbatim}"
-         { output_string (lexeme lexbuf);
-	   pr_verbatim lexbuf; pr_doc lexbuf }
-  | eof { () }
-  | _   { output_char (first_char lexbuf); pr_doc lexbuf }
+      { output_string (lexeme lexbuf);
+	pr_verbatim lexbuf; pr_doc lexbuf }
+  | eof 
+      { () }
+  | _   
+      { output_char (first_char lexbuf); pr_doc lexbuf }
 
 and pr_verb = parse
   | eof  { () }
