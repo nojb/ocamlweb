@@ -100,16 +100,12 @@ val output_es : unit -> unit
 val output_vspace : unit -> unit
 
 (*s The following functions deal with sectioning. The highest level is
-    the one of modules and interfaces. A module may contain two subparts, 
-    one for the specification and one for the code.
+    the one of modules and interfaces. 
     The next level is the one of section. The last level is the one
     of paragraphs, which are atomic pieces of documentation or code. *)
 
 val output_module : string -> unit
 val output_interface : string -> unit
-
-val interface_part : unit -> unit
-val code_part : unit -> unit
 
 val begin_section : unit -> unit
 

@@ -92,9 +92,7 @@ let check_if_file_exists f =
 let what_file f =
   check_if_file_exists f;
   if check_suffix f ".ml" then
-    let fi = (chop_extension f) ^ ".mli" in
-    let intf = if Sys.file_exists fi then Some (make_caml_file fi) else None in
-    File_impl (make_caml_file f, intf)
+    File_impl (make_caml_file f)
   else if check_suffix f ".mli" then
     File_intf (make_caml_file f)
   else if check_suffix f ".tex" then
@@ -183,8 +181,7 @@ let parse () =
 
     | ("-impl" | "--impl") :: f :: rem -> 
 	check_if_file_exists f;
-	let m = File_impl ({ caml_filename = f; caml_module = module_name f },
-			   None) in
+	let m = File_impl { caml_filename = f; caml_module = module_name f } in
 	add_file m; parse_rec rem
     | ("-impl" | "--impl") :: [] ->
 	usage ()

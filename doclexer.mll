@@ -24,6 +24,8 @@
   open Web
 (*i*)
 
+(*s Global variables and functions used by the lexer. *)
+
   let skip_header = ref true
 
   let comment_depth = ref 0
@@ -69,7 +71,11 @@
     parlist := [];
     seclist := []
 
+(*i*)
 }
+(*i*)
+
+(*s Shortcuts for regular expressions. *)
 
 let space = [' ' '\t']
 let space_or_nl = [' ' '\t' '\n']
@@ -80,7 +86,8 @@ let rcs_keyword =
   "Author" | "Date" | "Header" | "Id" | "Name" | "Locker" | "Log" |
   "RCSfile" | "Revision" | "Source" | "State"
 
-(* to skip the headers *)
+
+(*s Entry point to skip the headers. Returns when headers are skipped. *)
 rule header = parse
   | "(*"   { comment_depth := 1; skip_comment lexbuf;
 	     skip_until_nl lexbuf; header lexbuf }
@@ -89,7 +96,7 @@ rule header = parse
   | _      { lexbuf.lex_curr_pos <- lexbuf.lex_curr_pos - 1 }
   | eof    { () }
 
-(* inside a module, at the beginning of a line) *)
+(*s Inside a module, at the beginning of a line. *)
 and implementation = parse
   | space* "(*" '*'* "*)" space* '\n'
            { implementation lexbuf }
@@ -110,7 +117,7 @@ and implementation = parse
 	     code lexbuf; implementation lexbuf }
   | eof    { new_section (); List.rev !seclist }
       
-(* inside the documentation part *)
+(*s Inside the documentation part, anywhere. *)
 and documentation = parse
   | "(*" { Buffer.add_string docub (lexeme lexbuf);
 	   incr comment_depth; documentation lexbuf }
@@ -130,7 +137,7 @@ and documentation = parse
   | eof  { push_doc () }
   | _    { Buffer.add_char docub (first_char lexbuf); documentation lexbuf }
 
-(* inside the code part *)
+(*s Inside the code part, anywhere. *)
 and code = parse
   | '\n' space* '\n' 
          { push_code () }
@@ -146,13 +153,13 @@ and code = parse
          { Buffer.add_string codeb (lexeme lexbuf); code lexbuf }
   | _    { Buffer.add_char codeb (first_char lexbuf); code lexbuf }
 
-(* to skip everything until a newline *)
+(*s To skip everything until a newline. *)
 and skip_until_nl = parse
   | '\n' { () }
   | eof  { () }
   | _    { skip_until_nl lexbuf }
 
-(* to read a comment inside a piece of code *)
+(*s To read a comment inside a piece of code. *)
 and comment = parse
   | "(*" | "(*c"
          { Buffer.add_string codeb "(*"; incr comment_depth; comment lexbuf }
@@ -161,7 +168,7 @@ and comment = parse
   | eof  { () }
   | _    { Buffer.add_char codeb (first_char lexbuf); comment lexbuf }
 
-(* to skip a comment (used by header) *)
+(*s To skip a comment (used by [header]). *)
 and skip_comment = parse
   | "(*" { incr comment_depth; skip_comment lexbuf }
   | "*)" { decr comment_depth;
@@ -169,13 +176,14 @@ and skip_comment = parse
   | eof  { () }
   | _    { skip_comment lexbuf }
 
-(* ignored parts, between "(*i" and "i*)" *)
+(*s Ignored parts, between "(*i" and "i*)". Note that such comments
+    are not nested. *)
 and ignore = parse
   | "i*)" { () }
   | eof   { () }
   | _     { ignore lexbuf }
 
-(* strings in code *)
+(*s Strings in code. *)
 and code_string = parse
   | '"'      { Buffer.add_char codeb '"' }
   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
@@ -184,9 +192,11 @@ and code_string = parse
   | eof      { () }
   | _        { Buffer.add_char codeb (first_char lexbuf); code_string lexbuf }
 
+(*i*)
 {
+(*i*)
 
-(*s Reading the Caml files. *)
+(*s \textbf{Caml files.} *)
 
 type caml_file = { caml_filename : string; caml_module : string }
 
@@ -197,9 +207,11 @@ let make_caml_file f =
     caml_module = module_name (Filename.chop_extension f) }
 
 type file_type =
-  | File_impl  of caml_file * caml_file option
+  | File_impl  of caml_file
   | File_intf  of caml_file
   | File_other of string
+
+(*s \textbf{Reading Caml files.} *)
 
 let raw_read_file f =
   reset_lexer ();
@@ -210,25 +222,16 @@ let raw_read_file f =
   close_in c;
   contents
 
-let read_intf i = 
-  { interf_file = i.caml_filename; 
-    interf_name = i.caml_module; 
-    interf_contents = raw_read_file i.caml_filename }
-    
-let read_impl (m,mi) =
-  let interf = match mi with 
-    | None -> None
-    | Some i -> Some (read_intf i)
-  in
-  { implem_file = m.caml_filename; 
-    implem_name = m.caml_module;
-    implem_contents = raw_read_file m.caml_filename;
-    implem_interf = interf }
+let read m =
+  { content_file = m.caml_filename; 
+    content_name = m.caml_module;
+    content_contents = raw_read_file m.caml_filename }
 
 let read_one_file = function
-  | File_impl (m,i) -> Implem (read_impl (m,i))
-  | File_intf f -> Interf (read_intf f)
+  | File_impl m -> Implem (read m)
+  | File_intf m -> Interf (read m)
   | File_other f -> Other f
 
-
+(*i*)
 }
+(*i*)

@@ -32,20 +32,14 @@ type raw_section = {
   sec_contents : paragraph list;
   sec_beg : int }
 
-type interf = { 
-  interf_file : string;
-  interf_name : string;
-  interf_contents : raw_section list }
-
-type implem = { 
-  implem_file : string;
-  implem_name : string;
-  implem_contents : raw_section list;
-  implem_interf : interf option } 
+type content = { 
+  content_file : string;
+  content_name : string;
+  content_contents : raw_section list } 
 
 type file = 
-  | Implem of implem
-  | Interf of interf
+  | Implem of content
+  | Interf of content
   | Other  of string
 
 val extern_defs : bool ref

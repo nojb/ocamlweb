@@ -64,9 +64,11 @@ test: ocamlweb
 	cd tmp; ../ocamlweb --latex-sects essai.ml -o essai.tex ; \
 	$(LATEX) essai ; grep -q "Rerun" essai.log && $(LATEX) essai || true
 
-BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml 
+BOOTSTRAP= bootstrap.tex output.mli output.ml cross.mli cross.ml \
+           pretty.mli --impl pretty.mll web.mli web.ml \
+	   doclexer.mli --impl doclexer.mll main.ml 
 
-bootstrap: ocamlweb # $(BOOTSTRAP)
+bootstrap: ocamlweb
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
 	cd test; $(LATEX) ocamlweb
 	cd test; grep -q "Rerun" ocamlweb.log && $(LATEX) ocamlweb || true
@@ -82,7 +84,8 @@ NAME=ocamlweb-$(VERSION)
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = buffer.mli buffer.ml					\
-        doclexer.mll cross.ml cross.mli pretty.mli pretty.mll	\
+        doclexer.mli doclexer.mll cross.ml cross.mli		\
+	pretty.mli pretty.mll					\
 	output.mli output.ml web.mli web.ml main.ml		\
 	ocamlweb.sty bootstrap.tex				\
 	Makefile .depend README INSTALL COPYING GPL CHANGES

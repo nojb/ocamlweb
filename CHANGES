@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o bootstrap is now completed
+  o interfaces are no more inserted automatically before implementations 
+    (patch from François Pottier)
+
 version 0.4, 25/06/99
 =====================
   o better handling of spaces before sections (thanks to François Pottier)

@@ -1,3 +1,4 @@
+doclexer.cmi: web.cmi 
 buffer.cmo: buffer.cmi 
 buffer.cmx: buffer.cmi 
 cross.cmo: ocaml-parser/asttypes.cmi ocaml-parser/lexer.cmi \
@@ -8,10 +9,10 @@ cross.cmx: ocaml-parser/asttypes.cmi ocaml-parser/lexer.cmx \
     ocaml-parser/location.cmx ocaml-parser/longident.cmx output.cmx \
     ocaml-parser/parse.cmx ocaml-parser/parsetree.cmi \
     ocaml-parser/syntaxerr.cmx cross.cmi 
-doclexer.cmo: buffer.cmi output.cmi web.cmi 
-doclexer.cmx: buffer.cmx output.cmx web.cmx 
-main.cmo: buffer.cmi doclexer.cmo output.cmi web.cmi 
-main.cmx: buffer.cmx doclexer.cmx output.cmx web.cmx 
+doclexer.cmo: buffer.cmi output.cmi web.cmi doclexer.cmi 
+doclexer.cmx: buffer.cmx output.cmx web.cmx doclexer.cmi 
+main.cmo: buffer.cmi doclexer.cmi output.cmi version.cmo web.cmi 
+main.cmx: buffer.cmx doclexer.cmx output.cmx version.cmx web.cmx 
 output.cmo: output.cmi 
 output.cmx: output.cmi 
 pretty.cmo: output.cmi pretty.cmi 
@@ -22,11 +23,9 @@ ocaml-parser/lexer.cmo: ocaml-parser/misc.cmi ocaml-parser/parser.cmi \
     ocaml-parser/lexer.cmi 
 ocaml-parser/lexer.cmx: ocaml-parser/misc.cmx ocaml-parser/parser.cmx \
     ocaml-parser/lexer.cmi 
-ocaml-parser/linenum.cmo: ocaml-parser/misc.cmi ocaml-parser/linenum.cmi 
-ocaml-parser/linenum.cmx: ocaml-parser/misc.cmx ocaml-parser/linenum.cmi 
 ocaml-parser/location.cmo: ocaml-parser/linenum.cmi ocaml-parser/terminfo.cmi \
     ocaml-parser/warnings.cmi ocaml-parser/location.cmi 
-ocaml-parser/location.cmx: ocaml-parser/linenum.cmx ocaml-parser/terminfo.cmx \
+ocaml-parser/location.cmx: ocaml-parser/linenum.cmi ocaml-parser/terminfo.cmx \
     ocaml-parser/warnings.cmx ocaml-parser/location.cmi 
 ocaml-parser/longident.cmo: ocaml-parser/misc.cmi ocaml-parser/longident.cmi 
 ocaml-parser/longident.cmx: ocaml-parser/misc.cmx ocaml-parser/longident.cmi 

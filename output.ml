@@ -306,12 +306,6 @@ let output_module s =
   output_latex_id s;
   output_string "}\n"
 
-let interface_part () =
-  output_string "\\ocwinterfacepart{}\n"
-
-let code_part () =
-  output_string "\\ocwcodepart{}\n"
-
 let output_interface s =
   output_string "\\ocwinterface{";
   output_latex_id s;

@@ -31,20 +31,14 @@ type raw_section =  {
   sec_contents : paragraph list;
   sec_beg : int }
 
-type interf = { 
-  interf_file : string;
-  interf_name : string;
-  interf_contents : raw_section list }
-
-type implem = { 
-  implem_file : string;
-  implem_name : string;
-  implem_contents : raw_section list;
-  implem_interf : interf option } 
+type content = { 
+  content_file : string;
+  content_name : string;
+  content_contents : raw_section list } 
 
 type file = 
-  | Implem of implem
-  | Interf of interf
+  | Implem of content
+  | Interf of content
   | Other  of string
 
 (*i*)
@@ -69,19 +63,9 @@ let add_latex_option s =
 
 (*s Construction of the global index. *)
 
-let index_interf inte =
-  cross_interf inte.interf_file inte.interf_name
-
-let index_implem imp =
-  cross_implem imp.implem_file imp.implem_name;
-  begin match imp.implem_interf with
-    | None -> ()
-    | Some i -> index_interf i
-  end
-
 let index_file = function 
-  | Implem i -> index_implem i 
-  | Interf i -> index_interf i
+  | Implem i -> cross_implem i.content_file i.content_name
+  | Interf i -> cross_interf i.content_file i.content_name
   | Other _ -> ()
 
 let build_index l = List.iter index_file l
@@ -111,16 +95,12 @@ let add_sec_loc =
     add_file_loc sec_locations f (s.sec_beg,!sec_counter);
     List.iter (add_par_loc f) s.sec_contents
 
-let add_intf_loc it =
-  List.iter (add_sec_loc it.interf_file) it.interf_contents
-
-let add_impl_loc im =
-  begin match im.implem_interf with None -> () | Some i -> add_intf_loc i end;
-  List.iter (add_sec_loc im.implem_file) im.implem_contents
+let add_file_loc it =
+  List.iter (add_sec_loc it.content_file) it.content_contents
 
 let locations_for_a_file = function
-  | Implem i -> add_impl_loc i
-  | Interf i -> add_intf_loc i
+  | Implem i -> add_file_loc i
+  | Interf i -> add_file_loc i
   | Other _ -> ()
 
 let find_where w =
@@ -274,13 +254,14 @@ let pretty_print_section first f s =
   if first & s.sec_beg > 0 then output_label (make_label_name (f,0));
   output_label (make_label_name (f,s.sec_beg));
   let rec loop is_first_paragraph = function
-      [] ->
+    | [] ->
 	()
-    | [ last_paragraph ] ->
-	pretty_print_paragraph is_first_paragraph true f last_paragraph
-    | paragraph :: rest ->
-	pretty_print_paragraph is_first_paragraph false f paragraph;
-	loop false rest in
+    | [ p ] ->
+	pretty_print_paragraph is_first_paragraph true f p
+    | p :: rest ->
+	pretty_print_paragraph is_first_paragraph false f p;
+	loop false rest 
+  in
   loop true s.sec_contents
     
 let pretty_print_sections f = function
@@ -289,24 +270,13 @@ let pretty_print_sections f = function
       pretty_print_section true f s; 
       List.iter (pretty_print_section false f) r
 
-let pretty_print_implem imp =
-  output_module imp.implem_name;
-  begin match imp.implem_interf with
-    | None -> ()
-    | Some i -> 
-	interface_part ();
-	pretty_print_sections i.interf_file i.interf_contents;
-	code_part ()
-  end;
-  pretty_print_sections imp.implem_file imp.implem_contents
-
-let pretty_print_interf inte =
-  output_interface inte.interf_name;
-  pretty_print_sections inte.interf_file inte.interf_contents
+let pretty_print_content output_header content =
+  output_header content.content_name;
+  pretty_print_sections content.content_file content.content_contents
 
 let pretty_print_file = function
-  | Implem i -> pretty_print_implem i 
-  | Interf i -> pretty_print_interf i
+  | Implem i -> pretty_print_content output_module i 
+  | Interf i -> pretty_print_content output_interface i
   | Other f -> output_file f
 
 
