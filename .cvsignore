@@ -4,3 +4,5 @@ ocamlweb
 pretty.ml
 export
 vrac
+config.cache
+config.status

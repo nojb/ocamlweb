@@ -1,0 +1,44 @@
+dnl ocamlweb autoconf input
+
+
+dnl begin
+AC_INIT(web.mli)
+
+AC_CONFIG_AUX_DIR(./support)
+# need support/install-sh
+# need support/missing
+# need support/mkinstalldirs
+
+dnl Check for programs
+
+# Check for OCaml programs
+AC_PATH_PROG(OCAMLC,ocamlc,no)
+if test "$OCAMLC" = no ; then
+	AC_MSG_ERROR(Cannot find ocamlc.)
+fi
+AC_PATH_PROG(OCAMLOPT,ocamlopt,no)
+if test "$OCAMLOPT" = no ; then
+	AC_MSG_ERROR(Cannot find ocamlopt.)
+fi
+AC_PATH_PROG(OCAMLMKTOP,ocamlmktop,no)
+if test "$OCAMLMKTOP" = no ; then
+	AC_MSG_ERROR(Cannot find ocamlmktop.)
+fi
+AC_PATH_PROG(OCAMLDEP,ocamldep,no)
+if test "$OCAMLC" = no ; then
+	AC_MSG_ERROR(Cannot find ocamldep.)
+fi
+
+AC_SUBST(OCAMLC)
+AC_SUBST(OCAMLOPT)
+AC_SUBST(OCAMLMKTOP)
+AC_SUBST(OCAMLDEP)
+
+AC_PATH_PROG(MKTEXLSR,mktexlsr,no)
+if test "$MKTEXLSR" = no ; then
+	AC_MSG_ERROR(Cannot find mktexlsr.)
+fi
+AC_SUBST(MKTEXLSR)
+
+# Finally create all the generated files
+AC_OUTPUT(Makefile)

@@ -3,13 +3,16 @@
 #########################################
 
 # where to install the binary executable
-BINDIR = /usr/bin
+PREFIX = @prefix@
+BINDIR = $(PREFIX)/bin
 
 # where to put the style file
-TEXDIR = /usr/share/texmf/tex/latex/misc
+BASETEXDIR = $(PREFIX)/share/texmf
+TEXDIR = $(BASETEXDIR)/tex/latex/misc 
 
 # command to update TeX' kpathsea database
-UPDATETEX = /usr/bin/mktexlsr /usr/share/texmf /var/spool/texmf > /dev/null
+MKTEXLSR = @MKTEXLSR@
+UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/null
 
 #########################################
 # End of configuration part
@@ -19,9 +22,10 @@ MAJORVN=0
 MINORVN=7
 VERSION=$(MAJORVN).$(MINORVN)
 
-CAMLC    = ocamlc
-CAMLCOPT = ocamlopt 
-CAMLDEP  = ocamldep
+CAMLC    = @OCAMLC@
+CAMLCOPT = @OCAMLOPT@
+CAMLDEP  = @OCAMLDEP@
+
 ZLIBS    = -I ocaml-parser
 DEBUG    = 
 PROFILE  =
@@ -61,8 +65,8 @@ version.ml: Makefile
 	echo "let date = \""`date`"\"" >> version.ml
 
 install:
-	cp ocamlweb $(BINDIR)
-	cp ocamlweb.sty $(TEXDIR)
+	cp ocamlweb $(BINDIR)		
+	cp ocamlweb.sty $(TEXDIR)	
 	$(UPDATETEX)
 
 local:
@@ -163,13 +167,13 @@ binary: ocamlweb manual
 #################
 
 .SUFFIXES: .mli .ml .cmi .cmo .cmx .mll
- 
+
 .mll.ml:
 	ocamllex $<
- 
+
 .mli.cmi:
 	$(CAMLC) -c $(BYTEFLAGS) $<
- 
+
 .ml.cmo:
 	$(CAMLC) -c $(BYTEFLAGS) $<
 

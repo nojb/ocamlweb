@@ -13,8 +13,8 @@ COMPILATION (source distribution only)
 INSTALLATION
 ============
 
-  1. Edit the Makefile and modify the configuration section at the
-     beginning of this file.
+  1. Use configure script by typing "./configure"
+     
 
   2. type "make install"
 
