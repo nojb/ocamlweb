@@ -159,7 +159,7 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 
 OCAMLLEXFILES = lex_syntax.mli lex_parser.mly lex_lexer.mll
 
-DOCFILES = doc/$(NAME)-man.ps doc/$(NAME)-man.html doc/ocamlweb.1
+DOCFILES = doc/$(NAME)-man.tex doc/$(NAME)-man.html doc/ocamlweb.1
 
 export: source linux
 	cp README COPYING LGPL CHANGES $(FTP)
