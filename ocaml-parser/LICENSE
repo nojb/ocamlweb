@@ -1,6 +1,30 @@
-All the files in this directory are Copyright INRIA 
-and distributed under the terms of the Q Public
-License version 1.0 (included below).
+In the following, "the Library" refers to all files marked "Copyright
+INRIA" in the following directories and their sub-directories:
+
+    asmrun, byterun, config, maccaml, otherlibs, stdlib, win32caml
+
+and "the Compiler" refers to all files marked "Copyright INRIA" in the
+other directories and their sub-directories.
+
+The Compiler is distributed under the terms of the Q Public License
+version 1.0 (included below).
+
+The Library is distributed under the terms of the GNU Library General
+Public License version 2 (included below).
+
+As a special exception to the GNU Library General Public License, you
+may link, statically or dynamically, a "work that uses the Library"
+with a publicly distributed version of the Library to produce an
+executable file containing portions of the Library, and distribute
+that executable file under terms of your choice, without any of the
+additional requirements listed in clause 6 of the GNU Library General
+Public License.  By "a publicly distributed version of the Library",
+we mean either the unmodified Library as distributed by INRIA, or a
+modified version of the Library that is distributed under the
+conditions defined in clause 3 of the GNU Library General Public
+License.  This exception does not however invalidate any other reasons
+why the executable file might be covered by the GNU Library General
+Public License.
 
 ----------------------------------------------------------------------
 
@@ -110,8 +134,8 @@ settled by the Court of Versailles.
 
 ----------------------------------------------------------------------
 
-		  GNU LIBRARY GENERAL PUBLIC LICENSE
-		       Version 2, June 1991
+                  GNU LIBRARY GENERAL PUBLIC LICENSE
+                       Version 2, June 1991
 
  Copyright (C) 1991 Free Software Foundation, Inc.
  59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
@@ -121,7 +145,7 @@ settled by the Court of Versailles.
 [This is the first released version of the library GPL.  It is
  numbered 2 because it goes with version 2 of the ordinary GPL.]
 
-			    Preamble
+                            Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -211,7 +235,7 @@ works together with the library.
   Note that it is possible for a library to be covered by the ordinary
 General Public License rather than by this special one.
 
-		  GNU LIBRARY GENERAL PUBLIC LICENSE
+                  GNU LIBRARY GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License Agreement applies to any software library which
@@ -245,7 +269,7 @@ such a program is covered only if its contents constitute a work based
 on the Library (independent of the use of the Library in a tool for
 writing it).  Whether that is true depends on what the Library does
 and what the program that uses the Library does.
-  
+
   1. You may copy and distribute verbatim copies of the Library's
 complete source code as you receive it, in any medium, provided that
 you conspicuously and appropriately publish on each copy an
@@ -523,7 +547,7 @@ decision will be guided by the two goals of preserving the free status
 of all derivatives of our free software and of promoting the sharing
 and reuse of software generally.
 
-			    NO WARRANTY
+                            NO WARRANTY
 
   15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO
 WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
@@ -546,7 +570,7 @@ FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
-		     END OF TERMS AND CONDITIONS
+                     END OF TERMS AND CONDITIONS
 
      Appendix: How to Apply These Terms to Your New Libraries
 

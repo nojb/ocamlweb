@@ -16,7 +16,9 @@ open Format
 
 type t =                             (* A is all *)
   | Comment of string                (* C *)
+  | Deprecated                       (* D *)
   | Partial_application              (* F *)
+  | Labels_omitted		     (* L *)
   | Method_override of string list   (* M *)
   | Partial_match of string          (* P *)
   | Statement_type                   (* S *)
@@ -25,7 +27,7 @@ type t =                             (* A is all *)
   | Other of string                  (* X *)
 ;;
 
-val parse_options : iserror:bool -> string -> unit;;
+val parse_options : bool -> string -> unit;;
 
 val is_active : t -> bool;;
 val is_error : t -> bool;;

@@ -250,12 +250,10 @@ let bigarray_set arr arg newval =
 %token OPEN
 %token <string> OPTLABEL
 %token OR
-%token PARSER
 %token PLUS
 %token <string> PREFIXOP
 %token PRIVATE
 %token QUESTION
-%token QUESTION2
 %token QUOTE
 %token RBRACE
 %token RBRACKET
@@ -526,8 +524,6 @@ class_expr:
 class_simple_expr:
     LBRACKET core_type_comma_list RBRACKET class_longident
       { mkclass(Pcl_constr($4, List.rev $2)) }
-  | LBRACKET core_type RBRACKET class_longident
-      { mkclass(Pcl_constr($4, [$2])) }
   | class_longident
       { mkclass(Pcl_constr($1, [])) }
   | OBJECT class_structure END
@@ -628,8 +624,6 @@ class_type:
 class_signature:
     LBRACKET core_type_comma_list RBRACKET clty_longident
       { mkcty(Pcty_constr ($4, List.rev $2)) }
-  | LBRACKET core_type RBRACKET clty_longident
-      { mkcty(Pcty_constr ($4, [$2])) }
   | clty_longident
       { mkcty(Pcty_constr ($1, [])) }
   | OBJECT class_sig_body END
@@ -750,16 +744,12 @@ expr:
       { mkexp(Pexp_let($2, List.rev $3, $5)) }
   | LET MODULE UIDENT module_binding IN seq_expr %prec prec_let
       { mkexp(Pexp_letmodule($3, $4, $6)) }
-  | PARSER opt_pat opt_bar parser_cases %prec prec_fun
-      { Pstream.cparser ($2, List.rev $4) }
   | FUNCTION opt_bar match_cases %prec prec_fun
       { mkexp(Pexp_function("", None, List.rev $3)) }
   | FUN labeled_simple_pattern fun_def %prec prec_fun
       { let (l,o,p) = $2 in mkexp(Pexp_function(l, o, [p, $3])) }
   | MATCH seq_expr WITH opt_bar match_cases %prec prec_match
       { mkexp(Pexp_match($2, List.rev $5)) }
-  | MATCH seq_expr WITH PARSER opt_pat opt_bar parser_cases %prec prec_match
-      { mkexp(Pexp_apply(Pstream.cparser ($5, List.rev $7), ["",$2])) }
   | TRY seq_expr WITH opt_bar match_cases %prec prec_try
       { mkexp(Pexp_try($2, List.rev $5)) }
   | TRY seq_expr WITH error %prec prec_try
@@ -886,12 +876,6 @@ simple_expr:
       { let (exten, fields) = $2 in mkexp(Pexp_record(fields, exten)) }
   | LBRACE record_expr error
       { unclosed "{" 1 "}" 5 }
-  | LBRACKETLESS stream_expr opt_semi GREATERRBRACKET
-      { Pstream.cstream (List.rev $2) }
-  | LBRACKETLESS stream_expr opt_semi error
-      { unclosed "[<" 1 ">]" 4 }
-  | LBRACKETLESS GREATERRBRACKET
-      { Pstream.cstream [] }
   | LBRACKETBAR expr_semi_list opt_semi BARRBRACKET
       { mkexp(Pexp_array(List.rev $2)) }
   | LBRACKETBAR expr_semi_list opt_semi error
@@ -965,49 +949,6 @@ fun_binding:
       { let (t, t') = $1 in mkexp(Pexp_constraint($3, t, t')) }
   | labeled_simple_pattern fun_binding
       { let (l, o, p) = $1 in mkexp(Pexp_function(l, o, [p, $2])) }
-;
-parser_cases:
-    parser_case                                 { [$1] }
-  | parser_cases BAR parser_case                { $3 :: $1 }
-;
-parser_case:
-    LBRACKETLESS stream_pattern opt_semi GREATERRBRACKET opt_pat
-    MINUSGREATER seq_expr
-      { (List.rev $2, $5, $7) }
-  | LBRACKETLESS stream_pattern opt_semi error
-      { unclosed "[<" 1 ">]" 4 }
-  | LBRACKETLESS GREATERRBRACKET opt_pat MINUSGREATER seq_expr
-      { ([], $3, $5) }
-;
-stream_pattern:
-    stream_pattern_component opt_err                     { [($1, $2)] }
-  | stream_pattern SEMI stream_pattern_component opt_err { ($3, $4) :: $1 }
-;
-stream_pattern_component:
-    QUOTE pattern
-      { Pstream.Spat_term ($2, None) }
-  | QUOTE pattern WHEN expr %prec prec_list
-      { Pstream.Spat_term ($2, Some $4) }
-  | pattern EQUAL expr
-      { Pstream.Spat_nterm ($1, $3) }
-  | pattern
-      { Pstream.Spat_sterm $1 }
-;
-opt_pat:
-    /* empty */                                 { None }
-  | simple_pattern                              { Some $1 }
-;
-opt_err:
-    /* empty */                                 { None }
-  | QUESTION2 expr %prec prec_list              { Some $2 }
-;
-stream_expr:
-    stream_expr_component                       { [$1] }
-  | stream_expr SEMI stream_expr_component      { $3 :: $1 }
-;
-stream_expr_component:
-    QUOTE expr %prec prec_list                  { Pstream.Sexp_term $2 }
-  | expr %prec prec_list                        { Pstream.Sexp_nterm $1 }
 ;
 match_cases:
     pattern match_action                        { [$1, $2] }
@@ -1238,7 +1179,8 @@ core_type:
 core_type2:
     simple_core_type_or_tuple
       { $1 }
-  | QUESTION LIDENT COLON core_type2 MINUSGREATER core_type2 %prec prec_type_arrow
+  | QUESTION LIDENT COLON core_type2 MINUSGREATER core_type2
+      %prec prec_type_arrow
       { mktyp(Ptyp_arrow("?" ^ $2 ,
                {ptyp_desc = Ptyp_constr(Lident "option", [$4]);
                 ptyp_loc = $4.ptyp_loc}, $6)) }
@@ -1253,52 +1195,63 @@ core_type2:
 ;
 
 simple_core_type:
+    simple_core_type2
+      { $1 }
+  | LPAREN core_type_comma_list RPAREN
+      { match $2 with [sty] -> sty | _ -> raise Parse_error }
+;
+simple_core_type2:
     QUOTE ident
       { mktyp(Ptyp_var $2) }
   | UNDERSCORE
       { mktyp(Ptyp_any) }
   | type_longident
       { mktyp(Ptyp_constr($1, [])) }
-  | simple_core_type type_longident %prec prec_constr_appl
+  | simple_core_type2 type_longident %prec prec_constr_appl
       { mktyp(Ptyp_constr($2, [$1])) }
-  | LPAREN core_type_comma_list RPAREN type_longident
-      %prec prec_constr_appl
+  | LPAREN core_type_comma_list RPAREN type_longident %prec prec_constr_appl
       { mktyp(Ptyp_constr($4, List.rev $2)) }
-  | LPAREN core_type RPAREN
-      { $2 }
   | LESS meth_list GREATER
       { mktyp(Ptyp_object $2) }
   | LESS GREATER
       { mktyp(Ptyp_object []) }
   | SHARP class_longident opt_present
       { mktyp(Ptyp_class($2, [], $3)) }
-  | simple_core_type SHARP class_longident opt_present %prec prec_constr_appl
+  | simple_core_type2 SHARP class_longident opt_present %prec prec_constr_appl
       { mktyp(Ptyp_class($3, [$1], $4)) }
   | LPAREN core_type_comma_list RPAREN SHARP class_longident opt_present
       %prec prec_constr_appl
       { mktyp(Ptyp_class($5, List.rev $2, $6)) }
-  | LBRACKET opt_bar row_field_list RBRACKET
-      { let l = List.rev $3 in
-        mktyp(Ptyp_variant(l, true, List.map (fun (p,_,_) -> p) l)) }
+  | LBRACKET tag_field RBRACKET
+      { mktyp(Ptyp_variant([$2], true, None)) }
+  | LBRACKET BAR row_field_list RBRACKET
+      { mktyp(Ptyp_variant(List.rev $3, true, None)) }
+  | LBRACKETBAR row_field_list RBRACKET
+      { mktyp(Ptyp_variant(List.rev $2, true, None)) }
+  | LBRACKET row_field BAR row_field_list RBRACKET
+      { mktyp(Ptyp_variant($2 :: List.rev $4, true, None)) }
   | LBRACKET GREATER opt_bar row_field_list RBRACKET
-      { let l = List.rev $4 in
-        mktyp(Ptyp_variant(l, false, List.map (fun (p,_,_) -> p) l)) }
+      { mktyp(Ptyp_variant(List.rev $4, false, None)) }
   | LBRACKETLESS opt_bar row_field_list RBRACKET
-      { mktyp(Ptyp_variant(List.rev $3, true, [])) }
+      { mktyp(Ptyp_variant(List.rev $3, true, Some [])) }
   | LBRACKETLESS opt_bar row_field_list GREATER name_tag_list RBRACKET
-      { mktyp(Ptyp_variant(List.rev $3, true, List.rev $5)) }
-  | LBRACKET RBRACKET
-      { mktyp(Ptyp_variant([],true,[])) }
+      { mktyp(Ptyp_variant(List.rev $3, true, Some (List.rev $5))) }
   | LBRACKET GREATER RBRACKET
-      { mktyp(Ptyp_variant([],false,[])) }
+      { mktyp(Ptyp_variant([], false, None)) }
 ;
 row_field_list:
     row_field                                   { [$1] }
   | row_field_list BAR row_field                { $3 :: $1 }
 ;
 row_field:
-    name_tag OF opt_ampersand amper_type_list   { ($1, $3, List.rev $4) }
-  | name_tag                                    { ($1, true, []) }
+    tag_field                                   { $1 }
+  | simple_core_type2                           { Rinherit $1 }
+;
+tag_field:
+    name_tag OF opt_ampersand amper_type_list
+      { Rtag ($1, $3, List.rev $4) }
+  | name_tag
+      { Rtag ($1, true, []) }
 ;
 opt_ampersand:
     AMPERSAND                                   { true }
@@ -1316,16 +1269,13 @@ name_tag_list:
     name_tag                                    { [$1] }
   | name_tag_list name_tag                      { $2 :: $1 }
 ;
-core_type_tuple:
-    simple_core_type STAR simple_core_type      { [$3; $1] }
-  | core_type_tuple STAR simple_core_type       { $3 :: $1 }
-;
 simple_core_type_or_tuple:
-    simple_core_type                    { $1 }
-  | core_type_tuple                     { mktyp(Ptyp_tuple(List.rev $1)) }
+    simple_core_type                            { $1 }
+  | simple_core_type STAR core_type_list
+      { mktyp(Ptyp_tuple($1 :: List.rev $3)) }
 ;
 core_type_comma_list:
-    core_type COMMA core_type                   { [$3; $1] }
+    core_type                                   { [$1] }
   | core_type_comma_list COMMA core_type        { $3 :: $1 }
 ;
 core_type_list:
@@ -1487,7 +1437,7 @@ opt_semi:
   | SEMI                                        { () }
 ;
 subtractive:
-  | MINUS					{ "-" }
+  | MINUS                                       { "-" }
   | MINUSDOT                                    { "-." }
 ;
 %%

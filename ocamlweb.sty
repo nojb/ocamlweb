@@ -36,20 +36,24 @@
 
 \ProcessOptions
 
-%END LATEX
-% HeVeA reads the following
+% macros to build and deconstruct pairs
+\def\@ocwpair#1#2{#1\noexpand\else#2}
+\def\@ocwfirst#1{\expandafter\iftrue#1\fi}
+\def\@ocwsecond#1{\expandafter\iffalse#1\fi}
 
-% Headings
+% page styles using marks that are pairs.
 
 \newcommand{\ps@ocamlweb}{%
   \renewcommand{\@oddhead}{%
     \vbox{\hbox to \textwidth{%
-     \expandafter\iftrue\firstmark\fi%
-     \hfil\vphantom{\S}%
-     \S\expandafter\iffalse\firstmark\fi
-     --%
-     \S\expandafter\iffalse\botmark\fi
-     \qquad\thepage}\hrule}%
+        \begingroup%
+        \edef\fp{\@ocwsecond{\firstmark}}%
+        \edef\lp{\@ocwsecond{\botmark}}%
+        \@ocwfirst{\firstmark}%
+        \hfil\vphantom{\S}%
+        \ifx\fp\lp\S\fp\else\S\fp--\S\lp\fi\qquad\thepage%
+        \endgroup}%
+      \hrule}%
   }%
   \renewcommand{\@evenhead}{\@oddhead}%
   \renewcommand{\@evenfoot}{}%
@@ -58,13 +62,16 @@
 \newcommand{\ps@ocamlwebindex}{%
   \renewcommand{\@oddhead}{%
     \vbox{\hbox to \textwidth{%
-     \expandafter\iftrue\firstmark\fi%
-     \hfil\vphantom{\S}%
-     \thepage}\hrule}%
-  }%
+     \@ocwfirst{\firstmark}\hfil\vphantom{\S}\thepage}\hrule}}%
   \renewcommand{\@evenhead}{\@oddhead}%
   \renewcommand{\@evenfoot}{}%
   \renewcommand{\@oddfoot}{\@evenfoot}}
+
+% needed to mak hypertex work
+\AtBeginDocument{\let\Hy@tempa\relax}
+
+%END LATEX
+% HeVeA reads the following
 
 % Hevea puts to much space with \medskip and \bigskip
 %HEVEA\renewcommand{\medskip}{}
@@ -168,7 +175,7 @@
 %HEVEA\newcommand{\ocwbegincode}{}
 %HEVEA\newcommand{\ocwendcode}{}
 
-%HEVEA\def\endgraf{}
+%HEVEA\newcommand{\endgraf}{}
 
 % visible space in a string
 %BEGIN LATEX
@@ -185,25 +192,22 @@
 \def\currentmodule{}
 \newcommand{\ocwheader}[1]{\gdef\currentmodule{#1}}
 
-\iflatexsectioning
-\newcommand{\ocwtitle}[1]{}
-\else
 \newcommand{\ocwtitle}[1]{%
  \section*{#1}%
  \def\currentmodule{#1}%
  \addtocounter{ocwcounter}{1}%
- \mark{#1\noexpand\else\theocwcounter}%
+ \mark{\@ocwpair{#1}{\theocwcounter}}%
  \addtocounter{ocwcounter}{-1}%
 }
-\fi
 %END LATEX
 %HEVEA\newcommand{\ocwtitle}[1]{\section*{#1}}
 
 % macro for typesetting the title of a module implementation
-\newcommand{\ocwmodule}[1]{\ocwtitle{Module #1}}
+\newcommand{\ocwmodule}[1]{\ocwtitle{Module #1}\typeout{OCamlWeb
+    file #1.ml}}
 
 % macro for typesetting the title of a module interface
-\newcommand{\ocwinterface}[1]{\ocwtitle{Interface for module #1}}
+\newcommand{\ocwinterface}[1]{\ocwtitle{Interface for module #1}\typeout{OCamlWeb file #1.mli}}
 
 % interface part of a module
 \newcommand{\ocwinterfacepart}{\subsection*{Interface}}
@@ -213,11 +217,11 @@
 
 % macro for typesetting the title of a lex description
 \newcommand{\ocwlexmodule}[1]{\ocwtitle{Module #1
-    (Lex)}}
+    (Lex)}\typeout{OCamlWeb file #1.mll}}
 
 % macro for typesetting the title of a yacc description
 \newcommand{\ocwyaccmodule}[1]{\ocwtitle{Module #1
-    (Yacc)}}
+    (Yacc)}\typeout{OcamlWeb file #1.mly}}
 
 % new WEB section
 \newcounter{ocwcounter}
@@ -226,11 +230,7 @@
 \refstepcounter{ocwcounter}%
 \bigskip\noindent{\bf\theocwcounter.}%
 %BEGIN LATEX
-\mark{%
-   \currentmodule%
-   \noexpand\else%
-   \theocwcounter%
-}%
+\mark{\@ocwpair{\currentmodule}{\theocwcounter}}%
 \kern1em%
 %END LATEX
 %HEVEA\hspace{1em}
@@ -240,8 +240,8 @@
 % index
 %BEGIN LATEX
 \newcommand{\ocwbeginindex}{%
-  \mark{Index\noexpand\else\theocwcounter}%
-  \let\ps@plain\ps@ocamlwebindex%
+  \mark{\@ocwpair{Index}{\theocwcounter}}%
+  \pagestyle{ocamlwebindex}
   \begin{theindex}%
 }%
 \newcommand{\ocwendindex}{\end{theindex}}

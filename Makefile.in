@@ -17,7 +17,7 @@ UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/n
 
 # Version
 MAJORVN=1
-MINORVN=1
+MINORVN=2
 VERSION=$(MAJORVN).$(MINORVN)
 OCAMLBEST=@OCAMLBEST@
 
@@ -34,7 +34,7 @@ OPTFLAGS = $(ZLIBS) $(PROFILE)
 CAML_CMO = ocaml-parser/misc.cmo ocaml-parser/clflags.cmo	\
 	   ocaml-parser/terminfo.cmo ocaml-parser/warnings.cmo	\
            ocaml-parser/linenum.cmo ocaml-parser/location.cmo	\
-	   ocaml-parser/longident.cmo ocaml-parser/pstream.cmo	\
+	   ocaml-parser/longident.cmo \
            ocaml-parser/syntaxerr.cmo ocaml-parser/parser.cmo	\
            ocaml-parser/lexer.cmo ocaml-parser/parse.cmo
 
@@ -230,6 +230,17 @@ tags:
               "--regex=/exception[ \t]+\([^ \t]+\)/\1/" \
 	      "--regex=/val[ \t]+\([^ \t]+\)/\1/" \
 	      "--regex=/module[ \t]+\([^ \t]+\)/\1/" *.mli *.ml
+
+# myself
+
+Makefile: Makefile.in config.status
+	./config.status
+
+config.status: configure
+	./config.status --recheck
+
+configure: configure.in
+	autoconf 
 
 # clean and depend
 ##################

@@ -15,4 +15,3 @@
 (* Command-line parameters *)
 
 let fast = ref false                    (* -unsafe *)
-and noassert = ref false                (* -noassert *)

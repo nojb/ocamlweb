@@ -207,7 +207,11 @@ and tr_core_type_desc loc = function
   | Ptyp_alias (ct,_) -> 
       tr_core_type ct
   | Ptyp_variant (l,_,_) ->
-      List.iter (fun (_,_,ctl) -> List.iter tr_core_type ctl) l
+      List.iter tr_row_field l
+
+and tr_row_field = function
+  | Rtag (_,_,ctl) -> List.iter tr_core_type ctl
+  | Rinherit t -> tr_core_type t
 
 and tr_core_field_type ft =
   tr_core_field_desc ft.pfield_loc ft.pfield_desc

@@ -51,18 +51,18 @@ ocaml-parser/parse.cmx: ocaml-parser/lexer.cmx ocaml-parser/location.cmx \
     ocaml-parser/parser.cmx ocaml-parser/syntaxerr.cmx ocaml-parser/parse.cmi 
 ocaml-parser/parser.cmo: ocaml-parser/asttypes.cmi ocaml-parser/clflags.cmo \
     ocaml-parser/location.cmi ocaml-parser/longident.cmi \
-    ocaml-parser/parsetree.cmi ocaml-parser/pstream.cmi \
-    ocaml-parser/syntaxerr.cmi ocaml-parser/parser.cmi 
+    ocaml-parser/parsetree.cmi ocaml-parser/syntaxerr.cmi \
+    ocaml-parser/parser.cmi 
 ocaml-parser/parser.cmx: ocaml-parser/asttypes.cmi ocaml-parser/clflags.cmx \
     ocaml-parser/location.cmx ocaml-parser/longident.cmx \
-    ocaml-parser/parsetree.cmi ocaml-parser/pstream.cmx \
-    ocaml-parser/syntaxerr.cmx ocaml-parser/parser.cmi 
-ocaml-parser/pstream.cmo: ocaml-parser/asttypes.cmi ocaml-parser/location.cmi \
-    ocaml-parser/longident.cmi ocaml-parser/parsetree.cmi \
-    ocaml-parser/pstream.cmi 
-ocaml-parser/pstream.cmx: ocaml-parser/asttypes.cmi ocaml-parser/location.cmx \
-    ocaml-parser/longident.cmx ocaml-parser/parsetree.cmi \
-    ocaml-parser/pstream.cmi 
+    ocaml-parser/parsetree.cmi ocaml-parser/syntaxerr.cmx \
+    ocaml-parser/parser.cmi 
+ocaml-parser/printast.cmo: ocaml-parser/asttypes.cmi \
+    ocaml-parser/location.cmi ocaml-parser/longident.cmi \
+    ocaml-parser/parsetree.cmi ocaml-parser/printast.cmi 
+ocaml-parser/printast.cmx: ocaml-parser/asttypes.cmi \
+    ocaml-parser/location.cmx ocaml-parser/longident.cmx \
+    ocaml-parser/parsetree.cmi ocaml-parser/printast.cmi 
 ocaml-parser/syntaxerr.cmo: ocaml-parser/location.cmi \
     ocaml-parser/syntaxerr.cmi 
 ocaml-parser/syntaxerr.cmx: ocaml-parser/location.cmx \
@@ -77,7 +77,7 @@ ocaml-parser/parse.cmi: ocaml-parser/parsetree.cmi
 ocaml-parser/parser.cmi: ocaml-parser/parsetree.cmi 
 ocaml-parser/parsetree.cmi: ocaml-parser/asttypes.cmi \
     ocaml-parser/location.cmi ocaml-parser/longident.cmi 
-ocaml-parser/pstream.cmi: ocaml-parser/parsetree.cmi 
+ocaml-parser/printast.cmi: ocaml-parser/parsetree.cmi 
 ocaml-parser/syntaxerr.cmi: ocaml-parser/location.cmi 
 ocamllex-parser/lex_lexer.cmo: ocamllex-parser/lex_parser.cmi \
     ocamllex-parser/lex_syntax.cmi 

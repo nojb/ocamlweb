@@ -3,6 +3,12 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.2, 14/01/2002
+=======================
+
+  o fixed bugs in ocamlweb.sty (thanks to Ralf Treinen)
+  o port to ocaml 3.04 and adequacy to ocaml 3.04 parser
+
 version 1.1, 20/09/2001
 =======================
   o fixed bug in module indexing

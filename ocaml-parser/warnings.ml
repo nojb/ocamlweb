@@ -16,7 +16,9 @@
 
 type t =                             (* A is all *)
   | Comment of string                (* C *)
+  | Deprecated                       (* D *)
   | Partial_application              (* F *)
+  | Labels_omitted		     (* L *)
   | Method_override of string list   (* M *)
   | Partial_match of string          (* P *)
   | Statement_type                   (* S *)
@@ -27,7 +29,9 @@ type t =                             (* A is all *)
 
 let letter = function        (* 'a' is all *)
   | Comment _ ->                'c'
+  | Deprecated ->               'd'
   | Partial_application ->      'f'
+  | Labels_omitted ->           'l'
   | Method_override _ ->        'm'
   | Partial_match _ ->          'p'
   | Statement_type ->           's'
@@ -37,7 +41,7 @@ let letter = function        (* 'a' is all *)
 ;;
 
 let check c =
-  try ignore (String.index "acfmpsuvxACFMPSUVX" c)
+  try ignore (String.index "acdflmpsuvxACDFLMPSUVX" c)
   with _ -> raise (Arg.Bad (Printf.sprintf "unknown warning option %c" c))
 ;;    
 
@@ -74,12 +78,16 @@ let parse_options iserr s =
   done
 ;;
 
+let () = parse_options false "l";;
+
 let message = function
   | Partial_match "" -> "this pattern-matching is not exhaustive."
   | Partial_match s ->
       "this pattern-matching is not exhaustive.\n\
        Here is an example of a value that is not matched:\n" ^ s
   | Unused_match -> "this match case is unused."
+  | Labels_omitted ->
+      "labels were omitted in the application of this function."
   | Method_override slist ->
       String.concat " "
         ("the following methods are overriden \
@@ -93,6 +101,7 @@ let message = function
   | Statement_type ->
       "this expression should have type unit."
   | Comment s -> "this is " ^ s ^ "."
+  | Deprecated -> "this syntax is deprecated."
   | Other s -> s
 ;;
 
