@@ -1,0 +1,7 @@
+
+{
+
+}
+
+rule token = parse
+  | '!' { action }

@@ -57,12 +57,26 @@ let output_file f =
 
 (*s \textbf{High level output.}
     In this section and the following, we introduce functions which are 
-    \LaTeX\ dependent. 
-  *)
+    \LaTeX\ dependent. *)
+
+(*s [output_verbatim] outputs a string in verbatim mode.
+    A valid delimiter is given by the function [char_out_of_string].
+    It assumes that one of the four characters of [fresh_chars] is not used
+    (which is the case in practice, since [output_verbatim] is only used
+    to print quote-delimited characters). *)
+
+let fresh_chars = [ '!'; '|'; '"'; '+' ]
+
+let char_out_of_string s = 
+  let rec search = function
+    | [] -> assert false
+    | c :: r -> if String.contains s c then search r else c
+  in
+  search fresh_chars
 
 let output_verbatim s =
-  (*i TODO : vérifier que "!" n'apparaît pas dans [s] i*)
-  output_string "\\verb!"; output_string s; output_string "!"
+  let c = char_out_of_string s in
+  output_string (sprintf "\\verb%c%s%c" c s c)
 
 let no_preamble = ref false
 
@@ -281,30 +295,24 @@ let output_ident s =
   end
 
 let output_lex_ident s =
-  if is_lex_keyword s then 
-    begin
-      leave_math (); output_lex_keyword s
-    end 
-  else
-    begin
-      enter_math ();
-      output_string "\\ocwlexident{";  
-      output_latex_id (s);
-      output_string "}";
-    end
+  if is_lex_keyword s then begin
+    leave_math (); output_lex_keyword s
+  end else begin
+    enter_math ();
+    output_string "\\ocwlexident{";  
+    output_latex_id s;
+    output_string "}";
+  end
 
 let output_yacc_ident s =
-  if is_yacc_keyword s then 
-    begin
-      leave_math (); output_yacc_keyword s
-    end 
-  else
-    begin
-      enter_math ();
-      output_string "\\ocwyaccident{";  
-      output_latex_id (s);
-      output_string "}";
-    end
+  if is_yacc_keyword s then begin
+    leave_math (); output_yacc_keyword s
+  end else begin
+    enter_math ();
+    output_string "\\ocwyaccident{";  
+    output_latex_id s;
+    output_string "}";
+  end
     
 (*s \textbf{Symbols.}
     Some mathematical symbols are printed in a nice way, in order
