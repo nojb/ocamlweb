@@ -1,0 +1,2907 @@
+#This file was created by <dorland> Thu Jun 15 15:14:51 2000
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
+\lyxformat 2.15
+\textclass report
+\begin_preamble
+\usepackage{ocamlweb}
+\end_preamble
+\language french
+\inputencoding latin1
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage widemarginsa4
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle plain
+
+\layout Author
+
+Dorland Anne 
+\latex latex 
+
+\backslash 
+and
+\latex default 
+ Muller Guillaume
+\layout Title
+
+Rapport de Stage
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Section*
+
+Introduction
+\layout Standard
+
+La programmation littéraire est fondée sur l'idée que pour que la documentation
+ d'un programme soit cohérente avec celui-ci, un programme et sa documentation
+ doivent être écrits simultanément.
+ 
+\family typewriter 
+Ocamlweb
+\family default 
+ est un logiciel de programmation littéraire pour 
+\family typewriter 
+Caml
+\family default 
+.
+ Il produit un fichier 
+\latex latex 
+
+\backslash 
+LaTeXe{}
+\latex default 
+ présentant le code et sa documentation à partir d'un fichier source 
+\family typewriter 
+Caml
+\family default 
+, offrant ainsi à l'utilisateur toute la puissance de 
+\latex latex 
+
+\backslash 
+LaTeXe{} 
+\latex default 
+pour rédiger ses commentaires.
+ Il ne permet cependant pas, dans sa version
+\protected_separator 
+0.7 de traiter les fichiers de grammaires 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+.
+\layout Standard
+
+Le but de ce TER-STAGE est de poursuivre le développement du logiciel
+\family typewriter 
+ Ocamlweb
+\family default 
+, lui permettant ainsi de gérer tous les types de fichiers, autant d'implantatio
+n ou d'interface, que ceux des grammaires.
+ 
+\layout Standard
+
+Tout d'abord, nous analyserons l'état du logiciel du point de vue de l'utilisate
+ur, dans le chapitre
+\protected_separator 
+
+\begin_inset LatexCommand \ref{chap1}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{chap1}
+
+\end_inset 
+
+ dans l'optique d'y appliquer nos modifications.
+ Ensuite, nous analyserons plus précisément le programme en lui-même, chapitre
+\protected_separator 
+
+\begin_inset LatexCommand \ref{chap2}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{chap2}
+
+\end_inset 
+
+, en commençant par l'architecture puis en précisant petit à petit les modificat
+ions proposées au niveau du code.
+ Nous détaillerons ensuite les problèmes rencontrés lors de la programmation
+ proprement dite, et les solutions envisagées, et enfin celle que nous avons
+ choisie dans le chapitre
+\protected_separator 
+
+\begin_inset LatexCommand \ref{chap3}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{chap3}
+
+\end_inset 
+
+, et enfin le chapitre
+\protected_separator 
+
+\begin_inset LatexCommand \ref{tests}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{tests}
+
+\end_inset 
+
+, est consacré aux tests.
+\layout Chapter
+
+Phase d'analyse des besoins
+\begin_inset LatexCommand \label{chap1}
+
+\end_inset 
+
+
+\layout Section
+
+Etat du logiciel avant le stage
+\layout Standard
+
+La version actuelle d'
+\family typewriter 
+Ocamlweb
+\begin_float footnote 
+\layout Standard
+
+Ocamlweb Version 0.7
+\end_float 
+ permet de formater les fichiers d'implantation (.ml) et d'interface (.mli)
+ 
+\family typewriter 
+Caml
+\family default 
+.
+ Le traitement des fichiers se fait automatiquement, cependant l'utilisateur
+ peut personnaliser les fontes utilisées pour les mot-clefs, les opérateurs,
+ etc ainsi que le sectionnement dans le document final.
+ Toutes les fontes utilisées sont définies dans le fichier 
+\emph on 
+ocamlweb.sty
+\emph toggle 
+ dont l'utilisateur peut redéfinir les commandes à volonté.
+ Le sectionnement, quant à lui, est contrôlé par les commentaires dans le
+ fichier initial.
+\layout Standard
+
+Cependant, les fichiers de type 
+\family typewriter 
+Lex
+\family default 
+ (.mll) et 
+\family typewriter 
+Yacc
+\family default 
+ (.mly) ne sont pas reconnus et ne sont traités que si l'on force le logiciel
+ à les voir comme des fichiers d'implantation (à l'aide de l'option 
+\family typewriter 
+--impl
+\family default 
+) et le traitement qui leur est appliqué est relativement simple, donc la
+ mise en page et le formatage sont restreints.
+ Ainsi, les terminaux, les non-terminaux, les expressions régulières, certains
+ mot-clefs comme 
+\family typewriter 
+error
+\family default 
+ ou 
+\family typewriter 
+eof
+\family default 
+ ne sont pas distingués du reste du code, contrairement à d'autres mot-clefs
+ tel que 
+\family typewriter 
+token
+\family default 
+,
+\family typewriter 
+ right
+\family default 
+, 
+\family typewriter 
+left
+\family default 
+, etc pour les fichiers 
+\family typewriter 
+Yacc
+\family default 
+ et
+\family typewriter 
+ let
+\family default 
+, 
+\family typewriter 
+and
+\family default 
+, 
+\family typewriter 
+rule
+\family default 
+, 
+\family typewriter 
+parse
+\family default 
+, etc pour les fichiers 
+\family typewriter 
+Lex
+\family default 
+.
+ Les commentaires et le contrôle qu'ils peuvent exercer sur le sectionnement
+ du document final sont reconnus dans les fichiers 
+\family typewriter 
+Lex
+\family default 
+ , mais dans les fichiers 
+\family typewriter 
+Yacc
+\family default 
+ ils sont traités comme de la documentation ( sans les /* ,*/ ).
+ Enfin, l'index est inexistant pour les deux types de fichiers.
+\layout Standard
+
+Des exemples de fichiers 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+ traités par 
+\family typewriter 
+Ocamlweb
+\family default 
+ version 0.7 se trouvent dans la section
+\protected_separator 
+
+\begin_inset LatexCommand \ref{sec: on.attend}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{sec: on.attend}
+
+\end_inset 
+
+.
+\layout Section
+
+Améliorations à apporter 
+\layout Standard
+
+Nous allons introduire une reconnaissance automatisée du type du fichier
+ (grâce à l'extension), ce qui autorisera l'utilisateur à ne donner en paramètre
+ que les noms de fichiers et les options de formatage.
+ De plus, une option supplémentaire, 
+\family typewriter 
+--grammar
+\family default 
+, sera ajoutée afin de permettre à l'utilisateur d'imprimer les règles de
+ grammaires sans leurs actions, tout en conservant les instructions importantes
+ comme les définitions d'expressions régulières pour les analyses lexicales,
+ les points d'entrée des grammaires ou encore les tokens reconnus.
+ Il pourra ainsi obtenir une description beaucoup plus claire de la grammaire
+ reconnue par son fichier.
+ 
+\layout Standard
+
+De plus, nous avons choisi par défaut que les mot-clefs et symboles spéciaux
+ seront imprimés en fonte 
+\latex latex 
+
+\backslash 
+textsf{SansSerif}
+\latex default 
+, les terminaux des grammaires 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+ en 
+\shape italic 
+italique
+\shape default 
+ et les non-terminaux en texte normal(droit).
+ Les macro-commandes que l'utilisateur peut redéfinir sont les suivantes
+ : 
+\family typewriter 
+
+\backslash 
+ocwlexkw
+\family default 
+ pour les mots clefs 
+\family typewriter 
+Lex
+\family default 
+, 
+\family typewriter 
+
+\backslash 
+ocwyacckw
+\family default 
+ pour les mots clefs 
+\family typewriter 
+Yacc
+\family default 
+, 
+\family typewriter 
+
+\backslash 
+ocwlexregexpr
+\family default 
+ pour les identificateurs associés à des expression régulières 
+\family typewriter 
+Lex
+\family default 
+, et enfin 
+\family typewriter 
+
+\backslash 
+ocwyaccterminals
+\family default 
+ pour les terminaux des grammaires 
+\family typewriter 
+Yacc
+\family default 
+ et 
+\family typewriter 
+
+\backslash 
+ocwyaccnonterminals
+\family default 
+ pour les non-terminaux des grammaires 
+\family typewriter 
+Yacc
+\family default 
+.
+\layout Standard
+
+Enfin, les commentaires dans les fichiers 
+\family typewriter 
+Yacc
+\family default 
+ pourront être contrôlés de la même façon que dans les fichiers 
+\family typewriter 
+Caml
+\family default 
+ et 
+\family typewriter 
+Lex
+\family default 
+, 
+\shape italic 
+i.e.
+
+\shape default 
+ nous autoriserons l'utilisateur à employer les commandes suivantes :
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+10 2 0 0 -1 -1 -1 -1
+1 1 0 0
+0 0 0 0
+1 0 0 0
+1 0 0 0
+0 0 1 0
+0 0 1 0
+0 0 1 0
+0 0 1 0
+0 0 1 0
+1 1 0 0
+2 1 0 "6em" ""
+2 1 1 "20em" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 1 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 1 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 1 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 1 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 1 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+
+\family typewriter 
+/* ...
+ */
+\family default 
+
+\newline 
+Commentaires standards, les 
+\family typewriter 
+/*
+\family default 
+ et 
+\family typewriter 
+*/
+\family default 
+ sont enlevés,
+\newline 
+
+\family typewriter 
+/*i ...
+ i*/
+\family default 
+
+\newline 
+Délimiteurs permettant à 
+\family typewriter 
+Ocamlweb
+\family default 
+ d'ignorer les commentaires,
+\newline 
+
+\family typewriter 
+/*s
+\family default 
+
+\newline 
+Commentaires introduisant les sections définies par l'utilisateur,
+\newline 
+
+\family typewriter 
+/*c
+\family default 
+
+\newline 
+Précise à 
+\family typewriter 
+Ocamlweb
+\family default 
+ que le commentaire doit être pris comme un commentaire de code 
+\family typewriter 
+Caml
+\family default 
+ et non pas comme un commentaire de documentation.
+ Donc nous l'afficherons avec les 
+\family typewriter 
+/*
+\family default 
+ et 
+\family typewriter 
+*/
+\family default 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\newline 
+
+\family typewriter 
+/*r
+\family default 
+
+\newline 
+Commentaire justifié à droite.
+\layout Standard
+
+Des fichiers d'exemple 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+ se trouvent en section
+\protected_separator 
+
+\begin_inset LatexCommand \ref{sec: on.attend}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{sec: on.attend}
+
+\end_inset 
+
+ ; ils sont formatés tels que nous souhaiterions qu'ils le soient par notre
+ version d'
+\family typewriter 
+Ocamlweb
+\family default 
+.
+\layout Chapter
+
+Phase d'analyse du programme
+\begin_inset LatexCommand \label{chap2}
+
+\end_inset 
+
+
+\layout Section
+
+Etude de la version 0.7 d'Ocamlweb
+\layout Standard
+
+Dans cette section, nous décrivons l'architecture d'
+\family typewriter 
+Ocamlweb-0.7
+\family default 
+, au niveau des modules puis plus précisément au niveau des fonctions.
+\layout Standard
+
+Tout d'abord, voyons comment les modules s'organisent sur la figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: modules}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: modules}
+
+\end_inset 
+
+.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Dépendances entre les modules
+\begin_inset LatexCommand \label{fig: modules}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 188 223
+file modules.ps
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+et quels sont leurs rôles respectifs :
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+7 2 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+0 1 0 0
+2 1 0 "6em" ""
+2 1 1 "20em" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+
+\series bold 
+Module
+\series default 
+
+\newline 
+
+\series bold 
+Fonction
+\series default 
+
+\newline 
+Output
+\newline 
+affichage bas niveau,
+\newline 
+Cross
+\newline 
+gestion des références croisées pour construire l'index,
+\newline 
+Pretty
+\newline 
+affichage du code et des commentaires,
+\newline 
+Web
+\newline 
+construction du document complet : regroupement des divers fichiers 
+\latex latex 
+
+\backslash 
+LaTeXe
+\backslash 
+
+\latex default 
+,
+\latex latex 
+ 
+\latex default 
+en-tête, index,
+\newline 
+Doclexer
+\newline 
+découpage des fichiers en documentation-code/grammaire,
+\newline 
+Main
+\newline 
+programme principal.
+\layout Standard
+
+Ensuite voyons de façon générale comment les différentes fonctions interagissent
+, 
+\emph on 
+i.e.
+
+\emph toggle 
+ quelles sont les fonctions principales, quelles fonctions elles appellent,
+ et dans quel ordre, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: appels}
+
+\end_inset 
+
+, figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: appels}
+
+\end_inset 
+
+.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Arbre des appels de fonction
+\begin_inset LatexCommand \label{fig: appels}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 213 673
+file appels.ps
+height 3 80
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+Voyons comment se transfèrent les types de données page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: types}
+
+\end_inset 
+
+, figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: types}
+
+\end_inset 
+
+.
+ Nous voyons sur cet arbre des appels, enrichis des types de données, les
+ 
+\emph on 
+types de sortie
+\emph toggle 
+ des fonctions, de façon à avoir une première idée du flot de circulation
+ des données à travers les différentes fonctions et, par conséquent, à travers
+ les différents modules.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Arbredes appels décoré par les types de données
+\begin_inset LatexCommand \label{fig: types}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 337 673
+file arbretypes.ps
+height 3 80
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+Enfin, si nous synthétisons toutes ces informations sous forme d'un graphe
+ représentant la fonction 
+\family typewriter 
+main
+\family default 
+, nous obtenons une vision globale de l'architecture (figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: boites}
+
+\end_inset 
+
+ , page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: boites}
+
+\end_inset 
+
+), sous la forme d'un graphe de flot de données de type SADT.
+ Le logiciel commence par interpréter la ligne de commande pour en extraire
+ les options et les noms de fichiers à traiter.
+ Ensuite, pour chacun de ces noms de fichiers, il découpe le contenu du
+ fichier correspondant en sections, paragraphes (et sous-paragraphes, pour
+ la version que nous écrivons), grâce à la fonction 
+\family typewriter 
+read_one_file
+\family default 
+, établit les références croisées qui permettront de construire l'index
+ (fonction 
+\family typewriter 
+locations_for_a_file
+\family default 
+) et traduit le contenu en un corps de fichier 
+\latex latex 
+
+\backslash 
+LaTeXe{}
+\latex default 
+.
+ Après avoir itéré ce processus sur tous les noms de fichiers trouvés sur
+ la ligne de commande et créé l'index avec la fonction 
+\family typewriter 
+print_index
+\family default 
+, il termine la fonction 
+\family typewriter 
+produce_document
+\family default 
+ par le regroupement du header, des corps de fichiers et de l'index en un
+ fichier 
+\latex latex 
+
+\backslash 
+LaTeXe
+\backslash 
+
+\latex default 
+ complet.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Flot de données principal
+\begin_inset LatexCommand \label{fig: boites}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 446 631
+file boites.ps
+width 3 75
+height 3 75
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+Les détails de ces différentes opérations se trouvent dans les figures suivantes
+ :
+\layout Standard
+
+La fonction 
+\family typewriter 
+read_one_file
+\family default 
+ s'occupe de construire le type 
+\family typewriter 
+Web.file
+\family default 
+ à partir du type 
+\layout Standard
+
+
+\family typewriter 
+Doclexer.file_type
+\family default 
+.
+ Pour ce faire, la fonction 
+\family typewriter 
+read
+\family default 
+ récupère le nom du fichier et charge le contenu dans une chaîne que 
+\family typewriter 
+raw_read_file
+\family default 
+ se charge de transformer en sections, paragraphes voire sous-paragraphes.
+ Voir figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: read_one_file}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: read_one_file}
+
+\end_inset 
+
+.
+ 
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Fonction read_one_file
+\begin_inset LatexCommand \label{fig: read_one_file}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 446 631
+file read_one_file.ps
+width 3 75
+height 3 75
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+La fonction 
+\family typewriter 
+locations_for_a_file
+\family default 
+ (figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: location_for_a_file}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: location_for_a_file}
+
+\end_inset 
+
+) se charge quant à elle de rechercher dans le type ainsi construit les
+ références croisées servant à créer l'index.
+ Elle est donc composée de fonctions descendant niveau par niveau dans le
+ type pour en extraire ces informations : 
+\family typewriter 
+add_file_loc
+\family default 
+ pour le champ 
+\family typewriter 
+content
+\family default 
+ du type 
+\family typewriter 
+Web.file
+\family default 
+, 
+\family typewriter 
+add_sec_loc
+\family default 
+ pour les différents sections et enfin 
+\family typewriter 
+add_par_loc
+\family default 
+ pour les divers paragraphes constituant chaque section.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Fonction locations_for_a_file 
+\begin_inset LatexCommand \label{fig: location_for_a_file}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 446 631
+file locations_4_a_file.ps
+width 3 75
+height 3 75
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+La fonction 
+\family typewriter 
+pretty_print_file
+\family default 
+, pour sa part, descend par étapes successives dans la structure du type
+ 
+\family typewriter 
+Web.file
+\family default 
+, de façon à en extraire la présentation souhaitée par l'utilisateur.
+ Les noms des fonctions sont relativement explicites, les suffixes donnant
+ le type sur lequel la fonction s'applique.
+ Les fonctions 
+\family typewriter 
+pretty_print_code
+\family default 
+ et 
+\family typewriter 
+pretty_print_doc 
+\family default 
+s'occupent respectivement de différencier la présentation du code et de
+ ses commantaires, des commentaires de documentation et de sectionnement.
+ Voir la figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: pretty_print_file}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: pretty_print_file}
+
+\end_inset 
+
+.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Fonction pretty_print_file
+\begin_inset LatexCommand \label{fig: pretty_print_file}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 446 631
+file pretty_print_file.ps
+width 3 75
+height 3 75
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Standard
+
+Enfin, la fonction
+\family typewriter 
+ build_index
+\family default 
+ détaillée figure
+\protected_separator 
+
+\begin_inset LatexCommand \ref{fig: build_index}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{fig: build_index}
+
+\end_inset 
+
+, traite chaque fichier suivant s'il s'agit d'un fichier d'implémentation
+ ou d'interface pour en extraire les informations pertinentes à la création
+ de l'index.
+\layout Standard
+
+\begin_float fig 
+\layout Caption
+
+Fonction build_index
+\begin_inset LatexCommand \label{fig: build_index}
+
+\end_inset 
+
+
+\layout Standard
+\align center 
+
+\begin_inset Figure size 446 631
+file build_index.ps
+width 3 75
+height 3 75
+flags 9
+
+\end_inset 
+
+
+\end_float 
+\layout Section
+
+Modifications proposées
+\layout Subsubsection*
+
+Module Output
+\layout Standard
+
+Il faudra ajouter les listes des mots clefs des grammaires 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+.
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+2 2 0 0 -1 -1 -1 -1
+1 1 0 0
+0 1 0 0
+2 1 0 "6em" ""
+2 1 1 "20em" ""
+0 2 0 1 0 0 0 "" ""
+0 2 0 1 0 0 0 "" ""
+0 8 0 1 0 0 0 "" ""
+0 8 0 1 0 0 0 "" ""
+
+
+\family typewriter 
+Lex
+\family default 
+
+\newline 
+let, rule, parse, and, eof
+\newline 
+
+\family typewriter 
+Yacc
+\family default 
+
+\newline 
+%token, %type, %start, %left, %right, %nonassoc, %prec, error
+\layout Subsubsection*
+
+Module Cross
+\layout Standard
+
+Nous prévoyons d'ajouter dans l'index les tokens et les non-terminaux des
+ grammaires de façon distinguée.
+\layout Subsubsection*
+
+Module Pretty
+\layout Standard
+
+Il nous faudra l'adapter à l'affichage de règles de grammaire lexicale tout
+ d'abord, puis syntaxique.
+ Nous introduirons au moins les fonctions 
+\family typewriter 
+pretty_print_lex_code : string
+\begin_inset Formula \( \rightarrow  \)
+\end_inset 
+
+unit
+\family default 
+ et 
+\family typewriter 
+pretty_print_yacc_code
+\family default 
+ 
+\family typewriter 
+: string
+\begin_inset Formula \( \rightarrow  \)
+\end_inset 
+
+unit
+\family default 
+, qui se chargent du formatage des sous-paragraphes propres à 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+.
+ Ces deux fonctions, qui parcourent le type 
+\family typewriter 
+Web.file,
+\family default 
+ n'iront pas trouver les mots clefs dans la même liste que les fichiers
+ normaux, ainsi les bons mots clefs seront reconnus dans les bons fichiers.
+ 
+\layout Subsubsection*
+
+Module Web
+\layout Standard
+
+Le type 
+\family typewriter 
+Web.file
+\family default 
+, donné ci-dessous, utilisé dans la version 0.7 et qui sert à découper le
+ fichier source en sections et paragraphes sur lesquels s'appliquent les
+ autres modules du logiciel, ne correspond plus à la vision que nous adoptons
+ pour le problème.
+ En effet, la structure des fichiers 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+ n'étant pas la même que celle des implantation et interface 
+\family typewriter 
+Caml
+\family default 
+, nous devons au moins distinguer des paragraphes 
+\family typewriter 
+Caml
+\family default 
+,
+\family typewriter 
+ Lex
+\family default 
+, et 
+\family typewriter 
+Yacc
+\family default 
+.
+ 
+\layout Standard
+
+
+\family typewriter 
+type file = 
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+Implem of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Interf of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Lex of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Yacc of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Other of string 
+\newline 
+
+\layout Standard
+
+
+\family typewriter 
+type paragraph = 
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+Documentation of string
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+Code of int 
+\begin_inset Formula \( \times  \)
+\end_inset 
+
+string
+\layout Standard
+
+où 
+\family typewriter 
+content
+\family default 
+ contient un champ 
+\family typewriter 
+raw_section list
+\family default 
+, lequel contient un champ 
+\family typewriter 
+paragraph list.
+\layout Standard
+
+Le problème suivant se pose alors : un fichier 
+\family typewriter 
+Lex
+\family default 
+ (respectivement 
+\family typewriter 
+Yacc
+\family default 
+) se compose de parties 
+\family typewriter 
+Lex
+\family default 
+ et de parties 
+\family typewriter 
+Caml
+\family default 
+ fortement imbriquées, et qui ne constituent pas forcément des paragraphes
+ d'elles-mêmes.
+ Voyons cela sur l'exemple ci dessous : 
+\newline 
+
+\layout Standard
+
+
+\family typewriter 
+\emph on 
+
+\begin_inset Formula \( \overbrace{rule\, zzz\, =parse}^{Type\, Lex} \)
+\end_inset 
+
+
+\layout Standard
+
+
+\family typewriter 
+\emph on 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\begin_inset Formula \( \underbrace{reg.expr.\{}_{Type\, Lex}\, \underbrace{\, \, action\, \, }_{Type\, Caml}\underbrace{\, \, \, \}\, \, \, \, \, \, }_{Type\, Lex} \)
+\end_inset 
+
+
+\layout Standard
+
+Au niveau du changement de type, de 
+\family typewriter 
+Lex
+\family default 
+ vers 
+\family typewriter 
+Caml
+\family default 
+ (au niveau de l'accolade ouvrante), le découpage nous donne deux paragraphes,
+ l'un 
+\family typewriter 
+Lex
+\family default 
+, l'autre 
+\family typewriter 
+Caml
+\family default 
+, or par définition, dans le fichier final, les paragraphes sont séparés
+ par un saut de taille moyenne (saut de paragraphe 
+\begin_inset Quotes eld
+\end_inset 
+
+medskip
+\begin_inset Quotes erd
+\end_inset 
+
+ 
+\latex latex 
+
+\backslash 
+LaTeXe{}
+\latex default 
+)
+\latex latex 
+ 
+\latex default 
+donc l'action commencera sur une nouvelle ligne et sera indentée comme un
+ nouveau paragraphe.
+ Or, les spécification d'
+\family typewriter 
+Ocamlweb
+\family default 
+ impliquent que l'on respecte la mise en page du fichier source, cela signifiant
+ que l'on ne doit pas couper une ligne de code du fichier source dans le
+ fichier final.
+\layout Standard
+
+Le type 
+\family typewriter 
+file 
+\family default 
+doit être modifié : en effet, il faut ajouter des constructeurs pour les
+ fichiers 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+, afin de les différencier des autres fichiers
+\family typewriter 
+.
+
+\family default 
+ Les types 
+\family typewriter 
+content
+\family default 
+ et 
+\family typewriter 
+raw_section 
+\family default 
+n'ont pas besoin d'être changés car ils sont communs à tous les types de
+ fichiers.
+ Le type 
+\family typewriter 
+paragraph
+\family default 
+ est toujours de la même forme,
+\emph on 
+ i.e.
+
+\emph toggle 
+ soit de la documentaion, soit du code.
+ En effet, nous devons différencier les différents types de fichiers dans
+ les modules
+\family typewriter 
+ Pretty 
+\family default 
+et 
+\family typewriter 
+Cross.
+\layout Standard
+
+
+\family typewriter 
+type file = 
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+Implem of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Interf of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Lex of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Yacc of content
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|Other of string 
+\newline 
+
+\layout Standard
+
+
+\family typewriter 
+type paragraph = 
+\layout Standard
+
+
+\family typewriter 
+Documentation of string
+\layout Standard
+
+
+\family typewriter 
+Code of int 
+\begin_inset Formula \( \times  \)
+\end_inset 
+
+(sub_paragraph list)
+\newline 
+
+\layout Standard
+
+
+\family typewriter 
+type sub_paragraph = 
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+CamlCode of string
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|LexCode of string
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|YaccCode of string
+\newline 
+
+\newline 
+
+\family default 
+Nous avons donc la même structure pour le type  
+\family typewriter 
+Web.file
+\family default 
+, mais avec un niveau de plus dans l'architecture : sous les paragraphes,
+ se trouvent les sous-paragraphes.
+\layout Subsubsection*
+
+Module Doclexer
+\layout Standard
+
+Le type 
+\family typewriter 
+file_type
+\family default 
+ doit contenir de nouveaux constructeurs pour les fichiers 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+ afin que, lors de la séparation du fichiers en paragraphes l'analyseur
+ grammatical puisse les différencier.
+ Il faudra donc aussi ajouter des analyseurs spécifiques à ces deux types
+ de fichiers (par exemple la reconnaissance des commentaires est différente
+ dans les fichiers 
+\family typewriter 
+Yacc
+\family default 
+).
+\layout Standard
+
+
+\family typewriter 
+type file_type = 
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+File_impl of caml_file
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|File_intf of caml_file
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|File_lex of caml_file
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|File_yacc of caml_file
+\layout Standard
+
+
+\family typewriter 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+|File_other of string
+\layout Subsubsection*
+
+Module Main
+\layout Standard
+
+Ce module sera modifié de façon certaine, au moins de façon
+\latex latex 
+ 
+\latex default 
+à différencier les types de fichiers pour les analyser de manière distincte.
+ De plus, nous ajouterons une option 
+\family typewriter 
+--grammar
+\family default 
+, qui permettra à l'utilisateur d'imprimer les différentes grammaires sans
+ les actions - mais avec les précédences et le point d'entrée principal
+ pour les fichiers 
+\family typewriter 
+Yacc
+\family default 
+, comme montré dans les exemples de la section
+\protected_separator 
+
+\begin_inset LatexCommand \ref{sec: on.attend}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{sec: on.attend}
+
+\end_inset 
+
+.
+\layout Standard
+
+Des exemples de découpage en paragraphes de fichiers 
+\family typewriter 
+Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+ avec ce nouveau type se trouvent dans la section
+\protected_separator 
+
+\begin_inset LatexCommand \ref{sec: web.file}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{sec: web.file}
+
+\end_inset 
+
+.
+\layout Standard
+
+Les fonctions appelées par 
+\family typewriter 
+locations_for_a_file
+\family default 
+ (
+\family typewriter 
+add_*_loc
+\family default 
+)
+\family typewriter 
+ 
+\family default 
+descendent dans le type
+\family typewriter 
+ Web.file
+\family default 
+, comme nous rajoutons un niveau pour les sous-paragraphes, il nous faudra
+ rajouter une fonction (au moins) pour ce nouveau niveau.
+\layout Chapter
+
+Codage
+\begin_inset LatexCommand \label{chap3}
+
+\end_inset 
+
+
+\layout Section
+
+Environnement de programmation
+\layout Standard
+
+Nous avons travaillé dans un environnement de programmation composé d'outils
+ puisssants connus sous Linux : XEmacs, CVS, et
+\latex latex 
+ 
+\backslash 
+LaTeX{}
+\latex default 
+.
+\layout Standard
+
+Nous donnons ci-dessous un aperçu des différentes fonctionnalités des logiciels
+ que nous avons appris à utiliser.
+\layout Subsubsection*
+
+CVS
+\layout Standard
+
+CVS est un système de gestion des versions permettant en particulier à plusieurs
+ personnes de travailler conjointement sur un même logiciel.
+ Pour commencer, il faut créer un serveur qui gardera trace des différentes
+ versions, ce qui, dans notre cas, était déjà fait.
+ 
+\layout Standard
+
+Ensuite, chacun copie les sources là où il veut travailler, à l'aide de
+ la commande 
+\series bold 
+checkout
+\series default 
+.
+ Nous avons utilisé cette commande de la façon suivante : 
+\layout Standard
+
+
+\family typewriter 
+cvs -d /users/demons/filliatr/ARCHIVE checkout ocamlweb, 
+\layout Standard
+
+ce qui crée la copie des sources dans le répertoire 
+\family typewriter 
+ocamlweb
+\family default 
+, et travaille dessus.
+ 
+\layout Standard
+
+Lorsqu'il désire communiquer ses modifications aux autres programmeurs,
+ en particulier quand il dispose d'une version stable, il exécute la commande
+ 
+\series bold 
+cvs commit
+\series default 
+.
+ Dans notre cas, nous l'utilisons avec l'option 
+\family typewriter 
+-m
+\family default 
+, par exemple : 
+\layout Standard
+
+
+\family typewriter 
+cvs commit -m 
+\begin_inset Quotes eld
+\end_inset 
+
+cette version traite les fichiers Lex
+\begin_inset Quotes erd
+\end_inset 
+
+
+\family default 
+, 
+\layout Standard
+
+ce qui permet de spécifier le commentaire associé à la version que nous
+ mettons à disposition des autres programmeurs.
+ 
+\layout Standard
+
+Si, au contraire, sa version n'est pas à jour, il lui suffit de lancer 
+\series bold 
+cvs
+\series default 
+ avec la commande 
+\series bold 
+update
+\series default 
+ (l'option 
+\series bold 
+-d
+\series default 
+ permet d'inclure les répertoires).
+ 
+\layout Standard
+
+De plus, nous avons utilisé une possibilité de CVS qui permet de travailler
+ sur une branche de développement différente de la branche principale.
+ Ainsi, nous avons pu modifier les sources notre branche, sans gêner les
+ personnes travaillant sur la dernière version d'
+\family typewriter 
+Ocamlweb
+\family default 
+ (qui vise à reconnaître les fichiers 
+\family typewriter 
+Caml-version
+\protected_separator 
+3
+\family default 
+, alors que nous travaillons sue la version 2).
+ Lorsque nous aurons terminé notre travail, nous pourrons fusionner notre
+ branche avec la branche principale.
+\layout Subsubsection*
+
+Latex 
+\layout Standard
+
+Nous connaissions déjà le principe et nous avions déjà manipulé 
+\latex latex 
+
+\backslash 
+LaTeXe{}
+\latex default 
+ à de nombreuses reprises, nous ne connaissions cependant rien du principe
+ des macros, et nous avons appris à définir et redéfinir des commandes.
+ 
+\layout Standard
+
+Voici, très brièvement comment on définit une commande dans un fichier .sty
+ : 
+\layout Standard
+
+
+\family typewriter 
+
+\backslash 
+newcommand{
+\backslash 
+ocwlexkw}[1]{
+\backslash 
+textsf{#1}}
+\family default 
+, 
+\layout Standard
+
+dans la première accolade on donne le nom, entre les crochets on donne le
+ nombre d'arguments, entre les accolades suivantes, on donne la commande
+ 
+\latex latex 
+
+\backslash 
+LaTeXe{}
+\latex default 
+ équivalente, le #1 correspondant à l'argument.
+\layout Subsubsection*
+
+Caml
+\layout Standard
+
+Nous avions déjà manipulé 
+\family typewriter 
+Caml
+\family default 
+, et nous en connaissions suffisamment pour écrire des programmes relativement
+ complexes.
+ Durant ce stage, nous avons appris à utiliser des fonctions un peu plus
+ poussées, et en particulier à utiliser les modules paramétrés, les 
+\begin_inset Quotes eld
+\end_inset 
+
+foncteurs
+\begin_inset Quotes erd
+\end_inset 
+
+ : 
+\family typewriter 
+Set
+\family default 
+ et 
+\family typewriter 
+Map
+\family default 
+ ; pour utiliser les modules de la bibliothèque standard permettant de gérer
+ des tables d'associations et des ensembles.
+ Nous avons en particulier créé un type Stringset, ensemble de chaînes :
+ 
+\layout LyX-Code
+
+module Stringset = 
+\layout LyX-Code
+
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+Set.Make(struct 
+\layout LyX-Code
+
+
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ type t = string 
+\layout LyX-Code
+
+
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ let compare = compare 
+\layout LyX-Code
+
+
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ 
+\protected_separator 
+ end)
+\layout Standard
+
+utilisant le type string et la fonction de comparaison par défaut.
+ 
+\layout Standard
+
+Nous pouvons créer un ensemble vide comme suit :
+\family typewriter 
+ 
+\layout Standard
+
+
+\family typewriter 
+<table> := Stringset.empty
+\family default 
+, 
+\layout Standard
+
+et auquel nous ajoutons un élément à un ensemble à l'aide de la commande
+ : 
+\layout Standard
+
+
+\family typewriter 
+<table> := Stringset.add <objet à ajouter> <table>
+\family default 
+.
+ 
+\layout Standard
+
+De même, nous pouvons tester si un élément appartient à l'ensemble : 
+\layout Standard
+
+
+\family typewriter 
+Stringset.mem <objet à tester> <la table>.
+\layout Section
+
+Problèmes soulevés par le codage
+\layout Subsection
+
+Module Doclexer
+\layout Standard
+
+Comme expliqué plus haut, nous avons changé le type 
+\family typewriter 
+Web.file
+\family default 
+, nous avons donc du modifier et ajouter un certain nombre de fonctions
+ et d'analyseurs grammaticaux afin de pouvoir découper les fichiers de code
+ sous cette nouvelle forme.
+ 
+\layout Standard
+
+Le problème principal était de savoir différencier les parties 
+\family typewriter 
+Caml
+\family default 
+ des partie 
+\family typewriter 
+Lex
+\family default 
+ (resp
+\family typewriter 
+ Yacc
+\family default 
+).
+ En effet, dans les fichiers 
+\family typewriter 
+Lex
+\family default 
+ et dans les actions des fichiers 
+\family typewriter 
+Yacc
+\family default 
+, les sous -paragraphes 
+\family typewriter 
+Caml
+\family default 
+ sont encadrés par des accolades ; donc lorsque l'on rencontre une accolade
+ dans une partie 
+\family typewriter 
+Lex
+\family default 
+ (resp 
+\family typewriter 
+Yacc
+\family default 
+) on entre dans le mode 
+\family typewriter 
+Caml
+\family default 
+, et lorsque l'on est dans une partie 
+\family typewriter 
+Caml
+\family default 
+ on ne sort que si le nombre d'accolades fermantes rencontrées est supérieur
+ à celui d'accolades ouvrantes : dans les fichiers 
+\family typewriter 
+Caml
+\family default 
+ les accolades sont autorisées, il ne s'agit pas de quitter le mode 
+\family typewriter 
+Caml 
+\family default 
+à la première accolade fermante rencontée, d'autant plus que le l'analyseur
+ grammatical des sous-paragraphes 
+\family typewriter 
+Caml
+\family default 
+ est utilisé pour tous les types de fichiers.
+ L'entête des fichiers 
+\family typewriter 
+Yacc
+\family default 
+ était plus simple à gérer car elle est encadrée par des %{ et %}, et cette
+ suite de caractères n'existe pas en 
+\family typewriter 
+Caml
+\family default 
+; il suffit donc de quitter l'analyseur 
+\family typewriter 
+Caml
+\family default 
+ dès que l'on rencontre un %}.
+ De même la traîne
+\begin_float footnote 
+\layout Standard
+
+
+\emph on 
+trailer 
+\emph default 
+en anglais.
+\end_float 
+, des fichiers Yacc est située après la seconde occurence de %% et jusqu'à
+ la fin du fichier, donc on ne sort du mode 
+\family typewriter 
+Caml
+\family default 
+ que lorsque 
+\family typewriter 
+eof
+\family default 
+ est rencontré.
+\layout Standard
+
+Il s'agissait donc de combiner toutes ces conditions pour découper proprement
+ le code.
+\layout Subsection
+
+Module Cross
+\layout Standard
+
+Ce module parcourt les fichiers de code pour ajouter à l'index les définitions
+ et utilisations de variables.
+ Pour les fichiers 
+\family typewriter 
+Caml
+\family default 
+, l'analyseur grammatical de 
+\family typewriter 
+Caml
+\family default 
+ est utilisé, donc il a fallu créer des analyseurs pour les grammaires des
+ fichiers
+\family typewriter 
+ Lex
+\family default 
+ et 
+\family typewriter 
+Yacc
+\family default 
+.
+ 
+\layout Standard
+
+Nous avons donc du définir où se trouvent les utilisations et définitions
+ des identificateurs dans un fichier 
+\family typewriter 
+Lex
+\family default 
+ (resp.
+ 
+\family typewriter 
+Yacc
+\family default 
+), et utiliser ce qui avait déjà été fait pour les parties 
+\family typewriter 
+Caml
+\family default 
+ de ces fichiers.
+\layout Section
+
+Auto-documentation d'Ocamlweb
+\layout Standard
+
+voir Annexe
+\protected_separator 
+
+\begin_inset LatexCommand \ref{sec: autodoc}
+
+\end_inset 
+
+, page
+\protected_separator 
+
+\begin_inset LatexCommand \pageref{sec: autodoc}
+
+\end_inset 
+
+.
+\layout Chapter
+
+Jeu de tests
+\begin_inset LatexCommand \label{tests}
+
+\end_inset 
+
+
+\layout Section
+
+Exemples de découpage en Web.file
+\begin_inset LatexCommand \label{sec: web.file}
+
+\end_inset 
+
+
+\layout Subsection*
+
+Le fichier Lex
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/lex/web_ex.mll}
+
+\end_inset 
+
+
+\layout Subsection*
+
+est découpé de la façon suivante :
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/lex/web_ex.txt}
+
+\end_inset 
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+Le fichier Yacc
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/yacc/web_ex.mly}
+
+\end_inset 
+
+
+\layout Subsection*
+
+est découpé de la façon suivante :
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/yacc/web_ex.txt}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Section
+
+Exemples de ce que l'on attend
+\begin_inset LatexCommand \label{sec: on.attend}
+
+\end_inset 
+
+
+\layout Subsection*
+
+Le fichier Lex
+\latex latex 
+ 
+\backslash 
+ldots
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/lex/lexer.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+
+\latex latex 
+
+\backslash 
+ldots
+\latex default 
+ est présenté par la version 0.7 d'Ocamlweb
+\latex latex 
+ 
+\backslash 
+ldots
+\layout Standard
+
+
+\begin_inset Include \input{../man_user/lex/lexer.ocw.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+
+\latex latex 
+
+\backslash 
+ldots
+\latex default 
+ doit être présenté par notre version d'Ocamlweb
+\latex latex 
+ 
+\backslash 
+ldots
+\layout Standard
+
+
+\begin_inset Include \input{../man_user/lex/lexer.nous.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+
+\latex latex 
+
+\backslash 
+ldots
+\latex default 
+ et sans les actions (option --grammar)
+\layout Standard
+
+
+\begin_inset Include \input{../man_user/lex/lexer.gonly.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+Le fichier Yacc
+\latex latex 
+ 
+\backslash 
+ldots
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/yacc/parser.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+
+\latex latex 
+
+\backslash 
+ldots
+\latex default 
+ est présenté par la version 0.7 d'Ocamlweb
+\latex latex 
+ 
+\backslash 
+ldots
+\layout Standard
+
+
+\begin_inset Include \input{../man_user/yacc/parser.ocw.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+
+\latex latex 
+
+\backslash 
+ldots
+\latex default 
+ est présenté par notre version d'Ocamlweb
+\latex latex 
+ 
+\backslash 
+ldots
+\layout Standard
+
+
+\begin_inset Include \input{../man_user/yacc/parser.nous.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Subsection*
+
+
+\latex latex 
+
+\backslash 
+ldots
+\latex default 
+ et sans les actions (option --grammar)
+\layout Standard
+
+
+\begin_inset Include \input{../man_user/yacc/parser.gonly.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Section
+
+Tests du logiciel
+\begin_inset LatexCommand \label{sec: testslogiciel}
+
+\end_inset 
+
+
+\layout Subsubsection
+
+Lex
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lex.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexcomactions.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexcomheader.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexcommentaires.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexcomtrailer.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexsansheader.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexsanslesdeux.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/lexsanstrailer.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/motclefcamllex.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/motcleflexcaml.mll}
+
+\end_inset 
+
+
+\layout Standard
+
+Yacc
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parse.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsecomactions.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsecomheader.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsecommentaires.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsecomtrailer.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsesansheader.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsesanslesdeux.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/parsesanstrailer.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/motclefcamlyacc.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \verbatiminput{../man_user/autres/motclefyacccaml.mly}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+appendix
+\layout Chapter
+
+Auto-documentation d'Ocamlweb
+\begin_inset LatexCommand \label{sec: autodoc}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Include \input{boot.tex}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+newpage
+\layout Section*
+
+Conclusion
+\layout Standard
+
+Ce stage de quelques mois au LRI, dans l'équipe des Démons ayant pour but
+ de poursuivre le développement du logiciel 
+\family typewriter 
+Ocamlweb 
+\family default 
+afin d'étendre ses 
+\begin_inset Quotes eld
+\end_inset 
+
+compétences
+\begin_inset Quotes erd
+\end_inset 
+
+ aux fichiers d'analyses lexicale et syntaxique, nous a tout d'abord permis
+ de nous familiariser avec certaines fonctions avancées de 
+\family typewriter 
+Caml
+\family default 
+ ainsi qu'à la rédaction de fichiers de définition de commandes 
+\latex latex 
+
+\backslash 
+LaTeXe{}
+\latex default 
+.
+ 
+\layout Standard
+
+De plus, nous avons travaillé avec un outil de développement professionnel,
+ CVS, de façon à effectuer nos modifications sur une copie des sources,
+ tout en conservant la dernière version stable intacte, autorisant ainsi
+ les autres membres de l'équipe à poursuivre leurs modifications sur la
+ branche principale.
+ Un certain nombre d'opérations (add, commit, update ...) permettent de mettre
+ à jour les différentes branches.
+ 
+\layout Standard
+
+Enfin, comme il s'agit pour les deux membres du binôme du premier stage
+ en laboratoire, nous avons eu l'occasion d'apprendre à rédiger un rapport
+ grâce à l'appui de rapports d'étudiants des années précédentes.
+ 
+\layout Standard
+
+ouverture...
+\the_end
