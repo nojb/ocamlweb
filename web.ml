@@ -229,13 +229,13 @@ let list_in_table id t =
 
 let entry_type_name = function
   | Value | Constructor -> ""
-  | Field      -> "(f)"
-  | Type       -> "(t)"
-  | Exception  -> "(e)"
-  | Module     -> "(m)"
-  | ModuleType -> "(s)"
-  | Class      -> "(c)"
-  | Method     -> "(#)"
+  | Field      -> "(label)"
+  | Type       -> "(type)"
+  | Exception  -> "(exn)"
+  | Module     -> "(module)"
+  | ModuleType -> "(sig)"
+  | Class      -> "(class)"
+  | Method     -> "(method)"
 
 let print_one_entry id =
   let def = list_in_table id !defined
