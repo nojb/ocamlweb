@@ -51,8 +51,6 @@ let output_file f =
   with End_of_file -> close_in ch
 
 
-(* \hrulefill *)
-
 (*s \textbf{High level output.}
     In this section and the following, we introduce functions which are 
     \LaTeX\ dependent. 
@@ -178,8 +176,18 @@ let output_latex_id s =
     output_escaped_char s.[i]
   done
 
+let is_upper_char = function
+  | 'A'..'Z' | '\192'..'\214' | '\216'..'\222' -> true
+  | _ -> false
+
+let is_upper_string s =
+  String.length s > 0 && is_upper_char s.[0]
+
 let output_raw_ident s =
-  output_string "\\ocwid{"; output_latex_id s; output_string "}"
+  output_string 
+    (if is_upper_string s then "\\ocwupperid{" else "\\ocwlowerid{"); 
+  output_latex_id s; 
+  output_string "}"
 
 let output_ident s =
   if is_keyword s then begin
@@ -302,9 +310,9 @@ let print_list print sep l =
     of at least three consecutive integers.
  *)
 
-type elem =
-  | Single of string * int
-  | Interval of (string * int) * (string * int)
+type 'a elem =
+  | Single of 'a * int
+  | Interval of ('a * int) * ('a * int)
 
 let intervals l =
   let rec group = function
@@ -323,7 +331,7 @@ let intervals l =
     identifier is defined) in bold face.
  *)
 
-let output_sec_ref (f,n) = output_string (sprintf "\\ref{%s:%d}" f n)
+let output_sec_ref ((f,l),_) = output_string (sprintf "\\ref{%s:%d}" f l)
 
 let output_elem = function
   | Single (f,n) -> 
@@ -350,9 +358,9 @@ let output_index_entry s def use =
 
 (*s Index in \LaTeX\ style. 
     When we are not in WEB style, the index in left to \LaTeX, and all
-    the work is done by the macro \verb!ocwrefindexentry!, which takes
-    three arguments: the identifier and the two lists of labels where
-    it is defined and used respectively.
+    the work is done by the macro \verb!\ocwrefindexentry!, which takes
+    three arguments: the name of the entry and the two lists of labels where
+    it is defined and used, respectively.
  *)
 
 let output_raw_index_entry s def use =

@@ -183,3 +183,55 @@ and code_string = parse
   | eof      { () }
   | _        { Buffer.add_char codeb (first_char lexbuf); code_string lexbuf }
 
+{
+
+(*s Reading the Caml files. *)
+
+type caml_file = { caml_filename : string; caml_module : string }
+
+let module_name f = String.capitalize (Filename.basename f)
+
+let make_impl f = 
+  { caml_filename = f;
+    caml_module = module_name (Filename.chop_suffix f ".ml") }
+
+let make_intf f = 
+  { caml_filename = f;
+    caml_module = module_name (Filename.chop_suffix f ".mli") }
+
+type file_type =
+  | File_impl  of caml_file * caml_file option
+  | File_intf  of caml_file
+  | File_other of string
+
+let raw_read_file f =
+  reset_lexer ();
+  let c = open_in f in
+  let buf = Lexing.from_channel c in
+  if !skip_header then header buf;
+  let contents = implementation buf in
+  close_in c;
+  contents
+
+let read_intf i = 
+  { interf_file = i.caml_filename; 
+    interf_name = i.caml_module; 
+    interf_contents = raw_read_file i.caml_filename }
+    
+let read_impl (m,mi) =
+  let interf = match mi with 
+    | None -> None
+    | Some i -> Some (read_intf i)
+  in
+  { implem_file = m.caml_filename; 
+    implem_name = m.caml_module;
+    implem_contents = raw_read_file m.caml_filename;
+    implem_interf = interf }
+
+let read_one_file = function
+  | File_impl (m,i) -> Implem (read_impl (m,i))
+  | File_intf f -> Interf (read_intf f)
+  | File_other f -> Other f
+
+
+}

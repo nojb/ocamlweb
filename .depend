@@ -16,5 +16,5 @@ output.cmo: output.cmi
 output.cmx: output.cmi 
 pretty.cmo: output.cmi pretty.cmi 
 pretty.cmx: output.cmx pretty.cmi 
-web.cmo: cross.cmi output.cmi pretty.cmi web.cmi 
-web.cmx: cross.cmx output.cmx pretty.cmx web.cmi 
+web.cmo: cross.cmi doclexer.cmo output.cmi pretty.cmi web.cmi 
+web.cmx: cross.cmx doclexer.cmx output.cmx pretty.cmx web.cmi 

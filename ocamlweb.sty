@@ -33,6 +33,8 @@
 
 \ProcessOptions
 
+% own name
+\newcommand{\ocamlweb}{\textsf{ocamlweb}}
 
 % underscore ?
 % \def\_{\kern.04em\vbox{\hrule width.3em height .6pt}\kern.08em}
@@ -53,9 +55,11 @@
 
 % macro for typesetting identifiers
 \expandafter\ifcase\webstylecase
-\newcommand{\ocwid}[1]{\textit{#1\/}}
+\newcommand{\ocwlowerid}[1]{\textit{#1\/}}
+\newcommand{\ocwupperid}[1]{\textit{#1\/}}
 \or
-\newcommand{\ocwid}[1]{\textsl{#1\/}}
+\newcommand{\ocwlowerid}[1]{\textsl{#1\/}}
+\newcommand{\ocwupperid}[1]{\textsl{#1\/}}
 \fi
 
 % newline with indentation of the next line as argument

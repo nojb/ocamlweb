@@ -22,6 +22,7 @@ open Printf
 open Cross
 open Output
 open Pretty
+open Doclexer
 
 type paragraph =
   | Documentation of string
@@ -87,7 +88,7 @@ let index_file = function
 let build_index l = List.iter index_file l
 
 
-(*s The locations table. *)
+(*s The locations tables. *)
 
 let sec_locations = ref Idmap.empty
 let code_locations = ref Idmap.empty
@@ -96,13 +97,21 @@ let add_file_loc table file loc =
   let l = try Idmap.find file !table with Not_found -> [] in
   table := Idmap.add file (loc::l) !table
 
-let add_par_loc f = function
-  | Code (l,_) -> add_file_loc code_locations f l
-  | Documentation _ -> ()
+let add_par_loc =
+  let par_counter = ref 0 in
+  fun f p -> match p with
+    | Code (l,_) -> 
+	incr par_counter;
+	add_file_loc code_locations f (l,!par_counter)
+    | Documentation _ -> 
+	()
 
-let add_sec_loc f s = 
-  add_file_loc sec_locations f s.sec_beg;
-  List.iter (add_par_loc f) s.sec_contents
+let add_sec_loc =
+  let sec_counter = ref 0 in
+  fun f s ->
+    incr sec_counter;
+    add_file_loc sec_locations f (s.sec_beg,!sec_counter);
+    List.iter (add_par_loc f) s.sec_contents
 
 let add_intf_loc it =
   let f = Filename.basename it.interf_file in
@@ -120,8 +129,8 @@ let locations_for_a_file = function
 
 let find_where w =
   let rec lookup = function
-      [] -> raise Not_found
-    | n::r -> if w.w_loc >= n then n else lookup r
+    | [] -> raise Not_found
+    | (l,n)::r -> if w.w_loc >= l then ((w.w_filename,l),n) else lookup r
   in
   let table = if !web then !sec_locations else !code_locations in
   lookup (Idmap.find w.w_filename table)
@@ -161,24 +170,32 @@ let rec uniquize = function
 let make_label_name (f,n) =
   (Filename.basename f) ^ ":" ^ (string_of_int n)
 
+let map_succeed_nf f l =
+  let rec map = function
+    | [] -> []
+    | x::l -> try (f x)::(map l) with Not_found -> (map l)
+  in
+  map l
+
 let print_one_entry s =
   let list_in_table t =
     try 
-      let l = Whereset.elements (Idmap.find s !t) in
-      let l = List.map (fun w -> w.w_filename,find_where w) l in
-      uniquize (Sort.list (fun (_,y) (_,y') -> y<y') l)
+      let l = Whereset.elements (Idmap.find s t) in
+      let l = map_succeed_nf find_where l in
+      let l = Sort.list (fun (_,n) (_,n') -> n<n') l in
+      uniquize l
     with Not_found -> 
       []
   in
-  let def = list_in_table defined
-  and use = list_in_table used in
+  let def = list_in_table !defined
+  and use = list_in_table !used in
   if !extern_defs || def <> [] then
     if !web then 
       output_index_entry s def use
     else 
       output_raw_index_entry s 
-	(List.map make_label_name def) 
-	(List.map make_label_name use) 
+	(List.map (fun x -> make_label_name (fst x)) def) 
+	(List.map (fun x -> make_label_name (fst x)) use) 
 
 let print_index () =
   begin_index ();
@@ -224,8 +241,8 @@ let pretty_print_file = function
 (*s Production of the document. We proceed in three steps:
     \begin{enumerate}
     \item Build the index;
-    \item Pretty-print;
-    \item Print the index.
+    \item Pretty-print of files;
+    \item Printing of the index.
     \end{enumerate}
  *)
 

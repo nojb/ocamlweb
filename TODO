@@ -1,9 +1,6 @@
 
-Parsing ocaml
-=============
-
- 3. (*x bla bla bla *) => met "bla bla bla" dans l'index (en faisant 
-    référence à la section courante) QUEL INDEX ?
+Parsing fichiers
+================
 
  4. possibilité d'échapper [ ou ] dans les quotations de code
     (actuellement ce n'est pas possible et cela provoque des incohérences)
@@ -12,21 +9,16 @@ Parsing ocaml
 Web (cross)
 ===========
 
- 1. nom de constructeurs dans le code : que faire ?
-
- 2. nom de constructeurs et étiquettes dans les déclarations de types
-    == définitions
-
  3. supprimer tout de même les modules et fonctions de Pervasives de l'index
-    lorsque l'on utilise l'option --extern-defs
-
- 4. que faire des noms qualifiés (M.f) ?
+    lorsque l'on utilise l'option --extern-defs ?
 
 
 Document LaTeX
 ==============
 
  1. underscore plus fin dans les identificateurs
+
+ 2. Afficher "This code is used in section(s) ..."
 
 
 Documentation ocamlweb

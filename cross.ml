@@ -40,7 +40,9 @@ let defined = ref Idmap.empty
 let used = ref Idmap.empty
 
 
-(*s The following generic function is used to add an entry in one table. *)
+(*s The function [add_global] is a generic function to add an entry in one 
+    table. [add_def] is used to add the definition of an identifier (so in the
+    table [defined]). *)
 	     
 let add_global table k i =
   try
@@ -49,35 +51,30 @@ let add_global table k i =
   with Not_found ->
     table := Idmap.add k (Whereset.add i Whereset.empty) !table
       
-
-(*s Another table, [locals], keeps the local identifiers, in order to
-    distinguish them from global identifiers.
- *)
-      
-module Stringset = Set.Make(struct type t = string let compare = compare end)
-		     
-let locals = ref Stringset.empty
-
-module Qidset = Set.Make(struct type t = Longident.t let compare = compare end)
-
-let opened = ref Qidset.empty
-
 let current_file = ref ""
 
 let current_location loc = 
   { w_filename = !current_file; w_loc = loc.loc_start }
-
-let reset_cross () =
-  opened := Qidset.empty;
-  locals := Stringset.empty
 
 let add_def loc s =
   if String.length s > 1 then begin
     add_global defined s (current_location loc)
   end
 
-let add_open s =
-  opened := Qidset.add s !opened
+
+(*s Another table, [locals], keeps the bound variables, in order to
+    distinguish them from global identifiers. Then the function [add_uses]
+    registers that an identifier is used (in the table [used], taking care 
+    of the fact that it is not a bound variable (in the table [locals]).
+    [add_uses_q] iters [add_uses] on a qualified identifier.
+ *)
+      
+module Stringset = Set.Make(struct type t = string let compare = compare end)
+		     
+let locals = ref Stringset.empty
+
+let reset_cross () =
+  locals := Stringset.empty
 
 let add_local s =
   locals := Stringset.add s !locals
@@ -95,13 +92,21 @@ let add_uses_q loc q =
   in
   add q
 
+
+(*s Some useful functions. *)
+
 let iter_fst f = List.iter (fun x -> f (fst x))
     
 let iter_snd f = List.iter (fun x -> f (snd x))
     
-(* Traversing of Caml files *)
-
 let option_iter f = function None -> ()  | Some x -> f x
+
+
+(*s When traversing a pattern, we must collect all its identifiers, in order
+    to declare them as bound variables (or definitions behind a \textsf{let}
+    construction). That is the job of the function [ids_of_a_pattern].
+    Then [pattern_for_def] declares all the identifiers of a pattern as
+    new definitions. *)
 
 let ids_of_a_pattern p =
   let r = ref [] in
@@ -127,12 +132,26 @@ let pattern_for_def p =
   let ids = ids_of_a_pattern p in
   List.iter (add_def loc) ids
 
+
+(*s The following function locally adds some given variables to the set of
+    bound variables, during the time of the application of a given function
+    on a given argument. *)
+
 let bind_variables ids f x =
   let save = !locals in
   List.iter add_local ids;
   f x;
   locals := save
 
+
+(*s \textbf{Traversing of Caml abstract syntax trees.}
+    Each type [t] in those abstract 
+    syntax trees is associated to a function [tr_t] which traverses it,
+    declaring the identifiers used and defined. Those types are defined
+    in the Caml module [Paresetree.mli] contained in the Caml source
+    distribution. *)
+
+(*s Core types. *)
 
 let rec tr_core_type t =
   tr_core_type_desc t.ptyp_loc t.ptyp_desc
@@ -158,19 +177,18 @@ and tr_core_field_type ft =
   tr_core_field_desc ft.pfield_loc ft.pfield_desc
 
 and tr_core_field_desc loc = function
-    Pfield (id,ct) ->
+  | Pfield (id,ct) ->
       add_uses loc id;
       tr_core_type ct
   | Pfield_var -> ()
 
-
-(* XXX Type expressions for the class language *)
+(*s Type expressions for the class language. *)
 
 let tr_class_infos f p =
   add_def p.pci_loc p.pci_name;
   f p.pci_expr
 
-(* Value expressions for the core language *)
+(*s Value expressions for the core language. *)
 
 let bind_pattern f (p,e) =
   bind_variables (ids_of_a_pattern p) f e
@@ -230,19 +248,20 @@ and tr_expression_desc loc = function
       tr_module_expr m; bind_variables [x] tr_expression e
   | Pexp_constant _ -> ()
   | Pexp_send (e,id) ->
-      add_uses loc id;
-      tr_expression e
+      add_uses loc id; tr_expression e
   | Pexp_new id ->
       add_uses_q loc id
   | Pexp_setinstvar (id,e) ->
-      add_uses loc id;
-      tr_expression e
+      add_uses loc id; tr_expression e
   | Pexp_override l ->
-      iter_fst (add_uses loc) l;
-      iter_snd tr_expression l
+      iter_fst (add_uses loc) l; iter_snd tr_expression l
+
+(*s Value descriptions. *)
 
 and tr_value_description vd =
   tr_core_type vd.pval_type
+
+(*s Type declarations. *)
 
 and tr_type_declaration td =
   tr_type_kind td.ptype_loc td.ptype_kind
@@ -258,13 +277,13 @@ and tr_type_kind loc = function
 and tr_exception_declaration ed =
   List.iter tr_core_type ed
 
-(* Type expressions for the class language *)
+(*s Type expressions for the class language. *)
 
 and tr_class_type c =
   tr_class_type_desc c.pcty_loc c.pcty_desc
 
 and tr_class_type_desc loc = function
-    Pcty_constr (id,l) ->
+  | Pcty_constr (id,l) ->
       add_uses_q loc id;
       List.iter tr_core_type l
   | Pcty_signature cs ->
@@ -278,7 +297,7 @@ and tr_class_signature (ct,l) =
   List.iter tr_class_type_field l
 
 and tr_class_type_field = function
-    Pctf_inher ct -> tr_class_type ct
+  | Pctf_inher ct -> tr_class_type ct
   | Pctf_val (id,_,ct,loc) ->
       add_def loc id;
       option_iter tr_core_type ct
@@ -296,13 +315,12 @@ and tr_class_description x = tr_class_infos tr_class_type x
 
 and tr_class_type_declaration x = tr_class_infos tr_class_type x 
 
-(* Value expressions for the class language *)
+(*s Value expressions for the class language. *)
 
 and tr_class_expr ce = tr_class_expr_desc ce.pcl_loc ce.pcl_desc
 
-
 and tr_class_expr_desc loc = function
-    Pcl_constr (id,l) ->
+  | Pcl_constr (id,l) ->
       add_uses_q loc id;
       List.iter tr_core_type l
   | Pcl_structure cs -> tr_class_structure cs
@@ -322,12 +340,11 @@ and tr_class_expr_desc loc = function
       tr_class_expr ce;
       tr_class_type ct
 
-
 and tr_class_structure (p,l) = 
   List.iter (fun f -> bind_pattern tr_class_field (p,f)) l
 
 and tr_class_field = function
-    Pcf_inher (ce,_) ->
+  | Pcf_inher (ce,_) ->
       tr_class_expr ce
   | Pcf_val (id,_,e,loc) ->
       add_def loc id;
@@ -352,14 +369,13 @@ and tr_class_field = function
 
 and tr_class_declaration x = tr_class_infos tr_class_expr x
 
-
-(* Type expressions for the module language *)
+(*s Type expressions for the module language. *)
 
 and tr_module_type mt =
   tr_module_type_desc mt.pmty_loc mt.pmty_desc
 
 and tr_module_type_desc loc = function
-    Pmty_ident id -> add_uses_q loc id
+  | Pmty_ident id -> add_uses_q loc id
   | Pmty_signature s -> tr_signature s
   | Pmty_functor (id,mt1,mt2) -> 
       tr_module_type mt1;
@@ -385,8 +401,8 @@ and tr_signature_item_desc loc = function
       add_def loc id; tr_module_type mt
   | Psig_modtype (id,mtd) ->
       add_def loc id; tr_modtype_declaration mtd
-  | Psig_open m ->
-      add_open m
+  | Psig_open q -> 
+      add_uses_q loc q
   | Psig_include mt ->
       tr_module_type mt
   | Psig_class l ->
@@ -399,14 +415,16 @@ and tr_modtype_declaration = function
   | Pmodtype_manifest mt -> tr_module_type mt
 
 and tr_with_constraint loc = function
-    Pwith_type td -> tr_type_declaration td
+  | Pwith_type td -> tr_type_declaration td
   | Pwith_module id -> add_uses_q loc id
+
+(*s Value expressions for the module language. *)
 
 and tr_module_expr me =
   tr_module_expr_desc me.pmod_loc me.pmod_desc
 
 and tr_module_expr_desc loc = function
-    Pmod_ident id -> add_uses_q loc id
+  | Pmod_ident id -> add_uses_q loc id
   | Pmod_structure s -> tr_structure s
   | Pmod_functor (id,mt,me) ->
       tr_module_type mt;
@@ -417,7 +435,6 @@ and tr_module_expr_desc loc = function
   | Pmod_constraint (me,mt) ->
       tr_module_expr me;
       tr_module_type mt
-
 
 and tr_structure l = 
   List.iter tr_structure_item l
@@ -440,14 +457,25 @@ and tr_structure_item_desc loc = function
       add_def loc id; tr_module_expr me
   | Pstr_modtype (id,mt) ->
       add_def loc id; tr_module_type mt
-  | Pstr_open m -> add_open m
+  | Pstr_open m -> 
+      add_uses_q loc m
   | Pstr_class l -> List.iter tr_class_declaration l
   | Pstr_class_type l -> List.iter tr_class_type_declaration l
 
 
-let wrapper parsing_function traverse_function f =
+(*s Given all that collecting functions, we can now define two functions
+    [cross_implem] and [cross_interf] which respectively compute the 
+    cross-references in implementations and interfaces. *)
+
+let add_module f suff = 
+  if Filename.check_suffix f suff then
+    let m = Filename.basename (Filename.chop_suffix f suff) in
+    add_def { loc_start = 0; loc_end = 0 } (String.capitalize m)
+
+let wrapper parsing_function traverse_function suff f =
   reset_cross ();
   current_file := f;
+  add_module f suff;
   let c = open_in f in
   let lexbuf = Lexing.from_channel c in
   try
@@ -458,7 +486,9 @@ let wrapper parsing_function traverse_function f =
     close_in c
   end
 
-let cross_implem = wrapper Parse.implementation tr_structure
+let cross_implem f = 
+  wrapper Parse.implementation tr_structure ".ml" f
 
-let cross_interf = wrapper Parse.interface tr_signature
+let cross_interf f = 
+  wrapper Parse.interface tr_signature ".mli" f
 

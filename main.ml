@@ -16,10 +16,15 @@
 
 (* $Id$ *)
 
+(*i*)
 open Printf
 open Output
 open Web
 open Doclexer
+(*i*)
+
+
+(*s \textbf{Usage.} Printed on error output. *)
 
 let usage () =
   prerr_endline "";
@@ -37,6 +42,10 @@ let usage () =
   prerr_endline "                 pass an option to the LaTeX package ocamlweb.sty";
   exit 1
 
+
+(*s \textbf{License informations.} Printed when using the option 
+    \verb!--warranty!. *)
+
 let copying () =
   prerr_endline "
 This program is free software; you can redistribute it and/or modify
@@ -51,6 +60,12 @@ See the GNU General Public License version 2 for more details
 (enclosed in the file GPL).";
   flush stderr
 
+
+(*s \textbf{Banner.} Always printed. Notice that it is printed on error
+    output, so that when the output of \ocamlweb\ is redirected this header
+    is not (unless both standard and error outputs are redirected, of 
+    course). *)
+
 let banner () =
   eprintf "This is ocamlweb version %s, compiled on %s\n"
     Version.version Version.date;
@@ -58,22 +73,11 @@ let banner () =
   eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
   flush stderr
 
-type caml_file = { caml_filename : string; caml_module : string }
 
-type file_type =
-    File_impl  of caml_file * caml_file option
-  | File_intf  of caml_file
-  | File_other of string
-
-let module_name f = String.capitalize (Filename.basename f)
-
-let make_impl f = 
-  { caml_filename = f;
-    caml_module = module_name (Filename.chop_suffix f ".ml") }
-
-let make_intf f = 
-  { caml_filename = f;
-    caml_module = module_name (Filename.chop_suffix f ".mli") }
+(*s \textbf{Separation of files.} Files given on the command line are
+    separating according to their type, which is determined by their suffix.
+    Implementations and interfaces have respective suffixes \verb!.ml!
+    and \verb!.mli! and \LaTeX\ files have suffix \verb!.tex!. *)
 
 let check_if_file_exists f =
   if not (Sys.file_exists f) then begin
@@ -96,11 +100,14 @@ let what_file f =
     exit 1
   end
 
+
+(*s \textbf{Parsing of the command line.} *)
+
 let parse () =
   let files = ref [] in
   let add_file f = files := f :: !files in
   let rec parse_rec = function
-      [] -> ()
+    | [] -> ()
 
     | ("-header" | "--header") :: rem ->
 	skip_header := false; parse_rec rem
@@ -154,41 +161,16 @@ let parse () =
   parse_rec (List.tl (Array.to_list Sys.argv));
   List.rev !files
 
-let raw_read_file f =
-  reset_lexer ();
-  let c = open_in f in
-  let buf = Lexing.from_channel c in
-  if !skip_header then header buf;
-  let contents = implementation buf in
-  close_in c;
-  contents
 
-let read_intf i = 
-  { interf_file = i.caml_filename; 
-    interf_name = i.caml_module; 
-    interf_contents = raw_read_file i.caml_filename }
-    
-let read_impl (m,mi) =
-  let interf = match mi with 
-    | None -> None
-    | Some i -> Some (read_intf i)
-  in
-  { implem_file = m.caml_filename; 
-    implem_name = m.caml_module;
-    implem_contents = raw_read_file m.caml_filename;
-    implem_interf = interf }
-
-let read_one_file = function
-    File_impl (m,i) -> Implem (read_impl (m,i))
-  | File_intf f -> Interf (read_intf f)
-  | File_other f -> Other f
+(*s \textbf{Main program.} Print the banner, parse the command line,
+    read the files and then call [produce_document] from module [Web]. *)
 
 let main () =
   banner();
   let files = parse() in
   if List.length files > 0 then begin
-    let modl = List.map read_one_file files in
-    produce_document modl;
+    let l = List.map read_one_file files in
+    produce_document l
   end
 
 let _ = Printexc.catch main ()

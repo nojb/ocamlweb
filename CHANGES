@@ -1,4 +1,10 @@
 
+  o two different macros, \ocwlowerid and \ocwupperid, for capitalized and
+    uncapitalized identifiers
+  o the index now uses LaTeX labels and refs, where all the labels are of the
+    kind \label{filename:location}
+  o the modules corresponding to the files now appear in the index
+
 version 0.26, 02/06/99
 ======================
   o ocamlweb.sty: greatly improved by Claude Marché
