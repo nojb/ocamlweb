@@ -61,16 +61,18 @@ install:
 manual:
 	cd doc; make all
 
+LATEX=export TEXINPUTS=..: ; latex
+
 test: ocamlweb
-	cd tmp; ../ocamlweb --latex-sects essai.ml -o essai.tex ; \
-	latex essai ; grep -q "Rerun" essai.log && latex essai || true
+	cd tmp; ../ocamlweb --$(LATEX)-sects essai.ml -o essai.tex ; \
+	$(LATEX) essai ; grep -q "Rerun" essai.log && $(LATEX) essai || true
 
 BOOTSTRAP= bootstrap.tex output.ml cross.ml --impl pretty.mll web.ml main.ml 
 
 bootstrap: ocamlweb # $(BOOTSTRAP)
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
-	cd test; latex ocamlweb
-	cd test; grep -q "Rerun" ocamlweb.log && latex ocamlweb || true
+	cd test; $(LATEX) ocamlweb
+	cd test; grep -q "Rerun" ocamlweb.log && $(LATEX) ocamlweb || true
 	-cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
 
 check: bootstrap
