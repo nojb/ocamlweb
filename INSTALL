@@ -1,0 +1,24 @@
+
+COMPILATION
+============
+
+  You need Objective Caml (>= 2.01) to compile the sources.
+ 
+  1. Compile with "make". It creates a binary file "ocamlweb".
+
+     If your platform supports native compilation, do instead "make opt"
+     to get a native-code binary (still named "ocamlweb").
+
+
+INSTALLATION
+============
+
+  1. Copy the binary file "ocamlweb" where you want,
+     either by editing the Makefile and doing "make install"
+     or by copying the file `by hand'.
+
+  2. Copy the LaTeX package "ocamlweb.sty" somewhere in your LaTeX
+     input path (one of the directories listed in $TEXINPUTS). This
+     file is needed to compile the documents produced by ocamlweb
+     with LaTeX.
+

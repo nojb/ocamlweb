@@ -30,8 +30,8 @@ all: ocamlweb
 ocamlweb: $(OBJS:.cmx=.cmo)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(OBJS:.cmx=.cmo)
 
-ocamlweb.opt: $(OBJS)
-	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb.opt $(OBJS)
+opt: $(OBJS)
+	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(OBJS)
 
 debug: $(OBJS:.cmx=.cmo)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(OBJS:.cmx=.cmo)
@@ -59,16 +59,19 @@ NAME=ocamlweb-$(VERSION)
 
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
-FILES = lexer.mll main.ml Makefile .depend README COPYING GPL CHANGES
+FILES = buffer.mli buffer.ml \
+        lexer.mll cross.mll pretty.mli pretty.mll \
+	output.mli output.ml web.mli web.ml main.ml \
+	Makefile .depend README INSTALL COPYING GPL CHANGES
 
-export: 
+export: source
 	cp README COPYING GPL CHANGES  $(FTP)
 	cd doc; make all export
 
-source: $(FILES)
+source:
 	mkdir -p export/$(NAME)
 	cp $(FILES) export/$(NAME)
-	(cd export ; tar cf $(NAME).tar ocamlweb ; \
+	(cd export ; tar cf $(NAME).tar $(NAME) ; \
 	gzip -f --best $(NAME).tar)
 	cp export/$(NAME).tar.gz $(FTP)
 

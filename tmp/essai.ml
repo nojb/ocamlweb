@@ -5,6 +5,11 @@
 
 (* documentation $\beta$ 1 *)
 
+val toto : string -> string
+     (* et si j'aime bien ce style,
+      * c'est mon droit
+      *)
+
 (*s documentation 2 où je parle de [ma_fonction x] ci-dessous définie
     et de bien d'autres choses que j'aimerais voir s'afficher sur un
     paragraphe un tant soit peu grand, comme celui-ci. 
