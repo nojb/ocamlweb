@@ -230,7 +230,14 @@ let main () =
   if not !quiet then banner();
   if List.length files > 0 then begin
     let l = List.map read_one_file files in
-    if not !web_style then web := false;
+    if !web_style 
+    then begin
+      if not !web then begin
+	eprintf "Warning: web sections encountered will in noweb style, ignored.\n";
+	flush stderr    
+      end
+    end
+    else web := false;
     if not !web then add_latex_option "noweb";
     produce_document l
   end
