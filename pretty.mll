@@ -66,7 +66,7 @@ let identifier = (lowercase | uppercase) identchar*
 let tex_reserved = 
   '$' | '#' | '%' | '&' | '\\' | '{' | '}' | '^' | '_' | '~'
 let latex_special = 
-  ' ' | '*' | "->" | "<-" | "<=" | ">=" | "<>"         (* math symbols *)
+  ' ' | '*' | "->" | "<-" | "<=" | ">=" | "<>" | "[]"   (* math symbols *)
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
@@ -115,6 +115,8 @@ and pr_code_string = parse
   | '"'  { output_es () }
   | '\n' { indentation 0; pr_code_string lexbuf }
   | ' '  { output_vspace (); pr_code_string lexbuf }
+  | '\\' '"'
+         { output_escaped_char '\\'; output_char '"'; pr_code_string lexbuf }
   | tex_reserved
          { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
   | eof  { () }

@@ -142,7 +142,7 @@ let output_ident s =
 let output_escaped_char c = 
   if c = '^' || c = '~' then leave_math();
   match c with
-    | '\\' -> output_string "\\ensuremath{\\backslash}"
+    | '\\' -> output_string "\\symbol{92}"
     | _ -> output_char '\\'; output_char c; output_string "{}"
 
 let output_latex_special = function
@@ -155,6 +155,7 @@ let output_latex_special = function
   | "<=" -> enter_math (); output_string "\\le{}"
   | ">=" -> enter_math (); output_string "\\ge{}"
   | "<>" -> enter_math (); output_string "\\not="
+  | "[]" -> output_string "[\\,]"
   | s    -> output_string s
 
 (* comments *)
