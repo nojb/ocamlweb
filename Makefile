@@ -3,10 +3,13 @@
 #########################################
 
 # where to install the binary executable
-BINDIR = /usr/local/bin
+BINDIR = /usr/bin
 
 # where to put the style file
 TEXDIR = /usr/share/texmf/tex/latex/misc
+
+# command to update TeX' kpathsea database
+UPDATETEX = /usr/bin/mktexlsr /usr/share/texmf /var/spool/texmf > /dev/null
 
 #########################################
 # End of configuration part
@@ -60,6 +63,7 @@ version.ml: Makefile
 install:
 	cp ocamlweb $(BINDIR)
 	cp ocamlweb.sty $(TEXDIR)
+	$(UPDATETEX)
 
 local:
 	cp ocamlweb $$HOME/bin/$$OSTYPE
