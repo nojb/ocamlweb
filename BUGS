@@ -1,0 +1,10 @@
+(Dis donc emacs, ceci est du -*-text-*- !)
+
+$Id$
+
+ 1. le token ";;" marque la fin d'un paragraphe, mais n'est pas reporté
+    dans le document LaTeX (Judicaël, 8/10/2001)
+
+
+
+
