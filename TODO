@@ -80,7 +80,8 @@ Web (cross)
 Document LaTeX
 ==============
 
- 1. underscore plus fin dans les identificateurs
+ 2. style myheadings avec hauts de pages mentionnant la section (en
+    mode web, bien sur)
 
  3. Index des modules
 
@@ -122,6 +123,7 @@ Document LaTeX
 
  7. \leqslant et \geqslant pour <= et >= respectivement.
     pbm: il faut \usepackage{amssymb}. ca pose pbm ?
+
     
 Documentation ocamlweb
 ======================
