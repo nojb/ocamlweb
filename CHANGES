@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o fixed bug of code indentation inside item-like environments
   o renaming of \comment (resp. \endcomment) in \ocwcomment
     (resp. \ocwendcomment) to avoid a clash with Hevea own macros
 
