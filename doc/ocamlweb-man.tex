@@ -6,6 +6,7 @@
 
 \newcommand{\WEB}{\textsf{WEB}}
 \newcommand{\Caml}{\textsf{Caml}}
+\newcommand{\OCaml}{\textsf{Objective Caml}}
 \newcommand{\ocamlweb}{\textsf{ocamlweb}}
 
 \begin{document}
@@ -13,8 +14,8 @@
 %%% titre %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{ocamlweb: a literate programming tool \\ 
                for Objective Caml}
-\author{Jean-Christophe Filli\^{a}tre \\
-        \normalsize\texttt{www.lri.fr/\~{}filliatr}}
+\author{Jean-Christophe Filli\^{a}tre and Claude March\'e \\
+        \normalsize\texttt{www.lri.fr/\~{}filliatr/ocamlweb}}
 \date{}
 \maketitle
 
@@ -24,13 +25,29 @@
 
 \section{Introduction}
 
-TODO
+Literate programming has been introduced by D.~E.~Knuth in 1984.  The
+main idea is to put a code and its documentation in a single file and
+to produce from it a document which is readable for a human, and not
+only for a machine.
+Although \ocamlweb\ borrows a lot of ideas from Knuth's original tool
+(called \WEB), there are big differences between them. First, \WEB\ 
+allows you to present the pieces of your code in any order, and this
+is quite useful when using poorly structured languages, like
+\textsf{Pascal} or \textsf{C}. But \OCaml\ is already highly
+structured, and this is no more useful. Moreover, \WEB\ requires the
+use of a tool to produce the code from the \WEB\ file, which greatly
+complicates the use of your favorite source-based tools (dependencies
+generator, debugger, emacs mode, etc.). When using \ocamlweb, the
+documentation is inserted in the code as comments (in the \Caml\ 
+sense), and your code is not linked to the existence of \ocamlweb\ in
+any way.
 
-Currently, the task of \ocamlweb\ is to:
+Currently, the task of \ocamlweb\ may be seen as:
 \begin{enumerate}
-\item make a readable documentation of the code;
-\item generate a global index of cross-references, where each identifier is
-  associated to the lists of sections where it is defined or used.
+\item making a readable documentation of the code;
+\item generating a global index of cross-references, where each
+  identifier is associated to the lists of sections where it is
+  defined or used.
 \end{enumerate}
 
 
