@@ -2,9 +2,10 @@
 
 		      LIST OF CHANGES
 		      ===============
-
+ 
+  o fixed bug with yacc token 'error'
   o adequacy to ocaml 3.01 parser
-  o options -dvi, -ps and -html to produce DVI, PS and HTML
+  o options -dvi, -ps and -html to produce DVI, PS and HTML directly
   o page style with headings (thanks to Ralf Treinen)
   o insertion into LaTeX preamble with option -p and (*p
   o macros \ocwbegincode and \ocwendcode before and after code pieces
