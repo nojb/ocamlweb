@@ -10,8 +10,7 @@ PROFILE  =
 BYTEFLAGS= $(ZLIBS) $(DEBUG)
 OPTFLAGS = $(ZLIBS) $(PROFILE)
 
-SOURCES = utils/config.mli utils/misc.mli utils/misc.ml \
-	utils/clflags.ml \
+SOURCES = utils/misc.mli utils/misc.ml \
 	utils/terminfo.mli utils/terminfo.ml \
 	utils/warnings.mli utils/warnings.ml \
 	parsing/linenum.mli parsing/linenum.mll \
@@ -24,8 +23,7 @@ SOURCES = utils/config.mli utils/misc.mli utils/misc.ml \
 	parsing/lexer.mli parsing/lexer.mll \
 	parsing/parse.mli parsing/parse.ml
 
-OBJS = config.cmo \
-       misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
+OBJS = misc.cmo clflags.cmo terminfo.cmo warnings.cmo \
        linenum.cmo location.cmo longident.cmo pstream.cmo syntaxerr.cmo \
        parser.cmo lexer.cmo parse.cmo
 

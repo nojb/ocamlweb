@@ -5,10 +5,6 @@ parser.cmi: parsetree.cmi
 parsetree.cmi: asttypes.cmi location.cmi longident.cmi 
 pstream.cmi: parsetree.cmi 
 syntaxerr.cmi: location.cmi 
-clflags.cmo: config.cmi 
-clflags.cmx: config.cmx 
-config.cmo: config.cmi 
-config.cmx: config.cmi 
 lexer.cmo: misc.cmi parser.cmi lexer.cmi 
 lexer.cmx: misc.cmx parser.cmx lexer.cmi 
 linenum.cmo: misc.cmi linenum.cmi 
