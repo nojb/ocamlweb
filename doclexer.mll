@@ -532,7 +532,7 @@ and yacc_subparagraphs = parse
           yacc_subparagraphs lexbuf 
 	end }
   | eof  
-      { if !in_lexyacc_action
+      { if !in_lexyacc_action && !doublepercentcounter <= 1
 	then 
 	  begin
 	    eprintf "File \"%s\", character %d\n" 
