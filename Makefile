@@ -122,6 +122,8 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	parse.mli parse.ml			\
 	README
 
+DOCFILES = doc/ocamlweb-man.ps doc/ocamlweb-man.html
+
 export: source linux
 	cp README COPYING GPL CHANGES $(FTP)
 	cd doc; make all export
@@ -131,10 +133,11 @@ export-bootstrap: bootstrap
 	gzip -c test/ocamlweb.ps > $(FTP)/ocamlweb.ps.gz
 	cp test/ocamlweb.html $(FTP)
 
-source:
+source: manual
 	mkdir -p export/$(NAME)/test
-	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test
+	cd export/$(NAME); mkdir -p ocaml-parser; mkdir -p test; mkdir -p doc
 	cp $(FILES) export/$(NAME)
+	cp $(DOCFILES) export/$(NAME)/doc
 	cd ocaml-parser; cp $(OCAMLFILES) ../export/$(NAME)/ocaml-parser
 	(cd export ; tar cf $(NAME).tar $(NAME) ; \
 	gzip -f --best $(NAME).tar)
@@ -149,9 +152,10 @@ solaris:
 
 BINARYFILES = README INSTALL COPYING GPL ocamlweb ocamlweb.sty
 
-binary: ocamlweb
-	mkdir -p export/$(BINARY)
+binary: ocamlweb manual
+	mkdir -p export/$(BINARY)/doc
 	cp $(BINARYFILES) export/$(BINARY)
+	cp $(DOCFILES) export/$(BINARY)/doc
 	(cd export; tar czf $(BINARY).tar.gz $(BINARY))
 	cp export/$(BINARY).tar.gz $(FTP)
 
