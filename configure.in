@@ -36,9 +36,9 @@ AC_SUBST(OCAMLOPT)
 AC_SUBST(OCAMLMKTOP)
 AC_SUBST(OCAMLDEP)
 
-AC_PATH_PROG(MKTEXLSR,mktexlsr,no)
-if test "$MKTEXLSR" = no ; then
-	AC_MSG_ERROR(Cannot find mktexlsr.)
+AC_PATH_PROG(MKTEXLSR,mktexlsr,true)
+if test "$MKTEXLSR" = true ; then
+	AC_MSG_WARN(Cannot find mktexlsr.)
 fi
 AC_SUBST(MKTEXLSR)
 
