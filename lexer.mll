@@ -167,7 +167,7 @@ and ignore = parse
 
 (* strings in code *)
 and code_string = parse
-    '"'      { Buffer.add_char codeb '"' }
+  | '"'      { Buffer.add_char codeb '"' }
   | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
              { Buffer.add_string codeb (Lexing.lexeme lexbuf); 
 	       code_string lexbuf }
