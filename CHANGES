@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o renaming of \comment (resp. \endcomment) in \ocwcomment
+    (resp. \ocwendcomment) to avoid a clash with Hevea own macros
+
 version 0.6, 21/10/99
 =====================
   o backtrack on the way to pretty-print comments (comments inside
