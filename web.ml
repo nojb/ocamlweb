@@ -80,7 +80,7 @@ let code_locations = ref Smap.empty
 
 let add_file_loc table file loc =
   let l = try Smap.find file !table with Not_found -> [] in
-  table := Smap.add file (loc::l) !table
+  table := Smap.add file (loc :: l) !table
 
 let add_par_loc =
   let par_counter = ref 0 in
@@ -108,7 +108,7 @@ let locations_for_a_file = function
 let find_where w =
   let rec lookup = function
     | [] -> raise Not_found
-    | (l,n)::r -> if w.w_loc >= l then ((w.w_filename,l),n) else lookup r
+    | (l,n) :: r -> if w.w_loc >= l then ((w.w_filename,l),n) else lookup r
   in
   let table = if !web then !sec_locations else !code_locations in
   lookup (Smap.find w.w_filename table)
@@ -176,12 +176,12 @@ let all_entries () =
 let intervals l =
   let rec group = function
     | (acc, []) -> List.rev acc
-    | (Interval (s1,(_,n2))::acc, (f,n)::rem) when n = succ n2 -> 
-	group (Interval (s1,(f,n))::acc, rem)
-    | ((Single _)::(Single (f1,n1) as s1)::acc, (f,n)::rem) when n = n1+2 ->
-	group (Interval ((f1,n1),(f,n))::acc, rem)
-    | (acc, (f,n)::rem) ->
-	group ((Single (f,n))::acc, rem)
+    | (Interval (s1,(_,n2)) :: acc, (f,n) :: rem) when n = succ n2 -> 
+	group (Interval (s1,(f,n)) :: acc, rem)
+    | ((Single _)::(Single (f1,n1) as s1)::acc, (f,n)::rem) when n = n1 + 2 ->
+	group (Interval ((f1,n1),(f,n)) :: acc, rem)
+    | (acc, (f,n) :: rem) ->
+	group ((Single (f,n)) :: acc, rem)
   in
   group ([],l)
 
@@ -209,12 +209,12 @@ let web_list l =
 
 let rec uniquize = function
   | [] | [_] as l -> l
-  | x::(y::r as l) -> if x = y then uniquize l else x :: (uniquize l)
+  | x :: (y :: r as l) -> if x = y then uniquize l else x :: (uniquize l)
 
 let map_succeed_nf f l =
   let rec map = function
     | [] -> []
-    | x::l -> try (f x)::(map l) with Not_found -> (map l)
+    | x :: l -> try (f x) :: (map l) with Not_found -> map l
   in
   map l
 
@@ -268,9 +268,8 @@ let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
   | Documentation s -> 
       pretty_print_doc is_first_paragraph s
   | Code (l,s) ->
-      if l>0 then output_label (make_label_name (f,l));
+      if l > 0 then output_label (make_label_name (f,l));
       pretty_print_code is_last_paragraph s f
-
 
 let pretty_print_section first f s = 
   if !web then begin_section ();
@@ -319,7 +318,3 @@ let produce_document l =
   if !index then print_index ();
   latex_trailer ();
   close_output ()
-
-
-
-
