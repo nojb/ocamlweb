@@ -6,36 +6,18 @@ $Id$
                     Liste des choses à faire
 		    ========================
 
-Manuel
-======
-
- 1. documenter truc pour citer du code :
-
-======================================================================
-(*s Voila un commentaire dans lequel je cite du code : *)
-(*i(*i*)
-
-    let f x = x + 1
-    let rec g x = if x = 0 then 1 else g (f (x-1))
-
-(*i*)i*)
-(* et voila c'est fait ! *)
-======================================================================
-
-   noter l'importance de la deuxieme ligne vide.
-
 Parsing fichiers
 ================
 
  4. possibilité d'échapper [ ou ] dans les quotations de code
     (actuellement ce n'est pas possible et cela provoque des incohérences)
 
- 4bis. les commandes LaTeX \[ et \] ne sont pas supportees
+    4bis. les commandes LaTeX \[ et \] ne sont pas supportees
 
- 5. Une commande pour rajouter une entrée dans l'index
+ 5. Une commande pour rajouter une entrée dans l'index ?
 
  6. Eviter les erreurs du style un commentaire qui commence comme
-    (*i... : mettre une synatxe plus stricte pour ces « commandes »
+    (*i... : mettre une syntaxe plus stricte pour ces « commandes »
     ocamlweb (s,c et i). Suggestions :
 
     a) imposer qu'apres la lettre s,c ou i il n'y ait pas une lettre.
@@ -48,7 +30,7 @@ Parsing fichiers
     (*l \newcommand{\toto}{...} *)
 
     Actuellement, faire ceci fonctionne (la macro \toto est bien
-    définie *) mais : si c'est un paragraphe de commentaire isolé cela
+    définie) mais : si c'est un paragraphe de commentaire isolé cela
     insère des espaces, si c'est un commentaire de code cela fait
     apparaitre les (* et *) !
 
@@ -68,12 +50,8 @@ Web (cross)
  3. supprimer tout de même les modules et fonctions de Pervasives de l'index
     lorsque l'on utilise l'option --extern-defs ?
 
-*4. Est-ce que les modules (correspondant aux fichiers) eux-mêmes doivent
-    apparaître dans l'index global, ou doivent-ils apparaître dans un index
-    particulier ?
+ 4. LEXERS: Ca marche, mais c'est très très lent !
 
-  LEXERS:     Ca marche, mais c'est très très lent !
-  -------
     cross.ml:
     let f' = if check_suffix f ".mll" then (chop_extension f) ^ ".ml" else f in
 
@@ -102,17 +80,8 @@ Document LaTeX
  2. style myheadings avec hauts de pages mentionnant la section (en
     mode web, bien sur)
 
- 3. Index des modules
-
-    Plus generalement, indications dans l'index de la nature des
-    entrees (mais rien pour valeurs et constructeurs)
-
- 5. Les espaces verticaux entre paragraphes sont pas terriblement au
-    point, surtout avec hevea. Il faudrait revoir l'utilisation de
-    \ocwnl et \medskip. Peut-etre remplacer \medskip par une macro
-    customisable \ocwnewpar. Par exemple, mettre un \medskip avant un
-    \ocwinterface n'est pas une bonne idée si \ocwinterface est un
-    \section.
+ 3. indexer les entrees de l'index lorsqu'il y a plusieurs types pour
+    un meme identificateur
 
  6. (Claude) Possibilité d'insérer du code caml dans les commentaires :
     cela est utile pour citer des exemples d'utilisation des
