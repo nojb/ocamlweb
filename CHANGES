@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o nicer pretty-print of [< and >]
+
 version 1.0, 15/06/2001 
 =======================
   o option --hevea-option to pass an option to hevea
