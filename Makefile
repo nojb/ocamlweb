@@ -101,7 +101,7 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 	parse.mli parse.ml			\
 	Makefile .depend README
 
-export: source linux solaris
+export: source linux
 	cp README COPYING GPL CHANGES $(FTP)
 	cd doc; make all export
 
