@@ -224,7 +224,7 @@ clean:
 	rm -f *~ *.cm[iox] *.o 
 	rm -f ocaml-parser/*~ ocaml-parser/*.cm[iox] ocaml-parser/*.o
 	rm -f ocamllex-parser/*~ ocamllex-parser/*.cm[iox] ocamllex-parser/*.o
-	rm -f ocamlweb 
+	rm -f ocamlweb ocamlweb.byte
 	rm -f $(GENERATED)
 	rm -f ocaml-parser/parser.output
 	rm -f ocamllex-parser/lex_parser.output
