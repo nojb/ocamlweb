@@ -167,7 +167,7 @@ let parse () =
 	quiet := true; parse_rec rem
 
     | ("--nogreek" | "--no-greek") :: rem ->
-	use_greek_letters := true; parse_rec rem
+	use_greek_letters := false; parse_rec rem
 
     | ("-h" | "-help" | "-?" | "--help") :: rem ->
 	usage ()

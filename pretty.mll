@@ -76,11 +76,11 @@ let identchar =
 let identifier = (lowercase | uppercase) identchar*
 let symbolchar =
   ['!' '$' '%' '&' '*' '+' '-' '.' '/' ':' '<' '=' '>' '?' '@' '^' '|' '~']
-let tex_reserved = 
-  '$' | '#' | '%' | '&' | '\\' | '{' | '}' | '^' | '_' | '~'
-let latex_special = 
-  ' ' | "*" | "->" | "<-" | "<=" | ">=" | "<>" | "[]" | "(" | ")" |
-  "&" | "&&" | "or" | "||" | "not"
+let caml_token =
+    "[" | "]" | "[|" | "|]" | "[<" | ">]" | "{" | "}" | "{<" | ">}" | "[]" 
+  | "(" | ")" | "or" | "not" | "||" 
+let symbol_token =
+  caml_token | (symbolchar+)
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
@@ -100,6 +100,9 @@ rule pr_code = parse
 
 and pr_code_inside = parse
   | '\n' { end_line () }
+  | ' '  { output_char '~'; pr_code_inside lexbuf }
+  | character
+         { output_verbatim (lexeme lexbuf); pr_code_inside lexbuf }
   | "'" identifier
          { let id = lexeme lexbuf in
 	   output_type_variable (String.sub id 1 (pred (String.length id))); 
@@ -107,16 +110,12 @@ and pr_code_inside = parse
   | "(*" { output_bc (); comment_depth := 1;
 	   pr_comment lexbuf; pr_code_inside lexbuf }
   | '"'  { output_bs (); pr_code_string lexbuf; pr_code_inside lexbuf }
-  | character
-         { output_verbatim (lexeme lexbuf); pr_code_inside lexbuf }
-  | tex_reserved
-         { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
-  | latex_special  
-         { output_latex_special (lexeme lexbuf); pr_code_inside lexbuf }
+  | symbol_token
+         { output_symbol (lexeme lexbuf); pr_code_inside lexbuf }
   | (identifier '.')* identifier
          { output_ident (lexeme lexbuf); pr_code_inside lexbuf }
   | eof  { end_line() }
-  | _    { output_char (first_char lexbuf); pr_code_inside lexbuf }
+  | _    { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
 
 
 (*s Comments. *)
@@ -149,10 +148,8 @@ and pr_code_string = parse
   | '\\' '\\'
          { output_escaped_char '\\'; output_escaped_char '\\'; 
 	   pr_code_string lexbuf }
-  | tex_reserved
-         { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
   | eof  { () }
-  | _    { output_char (first_char lexbuf); pr_code_string lexbuf }
+  | _    { output_escaped_char (first_char lexbuf); pr_code_string lexbuf }
 
 
 (*s Escaped code. *)
@@ -165,16 +162,19 @@ and escaped_code = parse
            end else
 	     if not !user_math_mode then leave_math () }
   | '"'  { output_bs (); pr_code_string lexbuf; escaped_code lexbuf }
+  | ' '  { output_char '~'; escaped_code lexbuf }
   | character
          { output_verbatim (lexeme lexbuf); escaped_code lexbuf }
-  | tex_reserved
-         { output_escaped_char (first_char lexbuf); escaped_code lexbuf }
-  | latex_special  
-         { output_latex_special (lexeme lexbuf); escaped_code lexbuf }
+  | "'" identifier
+         { let id = lexeme lexbuf in
+	   output_type_variable (String.sub id 1 (pred (String.length id))); 
+	   escaped_code lexbuf }
+  | symbol_token
+         { output_symbol (lexeme lexbuf); escaped_code lexbuf }
   | identifier
          { output_ident (lexeme lexbuf); escaped_code lexbuf }
   | eof  { if not !user_math_mode then leave_math () }
-  | _    { output_char (first_char lexbuf); escaped_code lexbuf }
+  | _    { output_escaped_char (first_char lexbuf); escaped_code lexbuf }
 
 
 (*s Documentation. 

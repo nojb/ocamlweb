@@ -210,11 +210,7 @@ let output_ident s =
   if is_keyword s then begin
     leave_math (); output_keyword s
   end else begin
-    enter_math ();
-    if String.length s = 1 then
-      output_escaped_char s.[0]
-    else
-      output_raw_ident s
+    enter_math (); output_raw_ident s
   end
 
 
@@ -225,24 +221,22 @@ let output_ident s =
     letters for the same reason.
  *)
 
-let output_latex_special = function
-  | " " -> output_string "~" 
-
+let output_symbol = function
   | "*" -> enter_math (); output_string "\\times{}"
   | "->" -> enter_math (); output_string "\\rightarrow{}"
   | "<-" -> enter_math (); output_string "\\leftarrow{}"
   | "<=" -> enter_math (); output_string "\\le{}"
   | ">=" -> enter_math (); output_string "\\ge{}"
   | "<>" -> enter_math (); output_string "\\not="
-  | "(" | ")" as s -> 
+  | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
             enter_math (); output_string s
   | "&" | "&&" ->
             enter_math (); output_string "\\land{}"
   | "or" | "||" ->
             enter_math (); output_string "\\lor{}"
   | "not" -> enter_math (); output_string "\\lnot{}"
-  | "[]" -> output_string "[\\,]"
-  | s    -> output_string s
+  | "[]" -> enter_math (); output_string "[\\,]"
+  | s    -> output_latex_id s
 
 let use_greek_letters = ref true
 
@@ -253,7 +247,7 @@ let output_greek l =
   enter_math (); output_char '\\'; output_string l; output_string "{}"
 
 let output_type_variable id = 
-  if !use_greek_letters then 
+  if not !use_greek_letters then 
     output_tv id
   else
     match id with 

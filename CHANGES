@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o better adequacy to caml tokens (and better pretty-printing)
+  o single letter identifiers are also printed using macros \ocwlowerid, etc.
+  o line breaks in strings are now correctly handled
   o more single-letter type variables output as greek letters. other
     type variables output as \ocwtv{id} which is customizable. An
     additional option --no-greek to ocamlweb disables to use of greek

@@ -66,7 +66,7 @@ val leave_math : unit -> unit
     like \_ for instance in \LaTeX. 
     [output_escaped_char] pretty-prints the reserved char of \LaTeX, 
     like \verb!&! or \verb!$!.
-    [output_latex_special] pretty-prints some mathematical symbols,
+    [output_symbol] pretty-prints the Caml symbols,
     like $\rightarrow$ for \texttt{->}. 
     [output_type_variable s] pretty-prints type variables, in particular 
     one-letter type variables are output as greek letters.  *)
@@ -77,7 +77,7 @@ val what_is_first_char : string -> char_type
 val is_keyword : string -> bool
 val output_ident : string -> unit
 val output_escaped_char : char -> unit
-val output_latex_special : string -> unit
+val output_symbol : string -> unit
 val output_type_variable : string -> unit
 
 (* Comments inside code are opened and closed respectively by 

@@ -7,7 +7,7 @@
 
 type truc = AA | BB | CC
 
-exception AAA of aatoto * aatruc * aamachin
+exception 'a AAA of 'a aatoto * 'b aatruc * aamachin
 
 type machin = { champ1 : int;
 		champ2 : string }
@@ -18,7 +18,13 @@ type machin = { champ1 : int;
     Je peux aussi parler de \verb!@x! si je veux... 
     ou encore << échapper >> cette ["chaine de caractères"]. *)
 
-let l = [1;3;2]
+let l = 
+  [|[|1;3;2|];
+    [|4;5;6|]|]
+
+let t = T
+
+let M.t = M.T
 
 let une_grande_chaine = "tatdn jgj gjhg jfjh \
     kjhsljkh hglg lglj gljb lgjh \
