@@ -70,13 +70,11 @@ See the GNU General Public License version 2 for more details
     course). *)
 
 let banner () =
-  if not !quiet then begin
-    eprintf "This is ocamlweb version %s, compiled on %s\n"
-      Version.version Version.date;
-    eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
-    eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
-    flush stderr
-  end
+  eprintf "This is ocamlweb version %s, compiled on %s\n"
+    Version.version Version.date;
+  eprintf "Copyright (c) 1999 Jean-Christophe Filliâtre\n";
+  eprintf "This is free software with ABSOLUTELY NO WARRANTY (use option -warranty)\n";
+  flush stderr
     
 
 (*s \textbf{Separation of files.} Files given on the command line are
@@ -170,7 +168,7 @@ let parse () =
     | ("-h" | "-help" | "-?" | "--help") :: rem ->
 	usage ()
     | ("-v" | "-version" | "--version") :: _ ->
-	exit 0
+	banner (); exit 0
     | ("-warranty" | "--warranty") :: _ ->
 	copying (); exit 0
 
@@ -213,7 +211,7 @@ let parse () =
 
 let main () =
   let files = parse() in
-  banner();
+  if not !quiet then banner();
   if List.length files > 0 then begin
     let l = List.map read_one_file files in
     produce_document l
