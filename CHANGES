@@ -3,6 +3,7 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o bytecode compilation if no ocamlopt available
   o adequacy to ocaml 3.00 parser; labels are now indexed
   o installation: $(BINDIR) and $(TEXDIR) created if they don't exist
   o a comment in the LaTeX file now indicates that it is a generated

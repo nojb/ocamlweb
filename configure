@@ -550,36 +550,31 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
 
 # Check for OCaml programs
+# Check for OCaml programs
 # Extract the first word of "ocamlc", so it can be a program name with args.
 set dummy ocamlc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:557: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_OCAMLC'+set}'`\" = set"; then
+echo "configure:558: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_OCAMLC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  case "$OCAMLC" in
-  /*)
-  ac_cv_path_OCAMLC="$OCAMLC" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_OCAMLC="$OCAMLC" # Let the user override the test with a dos path.
-  ;;
-  *)
+  if test -n "$OCAMLC"; then
+  ac_cv_prog_OCAMLC="$OCAMLC" # Let the user override the test.
+else
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
   ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
+  for ac_dir in $ac_dummy; do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
-      ac_cv_path_OCAMLC="$ac_dir/$ac_word"
+      ac_cv_prog_OCAMLC="ocamlc"
       break
     fi
   done
   IFS="$ac_save_ifs"
-  test -z "$ac_cv_path_OCAMLC" && ac_cv_path_OCAMLC="no"
-  ;;
-esac
+  test -z "$ac_cv_prog_OCAMLC" && ac_cv_prog_OCAMLC="no"
 fi
-OCAMLC="$ac_cv_path_OCAMLC"
+fi
+OCAMLC="$ac_cv_prog_OCAMLC"
 if test -n "$OCAMLC"; then
   echo "$ac_t""$OCAMLC" 1>&6
 else
@@ -592,33 +587,27 @@ fi
 # Extract the first word of "ocamlopt", so it can be a program name with args.
 set dummy ocamlopt; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:596: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_OCAMLOPT'+set}'`\" = set"; then
+echo "configure:591: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_OCAMLOPT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  case "$OCAMLOPT" in
-  /*)
-  ac_cv_path_OCAMLOPT="$OCAMLOPT" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_OCAMLOPT="$OCAMLOPT" # Let the user override the test with a dos path.
-  ;;
-  *)
+  if test -n "$OCAMLOPT"; then
+  ac_cv_prog_OCAMLOPT="$OCAMLOPT" # Let the user override the test.
+else
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
   ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
+  for ac_dir in $ac_dummy; do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
-      ac_cv_path_OCAMLOPT="$ac_dir/$ac_word"
+      ac_cv_prog_OCAMLOPT="ocamlopt"
       break
     fi
   done
   IFS="$ac_save_ifs"
-  test -z "$ac_cv_path_OCAMLOPT" && ac_cv_path_OCAMLOPT="no"
-  ;;
-esac
+  test -z "$ac_cv_prog_OCAMLOPT" && ac_cv_prog_OCAMLOPT="no"
 fi
-OCAMLOPT="$ac_cv_path_OCAMLOPT"
+fi
+OCAMLOPT="$ac_cv_prog_OCAMLOPT"
 if test -n "$OCAMLOPT"; then
   echo "$ac_t""$OCAMLOPT" 1>&6
 else
@@ -626,77 +615,35 @@ else
 fi
 
 if test "$OCAMLOPT" = no ; then
-	{ echo "configure: error: Cannot find ocamlopt." 1>&2; exit 1; }
-fi
-# Extract the first word of "ocamlmktop", so it can be a program name with args.
-set dummy ocamlmktop; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:635: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_OCAMLMKTOP'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
+	echo "configure: warning: Cannot find ocamlopt." 1>&2
+	BEST=byte
 else
-  case "$OCAMLMKTOP" in
-  /*)
-  ac_cv_path_OCAMLMKTOP="$OCAMLMKTOP" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_OCAMLMKTOP="$OCAMLMKTOP" # Let the user override the test with a dos path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_OCAMLMKTOP="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  test -z "$ac_cv_path_OCAMLMKTOP" && ac_cv_path_OCAMLMKTOP="no"
-  ;;
-esac
-fi
-OCAMLMKTOP="$ac_cv_path_OCAMLMKTOP"
-if test -n "$OCAMLMKTOP"; then
-  echo "$ac_t""$OCAMLMKTOP" 1>&6
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-if test "$OCAMLMKTOP" = no ; then
-	{ echo "configure: error: Cannot find ocamlmktop." 1>&2; exit 1; }
+	BEST=opt
 fi
 # Extract the first word of "ocamldep", so it can be a program name with args.
 set dummy ocamldep; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:674: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_OCAMLDEP'+set}'`\" = set"; then
+echo "configure:627: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_OCAMLDEP'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  case "$OCAMLDEP" in
-  /*)
-  ac_cv_path_OCAMLDEP="$OCAMLDEP" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_OCAMLDEP="$OCAMLDEP" # Let the user override the test with a dos path.
-  ;;
-  *)
+  if test -n "$OCAMLDEP"; then
+  ac_cv_prog_OCAMLDEP="$OCAMLDEP" # Let the user override the test.
+else
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
   ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
+  for ac_dir in $ac_dummy; do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
-      ac_cv_path_OCAMLDEP="$ac_dir/$ac_word"
+      ac_cv_prog_OCAMLDEP="ocamldep"
       break
     fi
   done
   IFS="$ac_save_ifs"
-  test -z "$ac_cv_path_OCAMLDEP" && ac_cv_path_OCAMLDEP="no"
-  ;;
-esac
+  test -z "$ac_cv_prog_OCAMLDEP" && ac_cv_prog_OCAMLDEP="no"
 fi
-OCAMLDEP="$ac_cv_path_OCAMLDEP"
+fi
+OCAMLDEP="$ac_cv_prog_OCAMLDEP"
 if test -n "$OCAMLDEP"; then
   echo "$ac_t""$OCAMLDEP" 1>&6
 else
@@ -715,7 +662,7 @@ fi
 # Extract the first word of "mktexlsr", so it can be a program name with args.
 set dummy mktexlsr; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:719: checking for $ac_word" >&5
+echo "configure:666: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MKTEXLSR'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -900,8 +847,8 @@ s%@infodir@%$infodir%g
 s%@mandir@%$mandir%g
 s%@OCAMLC@%$OCAMLC%g
 s%@OCAMLOPT@%$OCAMLOPT%g
-s%@OCAMLMKTOP@%$OCAMLMKTOP%g
 s%@OCAMLDEP@%$OCAMLDEP%g
+s%@BEST@%$BEST%g
 s%@MKTEXLSR@%$MKTEXLSR%g
 
 CEOF

@@ -40,16 +40,18 @@ CMO = output.cmo cross.cmo pretty.cmo web.cmo doclexer.cmo \
 
 CMX = $(CMO:.cmo=.cmx)
 
-all: ocamlweb
+all: @BEST@
+
+opt: ocamlweb
+
+byte: ocamlweb.byte
 
 ocamlweb: $(CAML_CMX) $(CMX)
 	$(CAMLCOPT) $(OPTFLAGS) -o ocamlweb $(CAML_CMX) $(CMX)
 	strip ocamlweb
 
-opt: ocamlweb
-
-byte: $(CAML_CMO) $(CMO)
-	$(CAMLC) $(BYTEFLAGS) -o ocamlweb $(CAML_CMO) $(CMO)
+ocamlweb.byte: $(CAML_CMO) $(CMO)
+	$(CAMLC) $(BYTEFLAGS) -o ocamlweb.byte $(CAML_CMO) $(CMO)
 
 debug: $(CAML_CMO) $(CMO)
 	$(CAMLC) $(BYTEFLAGS) -o ocamlweb-debug $(CAML_CMO) $(CMO)
@@ -60,7 +62,11 @@ version.ml: Makefile
 
 install:
 	mkdir -p $(BINDIR)
-	cp ocamlweb $(BINDIR)		
+	if test @BEST@ = opt ; then \
+		cp ocamlweb $(BINDIR) ; \
+	else \
+		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
+	fi
 	mkdir -p $(TEXDIR)
 	cp ocamlweb.sty $(TEXDIR)	
 	$(UPDATETEX)
