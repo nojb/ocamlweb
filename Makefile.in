@@ -2,6 +2,7 @@
 # where to install the binary executable
 prefix=@prefix@
 exec_prefix=@exec_prefix@
+MANDIR=@mandir@
 BINDIR=@bindir@
 
 # where to put the style file
@@ -13,8 +14,8 @@ MKTEXLSR = @MKTEXLSR@
 UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/null
 
 # Version
-MAJORVN=0
-MINORVN=9
+MAJORVN=1
+MINORVN=0
 VERSION=$(MAJORVN).$(MINORVN)
 OCAMLBEST=@OCAMLBEST@
 
@@ -74,16 +75,20 @@ install:
 	else \
 		cp ocamlweb.byte $(BINDIR)/ocamlweb ; \
 	fi
+	mkdir -p $(MANDIR)
+	cp ocamlweb.1 $(MANDIR)/man1
 	mkdir -p $(TEXDIR)
 	cp ocamlweb.sty $(TEXDIR)	
 	$(UPDATETEX)
 
 local: ocamlweb
 	cp ocamlweb $$HOME/bin/$$OSTYPE
+	cp ocamlweb.1 $$HOME/man/man1
 	cp ocamlweb.sty $$HOME/tex/inputs
 
 install-demons: ocamlweb
 	cp ocamlweb /users/demons/demons/bin/$$OSTYPE
+	cp ocamlweb.1 /users/demons/demons/man/man1
 	cp ocamlweb.sty /users/demons/demons/tex/inputs
 
 manual:
@@ -142,7 +147,7 @@ OCAMLFILES = misc.mli misc.ml clflags.ml	\
 
 OCAMLLEXFILES = lex_syntax.mli lex_parser.mly lex_lexer.mll
 
-DOCFILES = doc/ocamlweb-man.ps doc/ocamlweb-man.html
+DOCFILES = doc/ocamlweb-man.ps doc/ocamlweb-man.html doc/ocamlweb.1
 
 export: source linux
 	cp README COPYING LGPL CHANGES $(FTP)
