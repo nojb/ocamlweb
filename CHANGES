@@ -2,6 +2,10 @@
 
 		      LIST OF CHANGES
 		      ===============
+
+  o unterminated ocamlweb comments (*i ... *i) now generate an error
+    message 
+
 version 0.5, 29/9/99
 ====================
   o better result with hevea (a single line break between code lines, etc.)

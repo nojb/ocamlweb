@@ -180,7 +180,7 @@ and skip_comment = parse
     are not nested. *)
 and ignore = parse
   | "i*)" { () }
-  | eof   { () }
+  | eof   { prerr_endline "Unterminated ocamlweb comment"; exit 1 }
   | _     { ignore lexbuf }
 
 (*s Strings in code. *)
