@@ -80,9 +80,6 @@ Document LaTeX
  2. style myheadings avec hauts de pages mentionnant la section (en
     mode web, bien sur)
 
- 3. indenter les entrees de l'index lorsqu'il y a plusieurs types pour
-    un meme identificateur
-
  4. Cesures. Les identificateurs ne subissent pas de cesures, car
     affiches en mode math (\mathit et non \textit). La raison est que
     les apostrophes (x') ne sont pas jolis en mode texte.
