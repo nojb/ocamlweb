@@ -257,7 +257,7 @@ configure: configure.in
 ##################
 
 GENERATED = doclexer.ml pretty.ml version.ml yacc_lexer.ml \
-	    yacc_parser.ml yacc_parser.mli \
+	    yacc_parser.ml yacc_parser.mli yacc_parser.output \
             ocaml-parser/lexer.ml ocaml-parser/linenum.ml \
 	    ocaml-parser/parser.mli ocaml-parser/parser.ml \
 	    ocamllex-parser/lex_lexer.ml ocamllex-parser/lex_parser.ml \
