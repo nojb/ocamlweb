@@ -232,7 +232,6 @@ let parse () =
 
 let main () =
   let files = parse() in
-  if not !quiet then banner();
   if List.length files > 0 then begin
     let l = List.map read_one_file files in
     if !web_style 
