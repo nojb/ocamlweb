@@ -111,7 +111,7 @@ and documentation = parse
 	     skip_until_nl lexbuf;
 	     Documentation (Buffer.contents docub) 
 	   end}
-  | "$Id$']* "\$"
+  | "$Id\:" [^ '$']* "$"
          { documentation lexbuf }
   | '\n' " * "
          { Buffer.add_string docub "\n "; documentation lexbuf }
