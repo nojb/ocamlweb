@@ -23,13 +23,6 @@ let usage () =
   prerr_endline "Usage: ocamlweb <options> <files>";
   exit 1
 
-let parse () =
-  let rec parse_rec = function
-      [] -> ()
-    | _ -> usage()
-  in 
-  parse_rec (List.tl (Array.to_list Sys.argv))
-
 let copying () =
   prerr_endline "
 This program is free software; you can redistribute it and/or modify
@@ -44,6 +37,22 @@ See the GNU General Public License version 2 for more details
 (enclosed in the file GPL).";
   flush stderr
 
+let parse () =
+  let rec parse_rec files = function
+      [] -> files
+
+    | ("-h" | "-help" | "-?" | "--help") :: rem ->
+	usage ()
+    | ("-v" | "-version" | "--version") :: _ ->
+	exit 0
+    | ("-warranty" | "--warranty") :: _ ->
+	copying(); exit 0
+
+    | s::rem -> parse_rec (s::files) rem
+  in 
+  let l = parse_rec [] (List.tl (Array.to_list Sys.argv)) in
+  List.rev l
+
 let banner () =
   eprintf "This is ocamlweb version %s, compiled on %s\n"
     Version.version Version.date;
@@ -52,6 +61,7 @@ let banner () =
   flush stderr
 
 let main () =
-  banner()
+  banner();
+  parse()
 
 let _ = Printexc.catch main ()
