@@ -12,6 +12,12 @@ exception 'a AAA of 'a aatoto * 'b aatruc * aamachin
 type machin = { champ1 : int;
 		champ2 : string }
 
+let const = 0X4fff + 0O455 + 0B01010111001 + 1.5152E-4
+let autrec = 0xafaf125
+let f x = x land 0x4fffff
+
+let f toto toto' = c := !c + 8
+
 (*s documentation 2 où je parle de [ma_fonction x] ci-dessous définie
     et de bien d'autres choses que j'aimerais voir s'afficher sur un
     paragraphe un tant soit peu grand, comme celui-ci. 

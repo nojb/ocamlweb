@@ -259,7 +259,8 @@ let output_ident s =
  *)
 
 let output_symbol = function
-  | "*" -> enter_math (); output_string "\\times{}"
+  | "*"  -> enter_math (); output_string "\\times{}"
+  | "**" -> enter_math (); output_string "*\!*"
   | "->" -> enter_math (); output_string "\\rightarrow{}"
   | "<-" -> enter_math (); output_string "\\leftarrow{}"
   | "<=" -> enter_math (); output_string "\\le{}"
@@ -267,6 +268,7 @@ let output_symbol = function
   | "<>" -> enter_math (); output_string "\\not="
   | "==" -> enter_math (); output_string "\\equiv"
   | "!=" -> enter_math (); output_string "\\not\equiv"
+  | "~-" -> enter_math (); output_string "-"
   | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
             enter_math (); output_string s
   | "&" | "&&" ->
@@ -308,6 +310,35 @@ let output_type_variable id =
 let output_ascii_char n =
   output_string (sprintf "\\symbol{%d}" n)
 
+(*s \textbf{Constants.} *)
+
+let output_integer s =
+  let n = String.length s in
+  let base b = 
+    let v = String.sub s 2 (n - 2) in
+    output_string (sprintf "\\ocw%sconst{%s}" b v)
+  in
+  if n > 1 then
+    match s.[1] with
+      | 'x' | 'X' -> base "hex" 
+      | 'o' | 'O' -> base "oct"
+      | 'b' | 'B' -> base "bin"
+      | _ -> output_string s
+  else
+    output_string s
+
+let output_float s =
+  try
+    let i = try String.index s 'e' with Not_found -> String.index s 'E' in
+    let m = String.sub s 0 i in
+    let e = String.sub s (succ i) (String.length s - i - 1) in
+    if m = "1" then
+      output_string (sprintf "\\ocwfloatconstexp{%s}" e)
+    else
+      output_string (sprintf "\\ocwfloatconst{%s}{%s}" m e)
+  with Not_found ->
+    output_string s
+   
 
 (*s \textbf{Comments.} *)
 

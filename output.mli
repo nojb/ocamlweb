@@ -16,7 +16,7 @@
 
 (* $Id$ *)
 
-(* In that module, we concentrate all the printing functions.
+(*s In that module, we concentrate all the printing functions.
    Thus, it will be easy to add another kind of output, HTML for instance,
    by adapting the code of that module, and nothing else. 
    Default output is to standard output, but it can be redirected
@@ -26,7 +26,7 @@
 val set_output_to_file : string -> unit
 val close_output : unit -> unit
 
-(* These mutable flags controls the output. If [quiet], no extra
+(*s These mutable flags controls the output. If [quiet], no extra
    output is done on standard output, default is [false]. If
    [use_greek_letters] is true, greek letters are used to display (some
    of) the single-letter type variables, default is [true]. *)
@@ -35,7 +35,7 @@ val quiet : bool ref
 val use_greek_letters : bool ref
 val short : bool ref
 
-(* Then we introduce some low level output functions, for characters 
+(*s Then we introduce some low level output functions, for characters 
    and strings.
    [(output_file f)] copies the contents of file [f] on the output. 
    [(output_verbatim s)] outputs the string [s] `as is'. *)
@@ -51,8 +51,7 @@ val output_verbatim : string -> unit
     trailer. [(end_line ())] ends a line, [(indentation n)] introduces
     an indentation of size [n] at the beggining of a line.
     [latex_header] takes as argument the options of the \LaTeX\
-    package ocamlweb.sty.
-*)
+    package ocamlweb.sty. *)
 
 val set_no_preamble : bool -> unit
 val latex_header : string -> unit
@@ -89,7 +88,12 @@ val output_symbol : string -> unit
 val output_type_variable : string -> unit
 val output_ascii_char : int -> unit
 
-(* Comments inside code are opened and closed respectively by
+(*s Constants are typeset by the following functions. *)
+
+val output_integer : string -> unit
+val output_float : string -> unit
+
+(*s Comments inside code are opened and closed respectively by
    [output_bc] and [output_ec]. The function [output_hfill] is called
    before [output_bc] to justify a comment. *)
 
@@ -97,7 +101,7 @@ val output_bc : unit -> unit
 val output_ec : unit -> unit
 val output_hfill : unit -> unit
 
-(* Strings inside code are opened and close respectively by
+(*s Strings inside code are opened and close respectively by
    [ output_bs] and [output_es]. A space character in a string is 
    output as a visible space, with [output_vspace]. *)
 

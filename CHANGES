@@ -3,7 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
-  o creation of a branch stage-TER for support of lex and yacc files
+  o nicer quotes in identifiers
+  o pretty-printing of constants (hex, oct and bin integers, floats)
   o option -s, --short (no titles for files)
   o update of the documentation
   o pretty-printing for == and !=

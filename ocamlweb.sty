@@ -72,8 +72,16 @@
 % macro for typesetting identifiers
 \newcommand{\ocwsymbolid}[1]{{#1}}
 
-\newcommand{\ocwlowerid}[1]{\textit{#1\/}}
-\newcommand{\ocwupperid}[1]{\textit{#1\/}}
+\newcommand{\ocwlowerid}[1]{\ensuremath{\mathit{#1\/}}}
+\newcommand{\ocwupperid}[1]{\ensuremath{\mathit{#1\/}}}
+
+% macros for typesetting constants
+\newcommand{\ocwhexconst}[1]{\ensuremath{\mathtt{#1}_{16}}}
+\newcommand{\ocwoctconst}[1]{\ensuremath{#1_8}}
+\newcommand{\ocwbinconst}[1]{\ensuremath{#1_2}}
+
+\newcommand{\ocwfloatconst}[2]{\ensuremath{#1\cdot 10^{#2}}}
+\newcommand{\ocwfloatconstexp}[1]{\ensuremath{10^{#1}}}
 
 % newline, and indentation 
 %BEGIN LATEX

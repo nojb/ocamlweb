@@ -69,9 +69,10 @@ manual:
 
 LATEX=TEXINPUTS=..: ; export TEXINPUTS ; latex
 
-test: ocamlweb
-	cd tmp; ../ocamlweb --latex-sects essai.ml -o essai.tex ; \
-	$(LATEX) essai ; grep -q "Rerun" essai.log && $(LATEX) essai || true
+test: ocamlweb tmp/essai.ml
+	cd tmp; ../ocamlweb essai.ml -o essai.tex; \
+	$(LATEX) essai ; grep -q "Rerun" essai.log && $(LATEX) essai || true; \
+	hevea -o essai.html ../ocamlweb.sty essai.tex
 
 BOOTSTRAP= bootstrap.tex output.mli output.ml cross.mli cross.ml \
            pretty.mli --impl pretty.mll web.mli web.ml \

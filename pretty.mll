@@ -94,7 +94,12 @@ let symbol_token =
 let character = 
   "'" ( [^ '\\' '\''] | '\\' ['\\' '\'' 'n' 't' 'b' 'r'] 
       | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] ) "'"
-
+let decimal_literal = ['0'-'9']+
+let hex_literal = '0' ['x' 'X'] ['0'-'9' 'A'-'F' 'a'-'f']+
+let oct_literal = '0' ['o' 'O'] ['0'-'7']+
+let bin_literal = '0' ['b' 'B'] ['0'-'1']+
+let float_literal =
+  ['0'-'9']+ ('.' ['0'-'9']*)? (['e' 'E'] ['+' '-']? ['0'-'9']+)?
 
 (*s Pretty-printing of code.
     The following function pretty-prints some code and assumes that we are
@@ -193,6 +198,10 @@ and pr_code_inside = parse
   | (identifier '.')* identifier
          { output_ident (lexeme lexbuf); pr_code_inside lexbuf }
   | eof  { end_line() }
+  | decimal_literal | hex_literal | oct_literal | bin_literal
+         { output_integer (lexeme lexbuf); pr_code_inside lexbuf }
+  | float_literal
+         { output_float (lexeme lexbuf); pr_code_inside lexbuf }
   | _    { output_escaped_char (first_char lexbuf); pr_code_inside lexbuf }
 
 
@@ -276,6 +285,10 @@ and escaped_code = parse
   | identifier
          { output_ident (lexeme lexbuf); escaped_code lexbuf }
   | eof  { if not !user_math_mode then leave_math () }
+  | decimal_literal | hex_literal | oct_literal | bin_literal
+         { output_integer (lexeme lexbuf); escaped_code lexbuf }
+  | float_literal
+         { output_float (lexeme lexbuf); escaped_code lexbuf }
   | _    { output_escaped_char (first_char lexbuf); escaped_code lexbuf }
 
 
