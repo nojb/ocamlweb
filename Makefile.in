@@ -136,7 +136,8 @@ NAME=ocamlweb-$(VERSION)
 FTP = /users/demons/filliatr/ftp/ocaml/ocamlweb
 
 FILES = *.ml* ocamlweb.sty bootstrap.tex				\
-	Makefile.in configure .depend README INSTALL COPYING LGPL CHANGES
+	Makefile.in configure.in configure .depend \
+	README INSTALL COPYING LGPL CHANGES
 
 OCAMLFILES = misc.mli misc.ml clflags.ml	\
         terminfo.mli terminfo.ml		\
