@@ -44,41 +44,21 @@ Parsing fichiers
        (*   notez que la variable x \node{orig}{ici}
        \line{->}{orig}{dest} est ... *)
 
+
 Web (cross)
 ===========
 
  3. supprimer tout de même les modules et fonctions de Pervasives de l'index
     lorsque l'on utilise l'option --extern-defs ?
 
- 4. LEXERS: Ca marche, mais c'est très très lent !
-
-    cross.ml:
-    let f' = if check_suffix f ".mll" then (chop_extension f) ^ ".ml" else f in
-
-    web.ml:
-    let lexer_after fmll fml l1 l2 =
-      let (_,x1,y1) = Linenum.for_position fml l1 in
-      let (_,x2,y2) = Linenum.for_position fmll l2 in
-      (x1,y1) >= (x2,y2)
-    
-    et dans find_where on met 
-    let after = 
-      if check_suffix w.w_filename ".mll" then 
-        lexer_after w.w_filename ((chop_extension w.w_filename) ^ ".ml")
-      else 
-        (>=)
-
-    main.ml: dans what_file
-    if check_suffix f ".ml" or check_suffix f ".mll" then
-
+ 5. BUG: les identificateurs apparaissant entre (*i*) et (*i*) sont
+    tout de même dans l'index.
+ 
 
 Document LaTeX
 ==============
 
  1. macros pour les symboles speciaux (incluant lettres grecques)
-
- 2. style myheadings avec hauts de pages mentionnant la section (en
-    mode web, bien sur)
 
  4. Cesures. Les identificateurs ne subissent pas de cesures, car
     affiches en mode math (\mathit et non \textit). La raison est que
@@ -135,7 +115,6 @@ Document LaTeX
     Enfin bref, du coup le \usepackage{amssymb} serait du ressort de
     l'utilisateur.  
 
- 8.  option pour ajouter un \usepackage
  8a. option pour changer de documentclass
 
     (Fabien Fleutot <Fabien.Fleutot@inria.fr>)
