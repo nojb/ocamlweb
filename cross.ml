@@ -107,15 +107,17 @@ let ids_of_a_pattern p =
   let r = ref [] in
   let add id = r := id :: !r in
   let rec pattern_d = function
+    | Ppat_any -> ()
     | Ppat_var id -> add id
     | Ppat_alias (p,id) -> add id; pattern p
+    | Ppat_constant _ -> ()
     | Ppat_tuple pl -> List.iter pattern pl
     | Ppat_construct (_,po,_) -> option_iter pattern po
     | Ppat_record l -> iter_snd pattern l
     | Ppat_array pl -> List.iter pattern pl
     | Ppat_or (p1,p2) -> pattern p1; pattern p2
     | Ppat_constraint (p,_) -> pattern p
-    | _ -> ()
+
   and pattern p = pattern_d p.ppat_desc
   in
   pattern p; !r
@@ -144,22 +146,41 @@ and tr_core_type_desc loc = function
       List.iter tr_core_type tl
   | Ptyp_constr (q,tl) ->
       add_uses_q loc q; List.iter tr_core_type tl
-(*i
-  | Ptyp_object of core_field_type list
-  | Ptyp_class of Longident.t * core_type list
-  | Ptyp_alias of core_type * string
-i*)
-  | _ -> ()
+  | Ptyp_object l ->
+      List.iter tr_core_field_type l
+  | Ptyp_class (id,l) ->
+      add_uses_q loc id;
+      List.iter tr_core_type l
+  | Ptyp_alias (ct,_) -> 
+      tr_core_type ct
+
+and tr_core_field_type ft =
+  tr_core_field_desc ft.pfield_loc ft.pfield_desc
+
+and tr_core_field_desc loc = function
+    Pfield (id,ct) ->
+      add_uses loc id;
+      tr_core_type ct
+  | Pfield_var -> ()
 
 
-let rec pattern_expression (p,e) =
-  bind_variables (ids_of_a_pattern p) tr_expression e
+(* XXX Type expressions for the class language *)
 
-and patterns_expression pl e =
+let tr_class_infos f p =
+  add_def p.pci_loc p.pci_name;
+  f p.pci_expr
+
+(* Value expressions for the core language *)
+
+let bind_pattern f (p,e) =
+  bind_variables (ids_of_a_pattern p) f e
+
+let bind_patterns f pl e =
   let ids = List.flatten (List.map ids_of_a_pattern pl) in
-  bind_variables ids tr_expression e
+  bind_variables ids f e
 
-and tr_expression e = 
+
+let rec tr_expression e = 
   tr_expression_desc e.pexp_loc e.pexp_desc
 
 and tr_expression_desc loc = function
@@ -178,18 +199,18 @@ and tr_expression_desc loc = function
   | Pexp_construct (_,e,_) -> 
       option_iter tr_expression e
   | Pexp_function pel -> 
-      List.iter pattern_expression pel
+      List.iter (bind_pattern tr_expression) pel
   | Pexp_match (e,pel) -> 
-      tr_expression e; List.iter pattern_expression pel
+      tr_expression e; List.iter (bind_pattern tr_expression) pel
   | Pexp_try (e,pel) -> 
-      tr_expression e; List.iter pattern_expression pel
+      tr_expression e; List.iter (bind_pattern tr_expression) pel
   | Pexp_let (recf,pel,e) -> 
       let pl = List.map fst pel in
       if recf = Recursive then 
-	iter_snd (patterns_expression pl) pel
+	iter_snd (bind_patterns tr_expression pl) pel
       else
 	iter_snd tr_expression pel; 
-      patterns_expression pl e
+      bind_patterns tr_expression pl e
   | Pexp_record (l,e) ->
       iter_fst (add_uses_q loc) l; iter_snd tr_expression l; 
       option_iter tr_expression e
@@ -208,13 +229,17 @@ and tr_expression_desc loc = function
   | Pexp_letmodule (x,m,e) ->
       tr_module_expr m; bind_variables [x] tr_expression e
   | Pexp_constant _ -> ()
-(*i
-  | Pexp_send of expression * string
-  | Pexp_new of Longident.t
-  | Pexp_setinstvar of string * expression
-  | Pexp_override of (string * expression) list
-i*)
-  | _ -> ()
+  | Pexp_send (e,id) ->
+      add_uses loc id;
+      tr_expression e
+  | Pexp_new id ->
+      add_uses_q loc id
+  | Pexp_setinstvar (id,e) ->
+      add_uses loc id;
+      tr_expression e
+  | Pexp_override l ->
+      iter_fst (add_uses loc) l;
+      iter_snd tr_expression l
 
 and tr_value_description vd =
   tr_core_type vd.pval_type
@@ -233,18 +258,115 @@ and tr_type_kind loc = function
 and tr_exception_declaration ed =
   List.iter tr_core_type ed
 
-(* Classes *)
+(* Type expressions for the class language *)
 
-and tr_class_type_declaration ctd =
-  () (* TODO *)
+and tr_class_type c =
+  tr_class_type_desc c.pcty_loc c.pcty_desc
 
-and tr_class_declaration cd =
-  () (* TODO *)
+and tr_class_type_desc loc = function
+    Pcty_constr (id,l) ->
+      add_uses_q loc id;
+      List.iter tr_core_type l
+  | Pcty_signature cs ->
+      tr_class_signature cs
+  | Pcty_fun (co,cl) ->
+      tr_core_type co;
+      tr_class_type cl
 
-(* Modules *)
+and tr_class_signature (ct,l) = 
+  tr_core_type ct;
+  List.iter tr_class_type_field l
+
+and tr_class_type_field = function
+    Pctf_inher ct -> tr_class_type ct
+  | Pctf_val (id,_,ct,loc) ->
+      add_def loc id;
+      option_iter tr_core_type ct
+  | Pctf_virt (id,_,ct,loc) ->
+      add_def loc id;
+      tr_core_type ct
+  | Pctf_meth (id,_,ct,loc) ->
+      add_def loc id;
+      tr_core_type ct
+  | Pctf_cstr (ct1,ct2,_) ->
+      tr_core_type ct1;
+      tr_core_type ct2
+
+and tr_class_description x = tr_class_infos tr_class_type x
+
+and tr_class_type_declaration x = tr_class_infos tr_class_type x 
+
+(* Value expressions for the class language *)
+
+and tr_class_expr ce = tr_class_expr_desc ce.pcl_loc ce.pcl_desc
+
+
+and tr_class_expr_desc loc = function
+    Pcl_constr (id,l) ->
+      add_uses_q loc id;
+      List.iter tr_core_type l
+  | Pcl_structure cs -> tr_class_structure cs
+  | Pcl_fun (p,ce) ->
+      bind_variables (ids_of_a_pattern p) tr_class_expr ce
+  | Pcl_apply (ce,l) ->
+      tr_class_expr ce;
+      List.iter tr_expression l
+  | Pcl_let (recf,pel,ce) -> 
+      let pl = List.map fst pel in
+      if recf = Recursive then 
+	iter_snd (bind_patterns tr_expression pl) pel
+      else
+	iter_snd tr_expression pel; 
+      bind_patterns tr_class_expr pl ce
+  | Pcl_constraint (ce,ct) ->
+      tr_class_expr ce;
+      tr_class_type ct
+
+
+and tr_class_structure (p,l) = 
+  List.iter (fun f -> bind_pattern tr_class_field (p,f)) l
+
+and tr_class_field = function
+    Pcf_inher (ce,_) ->
+      tr_class_expr ce
+  | Pcf_val (id,_,e,loc) ->
+      add_def loc id;
+      tr_expression e
+  | Pcf_virt(id,_,ct,loc) ->
+      add_def loc id;
+      tr_core_type ct
+  | Pcf_meth (id,_,e,loc) ->
+      add_def loc id;
+      tr_expression e
+  | Pcf_cstr (ct1,ct2,_) ->
+      tr_core_type ct1;
+      tr_core_type ct2
+  | Pcf_let (recf,pel,_) -> 
+      let pl = List.map fst pel in
+      if recf = Recursive then 
+	iter_snd (bind_patterns tr_expression pl) pel
+      else
+	iter_snd tr_expression pel
+  | Pcf_init e ->
+      tr_expression e
+
+and tr_class_declaration x = tr_class_infos tr_class_expr x
+
+
+(* Type expressions for the module language *)
 
 and tr_module_type mt =
-  () (* TODO *)
+  tr_module_type_desc mt.pmty_loc mt.pmty_desc
+
+and tr_module_type_desc loc = function
+    Pmty_ident id -> add_uses_q loc id
+  | Pmty_signature s -> tr_signature s
+  | Pmty_functor (id,mt1,mt2) -> 
+      tr_module_type mt1;
+      bind_variables [id] tr_module_type mt2
+  | Pmty_with (mt,cl) ->
+      tr_module_type mt;
+      List.iter (fun (id,c) -> add_uses_q loc id; tr_with_constraint loc c) cl
 
 and tr_signature s =
   List.iter tr_signature_item s
@@ -267,18 +389,35 @@ and tr_signature_item_desc loc = function
       add_open m
   | Psig_include mt ->
       tr_module_type mt
-(*i
-  | Psig_class of class_description list
-  | Psig_class_type of class_type_declaration list
-i*)
-  | _ -> ()
+  | Psig_class l ->
+      List.iter tr_class_description l
+  | Psig_class_type l ->
+      List.iter tr_class_type_declaration l
 
 and tr_modtype_declaration = function
   | Pmodtype_abstract -> ()
   | Pmodtype_manifest mt -> tr_module_type mt
 
+and tr_with_constraint loc = function
+    Pwith_type td -> tr_type_declaration td
+  | Pwith_module id -> add_uses_q loc id
+
 and tr_module_expr me =
-  () (* TODO *)
+  tr_module_expr_desc me.pmod_loc me.pmod_desc
+
+and tr_module_expr_desc loc = function
+    Pmod_ident id -> add_uses_q loc id
+  | Pmod_structure s -> tr_structure s
+  | Pmod_functor (id,mt,me) ->
+      tr_module_type mt;
+      bind_variables [id] tr_module_expr me
+  | Pmod_apply (me1,me2) ->
+      tr_module_expr me1;
+      tr_module_expr me2
+  | Pmod_constraint (me,mt) ->
+      tr_module_expr me;
+      tr_module_type mt
+
 
 and tr_structure l = 
   List.iter tr_structure_item l
@@ -302,8 +441,8 @@ and tr_structure_item_desc loc = function
   | Pstr_modtype (id,mt) ->
       add_def loc id; tr_module_type mt
   | Pstr_open m -> add_open m
-  | Pstr_class l -> tr_class_declaration l
-  | Pstr_class_type l -> tr_class_type_declaration l
+  | Pstr_class l -> List.iter tr_class_declaration l
+  | Pstr_class_type l -> List.iter tr_class_type_declaration l
 
 
 let wrapper parsing_function traverse_function f =

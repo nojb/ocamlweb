@@ -114,13 +114,13 @@
 \edef\ocwprevious{\ocwnext}%
 \def\ocwsep{, }%
 \fi}
-\def\compresslist#1{%
-\def\ocwprevious{0}%
-\@for \ocwloop:=#1\do{\loopbody}}
 
 \newcommand{\ocwrefindexentry}[3]{\item #1,\quad
 \def\ocwsep{\relax}%
 \def\ocwoutputref{\textbf}%
-\compresslist{#2} 
+\def\ocwprevious{0}%
+\@for\ocwloop:=#2\do{\loopbody}%
 \def\ocwoutputref{\textrm}%
-\compresslist{#3}}
+\def\ocwprevious{0}%
+\@for\ocwloop:=#3\do{\loopbody}%
+}
