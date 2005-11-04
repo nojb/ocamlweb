@@ -1,5 +1,7 @@
 (* HEADER THAT SHOULD NOT APPEAR! *)
 
+(* \tableofcontents *)
+
 (*i $Id$ i*)
 
 (*s Types declarations. *)

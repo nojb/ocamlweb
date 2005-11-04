@@ -102,7 +102,7 @@ let latex_header opt =
     output_string "\\usepackage";
     if opt <> "" then output_string (sprintf "[%s]" opt);
     output_string "{ocamlweb}\n";
-    output_string "\\pagestyle{ocamlweb}\n";
+    output_string "\\pagestyle{headings}\n";
     Queue.iter (fun s -> output_string s; output_string "\n") preamble;
     output_string "\\begin{document}\n"
   end;

@@ -33,39 +33,7 @@
 \DeclareOption{bypages}{\bypagetrue}
 \DeclareOption{bysections}{\bypagefalse}
 
-
 \ProcessOptions
-
-% macros to build and deconstruct pairs
-\def\@ocwpair#1#2{#1\noexpand\else#2}
-\def\@ocwfirst#1{\expandafter\iftrue#1\fi}
-\def\@ocwsecond#1{\expandafter\iffalse#1\fi}
-
-% page styles using marks that are pairs.
-
-\newcommand{\ps@ocamlweb}{%
-  \renewcommand{\@oddhead}{%
-    \vbox{\hbox to \textwidth{%
-        \begingroup%
-        \edef\fp{\@ocwsecond{\firstmark}}%
-        \edef\lp{\@ocwsecond{\botmark}}%
-        \@ocwfirst{\firstmark}%
-        \hfil\vphantom{\S}%
-        \ifx\fp\lp\S\fp\else\S\fp--\S\lp\fi\qquad\thepage%
-        \endgroup}%
-      \hrule}%
-  }%
-  \renewcommand{\@evenhead}{\@oddhead}%
-  \renewcommand{\@evenfoot}{}%
-  \renewcommand{\@oddfoot}{\@evenfoot}}
-
-\newcommand{\ps@ocamlwebindex}{%
-  \renewcommand{\@oddhead}{%
-    \vbox{\hbox to \textwidth{%
-     \@ocwfirst{\firstmark}\hfil\vphantom{\S}\thepage}\hrule}}%
-  \renewcommand{\@evenhead}{\@oddhead}%
-  \renewcommand{\@evenfoot}{}%
-  \renewcommand{\@oddfoot}{\@evenfoot}}
 
 % needed to make hypertex work
 \AtBeginDocument{\let\Hy@tempa\relax}
@@ -201,7 +169,7 @@
  \section*{#1}%
  \def\currentmodule{#1}%
  \addtocounter{ocwcounter}{1}%
- \mark{\@ocwpair{#1}{\theocwcounter}}%
+ \markboth{}{#1 \hfill {\rm\S\theocwcounter}\quad}%
  \addtocounter{ocwcounter}{-1}%
 }
 %END LATEX
@@ -232,7 +200,7 @@
 \refstepcounter{ocwcounter}%
 \bigskip\noindent{\bf\theocwcounter.}%
 %BEGIN LATEX
-\mark{\@ocwpair{\currentmodule}{\theocwcounter}}%
+\markboth{}{\currentmodule \hfill {\rm\S\theocwcounter}\quad}%
 \kern1em%
 %END LATEX
 %HEVEA\hspace{1em}
@@ -242,8 +210,7 @@
 % index
 %BEGIN LATEX
 \newcommand{\ocwbeginindex}{%
-  \mark{\@ocwpair{Index}{\theocwcounter}}%
-  \pagestyle{ocamlwebindex}
+  \markboth{}{Index \hfill {\rm\S\theocwcounter}\quad}%
   \begin{theindex}%
 }%
 \newcommand{\ocwendindex}{\end{theindex}}
@@ -284,4 +251,5 @@
 %HEVEA\newcommand{\lnot}{\ocwkw{not}}
 %HEVEA\newcommand{\lor}{\ocwkw{or}}
 %HEVEA\newcommand{\land}{\&}
-%HEVEA\newcommand{\mark}{}
+%HEVEA\newcommand{\markboth}{}{}
+

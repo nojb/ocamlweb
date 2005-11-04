@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.37, 4/11/2005
+=======================
+  o fixed bug with page headers (now uses \pagestyle{headings})
+
 version 1.36, 12/10/2004
 ========================
   o adequacy to ocaml 3.08.1 parser
