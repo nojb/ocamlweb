@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.38, 9/5/2012
+======================
+  o fixed encoding in HTML documentation
+
 version 1.37, 4/11/2005
 =======================
   o fixed bug with page headers (now uses \pagestyle{headings})
