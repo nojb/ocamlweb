@@ -12,3 +12,4 @@ yacc_parser.output
 yacc_parser.ml
 yacc_parser.mli
 ocamlweb.static
+autom4te.cache
