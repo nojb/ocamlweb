@@ -40,6 +40,7 @@ type sub_paragraph =
  
 type paragraph =
   | Documentation of bool * int * string
+  | RawLaTeX of string
   | Code of int * string
   | LexYaccCode of int * (sub_paragraph list)
 

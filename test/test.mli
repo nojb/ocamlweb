@@ -29,3 +29,9 @@ val foo : 'a -> 'b -> 'c
 val map : ('a -> 'b) -> 'a list -> 'b list
 
 val fold : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+
+(*l \bigskip\noindent And this is pure \LaTeX, where brackets are not
+  interpreted anymore, \emph{e.g.},
+  $$[P] =  \left\{ \begin{array}{ll} 1 & \mbox{if $P$ is true;} \\
+                                     0 & \mbox{otherwise.} \end{array}\right.$$
+*)

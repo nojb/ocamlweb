@@ -1,23 +1,25 @@
 (* header 1 *)
 (* header 2 *)
 
+(*l Pure \LaTeX: $\delta_{i,j} = [i=j]$ and [a]  \bigskip *)
+
 (*i $Id$ i*)
 
 module M = struct
 
-  (* et voici [x] *)
+  (* here is [x] *)
 
   let x = 1 < 2
 
   module N = struct
-    
+
     (*s bla bla bla *)
-    
+
     let y = 2
 
   end
 
-  (* et voilà *)	       
+  (* that's it *)
 
 end
 
@@ -32,11 +34,11 @@ open Hidden
 
 (*s Constants. *)
 
-let hexa = 0X4fff 
-let hexa = 0x12BC 
-let octal = 0O455 
-let octal = 0o455 
-let binary = 0B01010111001 
+let hexa = 0X4fff
+let hexa = 0x12BC
+let octal = 0O455
+let octal = 0o455
+let binary = 0B01010111001
 let binary = 0b00101011000
 let float = 1.5152E-4
 let float = 1.5152e-4
@@ -49,18 +51,18 @@ let a_longer_string = "this is a longer string\
 
 let an_array = [| [| 1; 3; 2 |]; [| 4; 5; 6 |] |]
 
-(*S More types and exceptions declarations. *)
+(*S More type and exception declarations. *)
 
 type stuff = AA | BB | CC
 
 exception Exception of 'a foo * 'b bar * gee
 
-type record = { 
+type record = {
   field1 : int;
-  field2 : string 
+  field2 : string
 }
 
-(*s Test of symbols pretty-print. *)
+(*s Test of symbol pretty-printing. *)
 
 let test_and x y = x && y
 
@@ -74,14 +76,14 @@ let test_physical_equality x y = x == y
 
 let test_physical_disequality x y = x != y
 
-(*s test of identifiers pretty-print. *)
+(*s test of identifier pretty-printing. *)
 
 let f x x' foo foo' = x + x' + foo + foo'
 
 (*s A bit of documentation. I quote a function call [foo x] and I
-    spend a few minutes speaking about [foo] and [x].  
-    I can quote ["a string"] or a record value [{ x = 1; y = 2 }] 
-    for instance. *) 
+    spend a few minutes speaking about [foo] and [x].
+    I can quote ["a string"] or a record value [{ x = 1; y = 2 }]
+    for instance. *)
 
 (*s Test of comments inside code. *)
 
@@ -114,7 +116,7 @@ let t = {
   c : int;
 }
 
-(*s Test escaped dollar in comments: \$ and even inside mathematical 
+(*s Test escaped dollar in comments: \$ and even inside mathematical
     mode: $\$$ *)
 
 (*s Toplevel directives. *)
