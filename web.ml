@@ -280,7 +280,7 @@ let intervals l =
     | (acc, []) -> List.rev acc
     | (Interval (s1,(_,n2)) :: acc, (f,n) :: rem) when n = succ n2 -> 
 	group (Interval (s1,(f,n)) :: acc, rem)
-    | ((Single _)::(Single (f1,n1) as s1)::acc, (f,n)::rem) when n = n1 + 2 ->
+    | ((Single _)::(Single (f1,n1))::acc, (f,n)::rem) when n = n1 + 2 ->
 	group (Interval ((f1,n1),(f,n)) :: acc, rem)
     | (acc, (f,n) :: rem) ->
 	group ((Single (f,n)) :: acc, rem)
@@ -399,7 +399,7 @@ let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
 
 let pretty_print_section first f s = 
   if !web then begin_section ();
-  if first & s.sec_beg > 0 then output_label (make_label_name (f,0));
+  if first && s.sec_beg > 0 then output_label (make_label_name (f,0));
   output_label (make_label_name (f,s.sec_beg));
   let rec loop is_first_paragraph = function
     | [] ->

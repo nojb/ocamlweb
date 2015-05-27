@@ -3,6 +3,8 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.39, 27/5/2015
+=======================
   o raw LaTeX with (*l ... *)
     (patch from Judicaël Courant)
 
