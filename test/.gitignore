@@ -4,3 +4,12 @@ test.html
 test.log
 test.tex
 test.toc
+test.pdf
+test.ps
+ocamlweb.aux
+ocamlweb.dvi
+ocamlweb.log
+ocamlweb.tex
+ocamlweb.ps
+ocamlweb.pdf
+ocamlweb.html

@@ -1,15 +1,15 @@
 (*
  * ocamlweb - A WEB-like tool for ocaml
  * Copyright (C) 1999-2001 Jean-Christophe FILLIÂTRE and Claude MARCHÉ
- * 
+ *
  * This software is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License version 2, as published by the Free Software Foundation.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * 
+ *
  * See the GNU Library General Public License version 2 for more details
  * (enclosed in the file LGPL).
  *)
@@ -20,10 +20,10 @@
 open Printf
 (*i*)
 
-(*s \textbf{Low level output.} 
+(*s \textbf{Low level output.}
    [out_channel] is a reference on the current output channel.
-   It is initialized to the standard output and can be 
-   redirect to a file by the function [set_output_to_file]. 
+   It is initialized to the standard output and can be
+   redirect to a file by the function [set_output_to_file].
    The function [close_output] closes the output channel if it is a file.
    [output_char], [output_string] and [output_file] are self-explainable.
  *)
@@ -31,7 +31,7 @@ open Printf
 let out_channel = ref stdout
 let output_is_file = ref false
 
-let set_output_to_file f = 
+let set_output_to_file f =
   out_channel := open_out f;
   output_is_file := true
 
@@ -56,7 +56,7 @@ let output_file f =
 
 
 (*s \textbf{High level output.}
-    In this section and the following, we introduce functions which are 
+    In this section and the following, we introduce functions which are
     \LaTeX\ dependent. *)
 
 (*s [output_verbatim] outputs a string in verbatim mode.
@@ -67,7 +67,7 @@ let output_file f =
 
 let fresh_chars = [ '!'; '|'; '"'; '+' ]
 
-let char_out_of_string s = 
+let char_out_of_string s =
   let rec search = function
     | [] -> assert false
     | c :: r -> if String.contains s c then search r else c
@@ -90,10 +90,12 @@ let class_options = ref "12pt"
 
 let fullpage_headings = ref true
 
+let encoding = ref "utf8"
+
 let latex_header opt =
   if not !no_preamble then begin
     output_string (sprintf "\\documentclass[%s]{article}\n" !class_options);
-    output_string "\\usepackage[latin1]{inputenc}\n";
+    output_string (sprintf "\\usepackage[%s]{inputenc}\n" !encoding);
     (*i output_string "\\usepackage[T1]{fontenc}\n"; i*)
     if !fullpage_headings then
       output_string "\\usepackage[headings]{fullpage}\n"
@@ -106,14 +108,14 @@ let latex_header opt =
     Queue.iter (fun s -> output_string s; output_string "\n") preamble;
     output_string "\\begin{document}\n"
   end;
-  output_string 
+  output_string
     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
-  output_string 
+  output_string
     "%% This file has been automatically generated with the command\n";
   output_string "%% ";
   Array.iter (fun s -> output_string s; output_string " ") Sys.argv;
   output_string "\n";
-  output_string 
+  output_string
     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
 
 let latex_trailer () =
@@ -129,7 +131,7 @@ let latex_trailer () =
  *)
 
 let math_mode = ref false
-		  
+
 let enter_math () =
   if not !math_mode then begin
     output_string "$";
@@ -144,7 +146,7 @@ let leave_math () =
 
 
 (*s \textbf{Indentation.}
-    An indentation at the beginning of a line of $n$ spaces 
+    An indentation at the beginning of a line of $n$ spaces
     is produced by [(indentation n)] (used for code only). *)
 
 let indentation n =
@@ -171,12 +173,12 @@ let end_line_string () =
     for base types and keywords.
   *)
 
-let build_table l = 
+let build_table l =
   let h = Hashtbl.create 101 in
   List.iter (fun key -> Hashtbl.add h  key ()) l;
   Hashtbl.mem h
 
-let is_caml_keyword = 
+let is_caml_keyword =
   build_table
     [ "and"; "as";  "assert"; "begin"; "class";
       "constraint"; "do"; "done";  "downto"; "else"; "end"; "exception";
@@ -188,28 +190,28 @@ let is_caml_keyword =
       "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr"
     ]
 
-let is_base_type = 
+let is_base_type =
   build_table
     [ "string"; "int"; "array"; "unit"; "bool"; "char"; "list"; "option";
       "float"; "ref" ]
 
-let is_lex_keyword = 
+let is_lex_keyword =
   build_table
-    [ "rule"; "let"; "and"; "parse"; "eof" ]
- 
+    [ "rule"; "let"; "and"; "parse"; "eof"; "as" ]
+
 let is_yacc_keyword =
   build_table
-    [ "%token"; "%left"; "%right"; "%type"; "%start"; "%nonassoc"; "%prec"; 
+    [ "%token"; "%left"; "%right"; "%type"; "%start"; "%nonassoc"; "%prec";
       "error" ]
-    
 
-let is_keyword s = is_base_type s || is_caml_keyword s 
+
+let is_keyword s = is_base_type s || is_caml_keyword s
 
 
 let output_keyword s =
-  if is_base_type s then 
-    output_string "\\ocwbt{" 
-  else 
+  if is_base_type s then
+    output_string "\\ocwbt{"
+  else
     output_string "\\ocwkw{";
   output_string s;
   output_string "}"
@@ -228,22 +230,22 @@ let output_yacc_keyword s =
 (*s \textbf{Identifiers.}
     The function [output_raw_ident] prints an identifier,
     escaping the \TeX\ reserved characters with [output_escaped_char].
-    The function [output_ident] prints an identifier, calling 
+    The function [output_ident] prints an identifier, calling
     [output_keyword] if necessary.
  *)
 
-let output_escaped_char c = 
+let output_escaped_char c =
   if c = '^' || c = '~' then leave_math();
   match c with
-    | '\\' -> 
+    | '\\' ->
 	output_string "\\symbol{92}"
-    | '$' | '#' | '%' | '&' | '{' | '}' | '_' -> 
+    | '$' | '#' | '%' | '&' | '{' | '}' | '_' ->
 	output_char '\\'; output_char c
-    | '^' | '~' -> 
+    | '^' | '~' ->
 	output_char '\\'; output_char c; output_string "{}"
     | '<' | '>' ->
         output_string "\\ensuremath{"; output_char c; output_string "}"
-    | _ -> 
+    | _ ->
 	output_char c
 
 let output_latex_id s =
@@ -277,26 +279,26 @@ let output_raw_ident s =
     | Symbol -> output_string "\\ocwsymbolid{"
   end;
   try
-    let qualification = Filename.chop_extension s in 
+    let qualification = Filename.chop_extension s in
     (* We extract the qualified name. *)
     let qualified_name =
       String.sub s (String.length qualification + 1)
 	(String.length s - String.length qualification - 1)
-    in 
+    in
     (* We check now whether the qualified term is a lower id or not. *)
     match qualified_name.[0] with
-      | 'A'..'Z' -> 
+      | 'A'..'Z' ->
       (* The qualified term is a module or a constructor: nothing to change. *)
           output_latex_id (s);
           output_string "}"
-      | _ -> 
-      (* The qualified term is a value or a type: 
+      | _ ->
+      (* The qualified term is a value or a type:
 	 \verb!\\ocwlowerid! used instead. *)
           output_latex_id (qualification ^ ".");
           output_string "}";
           output_string "\\ocwlowerid{";
           output_latex_id qualified_name;
-          output_string "}"        
+          output_string "}"
   with Invalid_argument _ ->
     (* The string [s] is a module name or a constructor: nothing to do. *)
     output_latex_id s;
@@ -314,7 +316,7 @@ let output_lex_ident s =
     leave_math (); output_lex_keyword s
   end else begin
     enter_math ();
-    output_string "\\ocwlexident{";  
+    output_string "\\ocwlexident{";
     output_latex_id s;
     output_string "}";
   end
@@ -324,11 +326,11 @@ let output_yacc_ident s =
     leave_math (); output_yacc_keyword s
   end else begin
     enter_math ();
-    output_string "\\ocwyaccident{";  
+    output_string "\\ocwyaccident{";
     output_latex_id s;
     output_string "}";
   end
-    
+
 (*s \textbf{Symbols.}
     Some mathematical symbols are printed in a nice way, in order
     to get a more readable code.
@@ -349,7 +351,7 @@ let output_symbol = function
   | "~-" -> enter_math (); output_string "-"
   | "[<" -> enter_math (); output_string "[\\langle{}"
   | ">]" -> enter_math (); output_string "\\rangle{}]"
-  | "<" | ">" | "(" | ")" | "[" | "]" | "[|" | "|]" as s -> 
+  | "<" | ">" | "(" | ")" | "[" | "]" | "[|" | "|]" as s ->
             enter_math (); output_string s
   | "&" | "&&" ->
             enter_math (); output_string "\\land{}"
@@ -362,17 +364,17 @@ let output_symbol = function
 
 let use_greek_letters = ref true
 
-let output_tv id = 
+let output_tv id =
   output_string "\\ocwtv{"; output_latex_id id; output_char '}'
 
 let output_greek l =
   enter_math (); output_char '\\'; output_string l; output_string "{}"
 
-let output_type_variable id = 
-  if not !use_greek_letters then 
+let output_type_variable id =
+  if not !use_greek_letters then
     output_tv id
   else
-    match id with 
+    match id with
       | "a" -> output_greek "alpha"
       | "b" -> output_greek "beta"
       | "c" -> output_greek "gamma"
@@ -395,13 +397,13 @@ let output_ascii_char n =
 
 let output_integer s =
   let n = String.length s in
-  let base b = 
+  let base b =
     let v = String.sub s 2 (n - 2) in
     output_string (sprintf "\\ocw%sconst{%s}" b v)
   in
   if n > 1 then
     match s.[1] with
-      | 'x' | 'X' -> base "hex" 
+      | 'x' | 'X' -> base "hex"
       | 'o' | 'O' -> base "oct"
       | 'b' | 'B' -> base "bin"
       | _ -> output_string s
@@ -419,7 +421,7 @@ let output_float s =
       output_string (sprintf "\\ocwfloatconst{%s}{%s}" m e)
   with Not_found ->
     output_string s
-   
+
 
 (*s \textbf{Comments.} *)
 
@@ -465,7 +467,7 @@ let output_module module_name =
     output_latex_id module_name;
     output_string "}\n"
   end
-      
+
 let output_interface module_name =
   if not !short then begin
     output_typeout_command (module_name^".mli");
@@ -489,7 +491,7 @@ let output_yaccmodule module_name =
     output_latex_id module_name;
     output_string "}\n"
   end
-      
+
 let in_code = ref false
 
 let begin_code () =
@@ -524,7 +526,7 @@ let end_doc_paragraph () =
 (*s \textbf{Index.}
     It is opened and closed with the two macros \verb!ocwbeginindex! and
     \verb!ocwendindex!.
-    The auxiliary function [print_list] is a generic function to print a 
+    The auxiliary function [print_list] is a generic function to print a
     list with a given printing function and a given separator.
   *)
 
@@ -533,15 +535,15 @@ let begin_index () =
 
 let end_index () =
   output_string "\n\n\\ocwendindex{}\n"
-  
-let print_list print sep l = 
+
+let print_list print sep l =
   let rec print_rec = function
     | [] -> ()
     | [x] -> print x
     | x::r -> print x; sep(); print_rec r
   in
   print_rec l
-  
+
 
 (*s \textbf{Index in WEB style.}
     The function [output_index_entry] prints one entry line, given the
@@ -556,14 +558,14 @@ type 'a elem = Single of 'a | Interval of 'a * 'a
 let output_ref r = output_string (sprintf "\\ref{%s}" r)
 
 let output_elem = function
-  | Single r -> 
+  | Single r ->
       output_ref r
-  | Interval (r1,r2) -> 
+  | Interval (r1,r2) ->
       output_ref r1;
       output_string "--";
       output_ref r2
 
-let output_bf_elem n = 
+let output_bf_elem n =
   output_string "\\textbf{"; output_elem n; output_string "}"
 
 let output_index_entry s t def use =
@@ -589,7 +591,7 @@ let output_index_entry s t def use =
  *)
 
 let output_raw_index_entry s t def use =
-  let sep () = output_string "," 
+  let sep () = output_string ","
   and sep' () = output_string ", " in
   output_string "\\ocwrefindexentry{";
   enter_math ();

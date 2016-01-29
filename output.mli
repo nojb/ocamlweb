@@ -1,15 +1,15 @@
 (*
  * ocamlweb - A WEB-like tool for ocaml
  * Copyright (C) 1999-2001 Jean-Christophe FILLIÂTRE and Claude MARCHÉ
- * 
+ *
  * This software is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License version 2, as published by the Free Software Foundation.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * 
+ *
  * See the GNU Library General Public License version 2 for more details
  * (enclosed in the file LGPL).
  *)
@@ -18,7 +18,7 @@
 
 (*s In that module, we concentrate all the printing functions.
    Thus, it will be easy to add another kind of output, HTML for instance,
-   by adapting the code of that module, and nothing else. 
+   by adapting the code of that module, and nothing else.
    Default output is to standard output, but it can be redirected
    to a file with [set_output_to_file]. [close_output] closes the output,
    if it is a file. *)
@@ -35,9 +35,9 @@ val quiet : bool ref
 val use_greek_letters : bool ref
 val short : bool ref
 
-(*s Then we introduce some low level output functions, for characters 
+(*s Then we introduce some low level output functions, for characters
    and strings.
-   [(output_file f)] copies the contents of file [f] on the output. 
+   [(output_file f)] copies the contents of file [f] on the output.
    [(output_verbatim s)] outputs the string [s] `as is'. *)
 
 val output_char : char -> unit
@@ -54,6 +54,7 @@ val output_verbatim : string -> unit
     package ocamlweb.sty. *)
 
 val class_options : string ref
+val encoding: string ref
 val set_no_preamble : bool -> unit
 val push_in_preamble : string -> unit
 val fullpage_headings : bool ref
@@ -68,16 +69,16 @@ val enter_math : unit -> unit
 val leave_math : unit -> unit
 
 (*s The following functions are used to pretty-print the code.
-    [is_keyword] identifies the keywords of Objective Caml. 
-    [output_ident] outputs an identifier, in different faces for keywords 
-    and other identifiers, escaping the characters that need it, 
-    like \_ for instance in \LaTeX. 
-    [output_escaped_char] pretty-prints the reserved char of \LaTeX, 
+    [is_keyword] identifies the keywords of Objective Caml.
+    [output_ident] outputs an identifier, in different faces for keywords
+    and other identifiers, escaping the characters that need it,
+    like \_ for instance in \LaTeX.
+    [output_escaped_char] pretty-prints the reserved char of \LaTeX,
     like \verb!&! or \verb!$!.
     [output_symbol] pretty-prints the Caml symbols,
-    like $\rightarrow$ for \texttt{->}. 
-    [output_type_variable s] pretty-prints type variables, in particular 
-    one-letter type variables are output as greek letters. 
+    like $\rightarrow$ for \texttt{->}.
+    [output_type_variable s] pretty-prints type variables, in particular
+    one-letter type variables are output as greek letters.
     [output_ascii_char n] outputs the character of ASCII code [n].
     *)
 
@@ -93,7 +94,7 @@ val output_ascii_char : int -> unit
 
 (* [output_lex_ident] (resp. [output_yacc_ident]) outputs an
    identifier as above but taking into account CAMLLEX keywords
-   (resp. CAMLYACC keywords) *) 
+   (resp. CAMLYACC keywords) *)
 
 val output_lex_ident : string -> unit
 val output_yacc_ident : string -> unit
@@ -116,7 +117,7 @@ val output_eyc : unit -> unit
 val output_hfill : unit -> unit
 
 (*s Strings inside code are opened and close respectively by
-   [ output_bs] and [output_es]. A space character in a string is 
+   [ output_bs] and [output_es]. A space character in a string is
    output as a visible space, with [output_vspace]. *)
 
 val output_bs : unit -> unit
@@ -124,7 +125,7 @@ val output_es : unit -> unit
 val output_vspace : unit -> unit
 
 (*s The following functions deal with sectioning. The highest level is
-    the one of modules and interfaces. 
+    the one of modules and interfaces.
     The next level is the one of section. The last level is the one
     of paragraphs, which are atomic pieces of documentation or code. *)
 
@@ -146,16 +147,16 @@ val begin_doc_paragraph : bool -> int -> unit
 val end_doc_paragraph : unit -> unit
 
 (*s Index functions. [(output_index_entry id t def use)] outputs an entry line
-    for identifier [id], with type [t], where [def] is the list of sections 
+    for identifier [id], with type [t], where [def] is the list of sections
     where [f] is introduced and [use] the list of sections where [f] is used.
     If the type of the entry is [""], then it is omitted. *)
 
 type 'a elem = Single of 'a | Interval of 'a * 'a
 
 val begin_index : unit -> unit
-val output_index_entry : 
+val output_index_entry :
   string -> string -> string elem list -> string elem list -> unit
-val output_raw_index_entry : 
+val output_raw_index_entry :
   string -> string -> string list -> string list -> unit
 val end_index : unit -> unit
 

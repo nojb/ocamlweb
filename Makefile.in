@@ -19,7 +19,7 @@ UPDATETEX = $(MKTEXLSR) /usr/share/texmf /var/spool/texmf $(BASETEXDIR) > /dev/n
 # ATTENTION A BIEN UTILISER UN NUMERO DE VERSION DE LA FORME X.YY
 # (requete de Ralf pour la Debian)
 MAJORVN=1
-MINORVN=39
+MINORVN=39+
 VERSION=$(MAJORVN).$(MINORVN)
 
 OCAMLBEST=@OCAMLBEST@
@@ -109,6 +109,7 @@ manual:
 	make -C doc VERSION=$(VERSION) all
 
 LATEX=TEXINPUTS=..: ; export TEXINPUTS ; latex
+PDFLATEX=TEXINPUTS=..: ; export TEXINPUTS ; pdflatex
 
 TESTFILES=test/test.mli test/test.ml test/test_lex.mll test/test_yacc.mly
 
@@ -118,10 +119,10 @@ test/test.tex: ocamlweb $(TESTFILES)
 .PHONY: test
 
 test: ocamlweb.sty test/test.tex
-	cd test; $(LATEX) test
-	cd test ; grep -q "Rerun" test.log && ($(LATEX) test) || true
+	cd test; $(PDFLATEX) test
+	cd test ; grep -q "Rerun" test.log && ($(PDFLATEX) test) || true
 	- cd test ; hevea -o test.html ../ocamlweb.sty test.tex
-	xdvi test/test.dvi
+	evince test/test.pdf
 
 BOOTSTRAP= bootstrap.tex output.mli output.ml \
 	   yacc_parser.mly yacc_lexer.mll cross.mli cross.ml \
@@ -130,10 +131,9 @@ BOOTSTRAP= bootstrap.tex output.mli output.ml \
 
 bootstrap: ocamlweb
 	./ocamlweb -o test/ocamlweb.tex $(BOOTSTRAP)
-	cd test; $(LATEX) ./ocamlweb
-	cd test; grep -q "Rerun" ocamlweb.log && ($(LATEX) ./ocamlweb) || true
+	cd test; $(PDFLATEX) ./ocamlweb
+	cd test; grep -q "Rerun" ocamlweb.log && ($(PDFLATEX) ./ocamlweb) || true
 	- cd test; hevea -o ocamlweb.html ../ocamlweb.sty ocamlweb.tex
-	cd test; dvips ocamlweb.dvi -o ocamlweb.ps
 
 check: bootstrap
 

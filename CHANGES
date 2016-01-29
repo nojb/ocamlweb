@@ -3,6 +3,10 @@
 		      LIST OF CHANGES
 		      ===============
 
+  o default character encoding is now utf8
+  o new option --encoding to specify a character encoding (e.g. latin1)
+  o new command line option -pdf to output PDF with pdflatex
+
 version 1.39, 27/5/2015
 =======================
   o raw LaTeX with (*l ... *)
