@@ -3,6 +3,9 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.40, 5/2/2018
+======================
+  o ocamlweb.sty: no more use of macro \tt
   o default character encoding is now utf8
   o new option --encoding to specify a character encoding (e.g. latin1)
   o new command line option -pdf to output PDF with pdflatex

@@ -25,25 +25,10 @@ and comment_depth = ref 0
 
 exception Lexical_error of string * int * int
 
-let initial_string_buffer = String.create 256
-let string_buff = ref initial_string_buffer
-let string_index = ref 0
-
-let reset_string_buffer () =
-  string_buff := initial_string_buffer;
-  string_index := 0
-
-let store_string_char c =
-  if !string_index >= String.length !string_buff then begin
-    let new_buff = String.create (String.length !string_buff * 2) in
-    String.blit !string_buff 0 new_buff 0 (String.length !string_buff);
-    string_buff := new_buff
-  end;
-  !string_buff.[!string_index] <- c;
-  incr string_index
-
-let get_stored_string () =
-  String.sub !string_buff 0 !string_index
+let string_buffer = Buffer.create 256
+let reset_string_buffer () = Buffer.reset string_buffer
+let store_string_char c = Buffer.add_char string_buffer c
+let get_stored_string () = Buffer.contents string_buffer
 
 let char_for_backslash = function
     'n' -> '\n'
@@ -68,22 +53,22 @@ let handle_lexical_error fn lexbuf =
   with Lexical_error(msg, _, _) ->
     raise(Lexical_error(msg, line, column))
 
-let cur_loc lexbuf = 
-  { start_pos = Lexing.lexeme_start_p lexbuf; 
-    end_pos = Lexing.lexeme_end_p lexbuf; 
-    start_line = !line_num; 
-    start_col = Lexing.lexeme_start lexbuf - !line_start_pos } 
+let cur_loc lexbuf =
+  { start_pos = Lexing.lexeme_start_p lexbuf;
+    end_pos = Lexing.lexeme_end_p lexbuf;
+    start_line = !line_num;
+    start_col = Lexing.lexeme_start lexbuf - !line_start_pos }
 
 }
 
 rule main = parse
-    [' ' '\013' '\009' '\012' ] + 
+    [' ' '\013' '\009' '\012' ] +
     { main lexbuf }
   | '\010'
     { line_start_pos := Lexing.lexeme_end lexbuf;
       incr line_num;
       main lexbuf }
-  | "(*" 
+  | "(*"
     { comment_depth := 1;
       handle_lexical_error comment lexbuf;
       main lexbuf }
@@ -94,24 +79,24 @@ rule main = parse
       | "and" -> Tand
       | "eof" -> Teof
       | "let" -> Tlet
-      | s -> 
+      | s ->
 	  let l = cur_loc lexbuf in
 	  (*i
-	  Printf.eprintf "ident '%s' occurs at (%d,%d)\n" 
+	  Printf.eprintf "ident '%s' occurs at (%d,%d)\n"
 	    s l.start_pos l.end_pos;
 	  i*)
 	  Tident (s,l) }
-  | '"' 
+  | '"'
     { reset_string_buffer();
       handle_lexical_error string lexbuf;
       Tstring(get_stored_string()) }
-  | "'" [^ '\\'] "'" 
+  | "'" [^ '\\'] "'"
     { Tchar(Char.code(Lexing.lexeme_char lexbuf 1)) }
-  | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
+  | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'"
     { Tchar(Char.code(char_for_backslash (Lexing.lexeme_char lexbuf 2))) }
-  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
+  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
     { Tchar(Char.code(char_for_decimal_code lexbuf 2)) }
-  | '{' 
+  | '{'
     { let n1 = Lexing.lexeme_end_p lexbuf
       and l1 = !line_num
       and s1 = !line_start_pos in
@@ -138,67 +123,67 @@ rule main = parse
               !line_num, Lexing.lexeme_start lexbuf - !line_start_pos)) }
 
 and action = parse
-    '{' 
+    '{'
     { incr brace_depth;
       action lexbuf }
-  | '}' 
+  | '}'
     { decr brace_depth;
       if !brace_depth = 0 then Lexing.lexeme_start_p lexbuf else action lexbuf }
-  | '"' 
+  | '"'
     { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
       action lexbuf }
-  | "'" [^ '\\'] "'" 
+  | "'" [^ '\\'] "'"
     { action lexbuf }
-  | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
+  | "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'"
     { action lexbuf }
-  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'" 
+  | "'" '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
     { action lexbuf }
-  | "(*" 
+  | "(*"
     { comment_depth := 1;
       comment lexbuf;
       action lexbuf }
-  | eof 
+  | eof
     { raise (Lexical_error("unterminated action", 0, 0)) }
   | '\010'
     { line_start_pos := Lexing.lexeme_end lexbuf;
       incr line_num;
       action lexbuf }
-  | _ 
+  | _
     { action lexbuf }
-      
+
 and string = parse
-    '"' 
+    '"'
     { () }
   | '\\' [' ' '\013' '\009' '\012'] * '\010' [' ' '\013' '\009' '\012'] *
     { line_start_pos := Lexing.lexeme_end lexbuf;
       incr line_num;
       string lexbuf }
-  | '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
+  | '\\' ['\\' '"' 'n' 't' 'b' 'r']
     { store_string_char(char_for_backslash(Lexing.lexeme_char lexbuf 1));
       string lexbuf }
-  | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9'] 
+  | '\\' ['0'-'9'] ['0'-'9'] ['0'-'9']
     { store_string_char(char_for_decimal_code lexbuf 1);
       string lexbuf }
-  | eof 
+  | eof
     { raise(Lexical_error("unterminated string", 0, 0)) }
   | '\010'
     { store_string_char '\010';
       line_start_pos := Lexing.lexeme_end lexbuf;
       incr line_num;
       string lexbuf }
-  | _ 
+  | _
     { store_string_char(Lexing.lexeme_char lexbuf 0);
       string lexbuf }
 
 and comment = parse
-    "(*" 
+    "(*"
     { incr comment_depth; comment lexbuf }
-  | "*)" 
+  | "*)"
     { decr comment_depth;
       if !comment_depth = 0 then () else comment lexbuf }
-  | '"' 
+  | '"'
     { reset_string_buffer();
       string lexbuf;
       reset_string_buffer();
@@ -211,11 +196,11 @@ and comment = parse
       { comment lexbuf }
   | "'\\" ['0'-'9'] ['0'-'9'] ['0'-'9'] "'"
       { comment lexbuf }
-  | eof 
+  | eof
     { raise(Lexical_error("unterminated comment", 0, 0)) }
   | '\010'
     { line_start_pos := Lexing.lexeme_end lexbuf;
       incr line_num;
       comment lexbuf }
-  | _ 
+  | _
     { comment lexbuf }

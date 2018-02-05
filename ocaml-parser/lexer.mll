@@ -96,27 +96,10 @@ let keyword_table =
 
 (* To buffer string literals *)
 
-let initial_string_buffer = String.create 256
-let string_buff = ref initial_string_buffer
-let string_index = ref 0
-
-let reset_string_buffer () =
-  string_buff := initial_string_buffer;
-  string_index := 0
-
-let store_string_char c =
-  if !string_index >= String.length (!string_buff) then begin
-    let new_buff = String.create (String.length (!string_buff) * 2) in
-      String.blit (!string_buff) 0 new_buff 0 (String.length (!string_buff));
-      string_buff := new_buff
-  end;
-  String.unsafe_set (!string_buff) (!string_index) c;
-  incr string_index
-
-let get_stored_string () =
-  let s = String.sub (!string_buff) 0 (!string_index) in
-  string_buff := initial_string_buffer;
-  s
+let string_buffer = Buffer.create 256
+let reset_string_buffer () = Buffer.reset string_buffer
+let store_string_char c = Buffer.add_char string_buffer c
+let get_stored_string () = Buffer.contents string_buffer
 
 (* To store the position of the beginning of a string and comment *)
 let string_start_loc = ref Location.none;;
@@ -158,14 +141,12 @@ let char_for_hexadecimal_code lexbuf i =
 
 let remove_underscores s =
   let l = String.length s in
-  let rec remove src dst =
-    if src >= l then
-      if dst >= l then s else String.sub s 0 dst
-    else
-      match s.[src] with
-        '_' -> remove (src + 1) dst
-      |  c  -> s.[dst] <- c; remove (src + 1) (dst + 1)
-  in remove 0 0
+  let b = Buffer.create l in
+  for i = 0 to l - 1 do match s.[i] with
+    | '_' -> ()
+    |  c  -> Buffer.add_char b c
+  done;
+  Buffer.contents b
 
 (* Update the current location with file name and line number. *)
 
