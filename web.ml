@@ -1,15 +1,15 @@
 (*
  * ocamlweb - A WEB-like tool for ocaml
  * Copyright (C) 1999-2001 Jean-Christophe FILLIÂTRE and Claude MARCHÉ
- * 
+ *
  * This software is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License version 2, as published by the Free Software Foundation.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * 
+ *
  * See the GNU Library General Public License version 2 for more details
  * (enclosed in the file LGPL).
  *)
@@ -30,7 +30,7 @@ type sub_paragraph =
   | CamlCode of string
   | LexCode  of string
   | YaccCode of string
- 
+
 type paragraph =
   | Documentation of bool * int * string
   | RawLaTeX of string
@@ -41,12 +41,12 @@ type raw_section =  {
   sec_contents : paragraph list;
   sec_beg : int }
 
-type content = { 
+type content = {
   content_file : string;
   content_name : string;
-  content_contents : raw_section list } 
+  content_contents : raw_section list }
 
-type file = 
+type file =
   | Implem of content
   | Interf of content
   | Lex    of content
@@ -68,7 +68,7 @@ let print c pr arg =
 (* to print a list between "[" "]" *)
 
 let rec print_end_list f = function
-  | [] -> 
+  | [] ->
       Format.printf "]@]"
   | x :: l ->
       Format.printf ";@ ";
@@ -76,36 +76,36 @@ let rec print_end_list f = function
       print_end_list f l
 
 let print_list f = function
-  | [] -> 
+  | [] ->
       Format.printf "[]"
   | x :: l ->
       Format.printf "@[<hv 2>[ ";
       f x;
       print_end_list f l
 
- 
+
 (* To print a subparagraph *)
-let print_sub_paragraph = function 
+let print_sub_paragraph = function
   | CamlCode s -> print "CamlCode" print_string s;
   | LexCode s  -> print "LexCode"  print_string s;
   | YaccCode s -> print "YaccCode" print_string s
-      
+
 (* To print a paragraph *)
-let print_paragraph = function 
-  | Documentation (_,_,s) -> 
+let print_paragraph = function
+  | Documentation (_,_,s) ->
       print "Documentation" print_string s
-  | RawLaTeX (s) -> 
+  | RawLaTeX (s) ->
       print "RawLaTeX" print_string s
-  | Code (i,s) -> 
+  | Code (i,s) ->
       Format.printf "Code(%d,@ %s)" i s
-  | LexYaccCode (i,spl) -> 
+  | LexYaccCode (i,spl) ->
       Format.printf "@[<hv 5>LexYaccCode(%d,@ " i;
-      print_list print_sub_paragraph spl; 
+      print_list print_sub_paragraph spl;
       Format.printf ")@]"
-      
+
 (* To print a section *)
 let print_raw_section { sec_contents = sc; sec_beg = sb } =
-  Format.printf "@[<hv 2>{ sec_beg = %d ;@ sec_contents =@ " sb ; 
+  Format.printf "@[<hv 2>{ sec_beg = %d ;@ sec_contents =@ " sb ;
   print_list print_paragraph sc;
   Format.printf ";@ }@]"
 
@@ -113,12 +113,12 @@ let print_raw_section { sec_contents = sc; sec_beg = sb } =
 let print_content { content_file = c;
 		    content_name = cn;
 		    content_contents  = rl } =
-  Format.printf "@[<hv 2>{ content_file = \"%s\" ;@ content_name = \"%s\" ;@ contents_contents =@ " c cn ; 
+  Format.printf "@[<hv 2>{ content_file = \"%s\" ;@ content_name = \"%s\" ;@ contents_contents =@ " c cn ;
   print_list print_raw_section rl ;
   Format.printf ";@ }@]"
 
 (* To print a [Web.file] *)
-let print_file f = 
+let print_file f =
   begin
     match f with
       | Implem c -> print "Implem" print_content c
@@ -129,7 +129,7 @@ let print_file f =
   end;
   Format.printf "@."
 
-      
+
 
 (*i*)
 
@@ -145,7 +145,7 @@ let extern_defs = ref false
 let latex_options = ref ""
 
 let add_latex_option s =
-  if !latex_options = "" then 
+  if !latex_options = "" then
     latex_options := s
   else
     latex_options := !latex_options ^ "," ^ s
@@ -153,11 +153,11 @@ let add_latex_option s =
 
 (*s Construction of the global index. *)
 
-let index_file = function 
+let index_file = function
   | Implem i -> cross_implem i.content_file i.content_name
   | Interf i -> cross_interf i.content_file i.content_name
   | Yacc i -> cross_yacc i.content_file i.content_name
-  | Lex i -> cross_lex i.content_file i.content_name 
+  | Lex i -> cross_lex i.content_file i.content_name
   | Other _ -> ()
 
 let build_index l = List.iter index_file l
@@ -177,10 +177,10 @@ let add_loc table file ((_,s) as loc) =
 let add_par_loc =
   let par_counter = ref 0 in
   fun f p -> match p with
-    | Code (l,_) -> 
+    | Code (l,_) ->
 	incr par_counter;
 	add_loc code_locations f (l,!par_counter)
-    | LexYaccCode (l,_) -> 
+    | LexYaccCode (l,_) ->
 	incr par_counter;
 	add_loc code_locations f (l,!par_counter)
     | Documentation _ -> ()
@@ -192,7 +192,7 @@ let add_sec_loc =
     incr sec_counter;
     add_loc sec_locations f (s.sec_beg,!sec_counter);
     (*i
-    Printf.eprintf "section %d starts at character %d of file %s\n" 
+    Printf.eprintf "section %d starts at character %d of file %s\n"
       !sec_counter s.sec_beg f;
     i*)
     List.iter (add_par_loc f) s.sec_contents
@@ -218,12 +218,12 @@ let find_where w =
 
 (*s Printing of the index. *)
 
-(*s Alphabetic order for index entries. 
-    To sort index entries, we define the following order relation 
+(*s Alphabetic order for index entries.
+    To sort index entries, we define the following order relation
     [alpha_string]. It puts symbols first (identifiers that do not begin
-    with a letter), and symbols are compared using Caml's generic order 
+    with a letter), and symbols are compared using Caml's generic order
     relation. For real identifiers, we first normalize them by translating
-    lowercase characters to uppercase ones and by removing all the accents, 
+    lowercase characters to uppercase ones and by removing all the accents,
     and then we use Caml's comparison.
  *)
 
@@ -239,13 +239,13 @@ let norm_char c = match Char.uppercase c with
   | c -> c
 
 let norm_string s =
-  let u = String.copy s in
+  let u = Bytes.of_string s in
   for i = 0 to String.length s - 1 do
-    u.[i] <- norm_char s.[i]
+    Bytes.set u i (norm_char s.[i])
   done;
-  u
+  Bytes.to_string u
 
-let alpha_string s1 s2 = 
+let alpha_string s1 s2 =
   match what_is_first_char s1, what_is_first_char s2 with
     | Symbol, Symbol -> s1 < s2
     | Symbol, _ -> true
@@ -253,7 +253,7 @@ let alpha_string s1 s2 =
     | _,_ -> norm_string s1 < norm_string s2
 
 let order_entry e1 e2 =
-  (alpha_string e1.e_name e2.e_name) || 
+  (alpha_string e1.e_name e2.e_name) ||
   (e1.e_name = e2.e_name && e1.e_type < e2.e_type)
 
 (*s The following function collects all the index entries and sort them
@@ -271,14 +271,14 @@ let all_entries () =
     of labels, which are treated by the \LaTeX\ macro \verb!\ocwrefindexentry!.
     When we are in WEB style, we can do a bit better, replacing a list
     like 1,2,3,4,7,8,10 by 1--4,7,8,10, as in usual \LaTeX\ indexes.
-    The following function [intervals] is used to group together the lists 
+    The following function [intervals] is used to group together the lists
     of at least three consecutive integers.
  *)
 
 let intervals l =
   let rec group = function
     | (acc, []) -> List.rev acc
-    | (Interval (s1,(_,n2)) :: acc, (f,n) :: rem) when n = succ n2 -> 
+    | (Interval (s1,(_,n2)) :: acc, (f,n) :: rem) when n = succ n2 ->
 	group (Interval (s1,(f,n)) :: acc, rem)
     | ((Single _)::(Single (f1,n1))::acc, (f,n)::rem) when n = n1 + 2 ->
 	group (Interval ((f1,n1),(f,n)) :: acc, rem)
@@ -301,9 +301,9 @@ let web_list l =
   List.map (elem_map (fun x -> make_label_name (fst x))) l
 
 
-(*s Printing one index entry. 
-    The function call [(list_in_table id t)] collects all the sections for 
-    the identifier [id] in the table [t], using the function [find_where], 
+(*s Printing one index entry.
+    The function call [(list_in_table id t)] collects all the sections for
+    the identifier [id] in the table [t], using the function [find_where],
     and sort the result thanks to the counter which was associated to each
     new location (see section~\ref{counters}). It also removes the duplicates
     labels.
@@ -321,12 +321,12 @@ let map_succeed_nf f l =
   map l
 
 let list_in_table id t =
-  try 
+  try
     let l = Whereset.elements (Idmap.find id t) in
     let l = map_succeed_nf find_where l in
     let l = Sort.list (fun x x' -> snd x < snd x') l in
     uniquize l
-  with Not_found -> 
+  with Not_found ->
     []
 
 let entry_type_name = function
@@ -340,7 +340,7 @@ let entry_type_name = function
   | Class      -> "(class)"
   | Method     -> "(method)"
   | LexParseRule -> "(camllex parsing rule)"
-  | RegExpr      -> "(camllex regexpr)"    
+  | RegExpr      -> "(camllex regexpr)"
   | YaccNonTerminal -> "(camlyacc non-terminal)"
   | YaccTerminal    -> "(camlyacc token)"
 
@@ -350,9 +350,9 @@ let print_one_entry id =
     let use = list_in_table id !used in
     let s = id.e_name in
     let t = entry_type_name id.e_type in
-    if !web then 
+    if !web then
       output_index_entry s t (web_list def) (web_list use)
-    else 
+    else
       output_raw_index_entry s t (label_list def) (label_list use)
   end
 
@@ -368,16 +368,16 @@ let print_index () =
 (*s Pretty-printing of the document. *)
 
 let rec pretty_print_sub_paragraph = function
-  | CamlCode(s) -> 
+  | CamlCode(s) ->
        pretty_print_caml_subpar s
-  | YaccCode(s) -> 
+  | YaccCode(s) ->
        pretty_print_yacc_subpar s
-  | LexCode(s)  -> 
+  | LexCode(s)  ->
        pretty_print_lex_subpar s
 
 
 let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
-  | Documentation (b,n,s) -> 
+  | Documentation (b,n,s) ->
       end_code ();
       pretty_print_doc is_first_paragraph (b,n,s);
       end_line()  (*i ajout Dorland-Muller i*)
@@ -389,15 +389,15 @@ let pretty_print_paragraph is_first_paragraph is_last_paragraph f = function
       if l > 0 then output_label (make_label_name (f,l));
       begin_code_paragraph ();
       begin_code ();
-      pretty_print_code is_last_paragraph s 
+      pretty_print_code is_last_paragraph s
   | LexYaccCode (l,s) ->
       if l > 0 then output_label (make_label_name (f,l));
       begin_code_paragraph ();
       begin_code ();
       List.iter pretty_print_sub_paragraph s;
-      end_code_paragraph is_last_paragraph 
+      end_code_paragraph is_last_paragraph
 
-let pretty_print_section first f s = 
+let pretty_print_section first f s =
   if !web then begin_section ();
   if first && s.sec_beg > 0 then output_label (make_label_name (f,0));
   output_label (make_label_name (f,s.sec_beg));
@@ -408,15 +408,15 @@ let pretty_print_section first f s =
 	pretty_print_paragraph is_first_paragraph true f p
     | p :: rest ->
 	pretty_print_paragraph is_first_paragraph false f p;
-	loop false rest 
+	loop false rest
   in
   loop true s.sec_contents;
   end_code ()
-    
+
 let pretty_print_sections f = function
   | [] -> ()
-  | s :: r -> 
-      pretty_print_section true f s; 
+  | s :: r ->
+      pretty_print_section true f s;
       List.iter (pretty_print_section false f) r
 
 let pretty_print_content output_header content =
@@ -425,7 +425,7 @@ let pretty_print_content output_header content =
   pretty_print_sections content.content_file content.content_contents
 
 let pretty_print_file = function
-  | Implem i -> pretty_print_content output_module i 
+  | Implem i -> pretty_print_content output_module i
   | Interf i -> pretty_print_content output_interface i
   | Lex i -> pretty_print_content output_lexmodule i
   | Yacc i -> pretty_print_content output_yaccmodule i
@@ -451,8 +451,3 @@ let produce_document l =
   if !index then print_index ();
   latex_trailer ();
   close_output ()
-
-
-
-
-
