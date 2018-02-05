@@ -581,10 +581,10 @@ let input_string_inside_file ic loc =
   let len =
     loc.Lex_syntax.end_pos.pos_cnum - loc.Lex_syntax.start_pos.pos_cnum
   in
-  let buf = String.create len in
+  let buf = Bytes.create len in
   try
     really_input ic buf 0 len;
-    buf
+    Bytes.to_string buf
   with End_of_file -> assert false
 
 let lexer_function_inside_file ic loc =
