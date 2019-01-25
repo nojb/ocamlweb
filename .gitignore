@@ -23,3 +23,4 @@ yacc_lexer.ml
 yacc_parser.ml
 yacc_parser.mli
 yacc_parser.output
+export
