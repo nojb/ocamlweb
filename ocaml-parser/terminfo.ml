@@ -19,7 +19,12 @@ type status =
   | Bad_term
   | Good_term of int
 ;;
-external setup : out_channel -> status = "caml_terminfo_setup";;
-external backup : int -> unit = "caml_terminfo_backup";;
-external standout : bool -> unit = "caml_terminfo_standout";;
-external resume : int -> unit = "caml_terminfo_resume";;
+(* external setup : out_channel -> status = "caml_terminfo_setup";; *)
+(* external backup : int -> unit = "caml_terminfo_backup";; *)
+(* external standout : bool -> unit = "caml_terminfo_standout";; *)
+(* external resume : int -> unit = "caml_terminfo_resume";; *)
+let setup _c = Bad_term
+let backup _n = ()
+let standout _b = ()
+let resume _n = ()
+

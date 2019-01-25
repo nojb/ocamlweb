@@ -3,6 +3,11 @@
 		      LIST OF CHANGES
 		      ===============
 
+version 1.41, 25/1/2019
+=======================
+  o fixed compilation with OCaml 4.07 (getting rid of terminfo stuff
+    in the OCaml parser, which was not used by ocamlweb anyway)
+
 version 1.40, 5/2/2018
 ======================
   o fixed compilation with recent versions of OCaml
