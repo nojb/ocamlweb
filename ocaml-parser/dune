@@ -1,0 +1,8 @@
+(ocamllex lexer linenum)
+
+(ocamlyacc parser)
+
+(library
+ (name ocaml_parser)
+ (modules_without_implementation asttypes parsetree)
+ (wrapped false))

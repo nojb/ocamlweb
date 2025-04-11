@@ -1,0 +1,8 @@
+(ocamlyacc yacc_parser)
+
+(ocamllex yacc_lexer doclexer pretty)
+
+(executable
+ (name main)
+ (public_name ocamlweb)
+ (libraries ocaml_parser ocamllex_parser))

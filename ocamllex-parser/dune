@@ -1,0 +1,8 @@
+(ocamllex lex_lexer)
+
+(ocamlyacc lex_parser)
+
+(library
+ (name ocamllex_parser)
+ (modules_without_implementation lex_syntax)
+ (wrapped false))
